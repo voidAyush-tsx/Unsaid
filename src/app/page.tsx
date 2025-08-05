@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Navbar from "../components/navBar_v1";
-import Features from "@/components/features";
+import Features from "../components/features";
+import GetInTouch from "../components/getInTouch";
 
 export default function Home() {
   return (
@@ -19,6 +20,7 @@ export default function Home() {
           priority
         />
       </div>
+
       <div className="flex flex-col px-48 py-36 items-center justify-center align-middle">
         <h1 className="font-unsaid font-extrabold mb-16" style={{ color: "#A1CDD9", fontSize:"60px"}}>Our Story</h1>
         <p
@@ -28,14 +30,24 @@ export default function Home() {
           At Unsaid, we believe that every emotion, every struggle, and every unspoken thought deserves to be acknowledged. Our journey began with a simple yet powerful idea—to create a safe and supportive platform for those navigating anxiety, stress, and mental well-being. We understand that sometimes, words fail us, but feelings remain. That's why we built Unsaid—a space where guidance, support, and healing come together.
         </p>
         <button className="flex flex-row bg-[#A1CDD9] rounded-full font-unsaid mt-16 px-8 py-4 gap-3">
-          <div className="font-unsaid font-extrabold text-left" style={{ color: "#fff", fontSize:"18px"}}>Get In Touch</div>
+          <div 
+          className="font-unsaid font-extrabold text-left" 
+          style={{ color: "#fff", fontSize:"18px"}}
+          >
+            Get In Touch
+          </div>
           <img src="/right_arrow.svg" alt="Arrow" className="w-5" />
         </button>
-
       </div>
+
       <div className="w-full">
         <Features/>
       </div>
+
+      <div className="w-full">
+        <GetInTouch/>
+      </div>
+
     </div>
   );
 }

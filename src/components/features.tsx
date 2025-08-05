@@ -2,7 +2,7 @@ import React from 'react';
 
 const Features: React.FC = () => {
   return (
-    <div className='relative min-h-screen flex flex-col items-center m-5 px-28 py-24 rounded-4xl bg-[#FB8728]'>
+    <div className='relative min-h-screen flex flex-col items-center m-4 px-28 py-24 rounded-4xl bg-[#FB8728]'>
       <div className='rounded-full px-4 py-2 bg-transparent border-2 border-white font-unsaid font-bold text-white'>
         What We Believe
       </div>
