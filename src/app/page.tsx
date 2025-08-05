@@ -3,12 +3,14 @@ import Navbar from "../components/navBar_v1";
 
 export default function Home() {
   return (
-    <>
-      <Navbar/>
+    <div className="relative w-full min-h-screen flex flex-col m-0">
+      <div className="fixed w-full">
+        <Navbar/>
+      </div>
       <div style={{ width: "100%" }}>
         <Image
           src="/home/home_page_1.png"
-          alt="Full width image"
+          alt="Landing Page"
           layout="responsive"
           width={1920}
           height={1080}
@@ -16,6 +18,6 @@ export default function Home() {
           priority
         />
       </div>
-    </>
+    </div>
   );
 }
