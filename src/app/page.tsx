@@ -2,6 +2,7 @@ import Image from "next/image";
 import Navbar from "../components/navBar_v1";
 import Features from "../components/features";
 import GetInTouch from "../components/getInTouch";
+import Footer from "../components/footer_v1";
 
 export default function Home() {
   return (
@@ -47,7 +48,39 @@ export default function Home() {
       <div className="w-full">
         <GetInTouch/>
       </div>
+      <div className="flex flex-row items-center rounded-4xl m-6 px-28 py-16 gap-24 bg-[#F4A258]">
+        <div className="flex flex-1">
+          <div className="flex flex-col rounded-full px-32 py-8 gap-4 items-center bg-white">
+            <img src="/Fprint.svg" alt="fingerPrint" className="w-28" />
+            <div
+            className="font-unsaid font-bold"
+            style={{ color: "#A1CDD9", fontSize:"16px"}}
+            >
+              Every fingerprint has it's own  story to tell.
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-col flex-1 gap-4">
+          <div
+          className="font-unsaid font-extrabold"
+          style={{ color: "#fff", fontSize:"48px"}}
+          >
+            Ready to check in with yourself?
+          </div>
+          <div>
+            <button 
+            className="font-unsaid font-extrabold rounded-full px-8 py-4 bg-[#A1CDD9]"
+            style={{ color: "#fff", fontSize:"18px"}}
+            >
+              Take the Anxiety Test
+            </button>
+          </div>
+        </div>
+      </div>
 
+      <div className="w-full">
+        <Footer/>
+      </div>
     </div>
   );
 }

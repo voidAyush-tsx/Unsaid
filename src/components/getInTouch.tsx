@@ -66,7 +66,7 @@ const getInTouch: React.FC = () => {
         <div className='flex items-center justify-center rounded-full bg-[#A1CDD9] w-[500px] h-[500px]'>
             <img src="/getInTouch/unsaid_mockup.svg" alt="Arrow" className="absolute rounded-4xl translate-y-40 w-115 z-2" />
             <div className='flex flex-col'>
-                <img src="/getInTouch/patient_reply.svg" alt="Arrow" className="absoulte translate-x-12 w-96 z-3" />
+                <img src="/getInTouch/patient_reply.svg" alt="Arrow" className="absoulte translate-x-14 w-96 z-3" />
                 <img src="/getInTouch/doctor_reply.png" alt="Arrow" className="absoulte -translate-x-12 w-96 z-3" />
             </div>
         </div>
