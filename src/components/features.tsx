@@ -14,7 +14,7 @@ const Features: React.FC = () => {
       </div>
       <div className="grid grid-cols-3 gap-4 mb-4 mt-16">
         <div className="rounded-4xl bg-white p-6 flex flex-col items-start justify-center">
-          <div className='rounded-full w-24 h-24 bg-amber-600'></div>
+          <img src="/features/logo_feature_1.svg" alt="feature_1" className="rounded-full w-24 h-24" />
           <div className='mt-12 text-left'>
             <div 
             className='font-unsaid font-extrabold'
@@ -31,7 +31,7 @@ const Features: React.FC = () => {
           </div>
         </div>
         <div className="rounded-4xl bg-white p-6 flex flex-col items-start justify-center">
-          <div className='rounded-full w-24 h-24 bg-amber-600'></div>
+          <img src="/features/logo_feature_2.svg" alt="feature_2" className="rounded-full w-24 h-24" />
           <div className='mt-12 text-left'>
             <div 
             className='font-unsaid font-extrabold'
@@ -48,7 +48,7 @@ const Features: React.FC = () => {
           </div>
         </div>
         <div className="rounded-4xl bg-white p-6 flex flex-col items-start justify-center">
-          <div className='rounded-full w-24 h-24 bg-amber-600'></div>
+          <img src="/features/logo_feature_3.svg" alt="feature_3" className="rounded-full w-24 h-24" />
           <div className='mt-12 text-left'>
             <div 
             className='font-unsaid font-extrabold'
@@ -68,7 +68,7 @@ const Features: React.FC = () => {
 
       <div className="grid grid-cols-3 gap-4">
         <div className="rounded-4xl bg-white p-6 flex flex-col items-start justify-center">
-          <div className='rounded-full w-24 h-24 bg-amber-600'></div>
+          <img src="/features/logo_feature_4.svg" alt="feature_4" className="rounded-full w-24 h-24" />
           <div className='mt-12 text-left'>
             <div 
             className='font-unsaid font-extrabold'
@@ -85,7 +85,7 @@ const Features: React.FC = () => {
           </div>
         </div>
         <div className="rounded-4xl bg-white p-6 flex flex-col items-start justify-center">
-          <div className='rounded-full w-24 h-24 bg-amber-600'></div>
+          <img src="/features/logo_feature_5.svg" alt="feature_5" className="rounded-full w-24 h-24" />
           <div className='mt-12 text-left'>
             <div 
             className='font-unsaid font-extrabold'
@@ -102,7 +102,7 @@ const Features: React.FC = () => {
           </div>
         </div>
         <div className="rounded-4xl bg-white p-6 flex flex-col items-start justify-center">
-          <div className='rounded-full w-24 h-24 bg-amber-600'></div>
+          <img src="/features/logo_feature_6.svg" alt="feature_6" className="rounded-full w-24 h-24" />
           <div className='mt-12 text-left'>
             <div 
             className='font-unsaid font-extrabold'

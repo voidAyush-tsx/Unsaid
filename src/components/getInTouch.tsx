@@ -20,7 +20,7 @@ const getInTouch: React.FC = () => {
         className='flex flex-row w-full gap-4 mt-12'
         >
             <div className='flex-1 flex flex-col items-start p-0 m-0'>
-                <div className='rounded-full mb-4 w-10 h-10 bg-[#F0F2E8]'></div>
+                <div className='flex items-center justify-center rounded-full mb-4 w-10 h-10 bg-[#F0F2E8]'><img src="/getInTouch/location_logo.svg" alt="Location" className="w-6 h-6 bg-transparent"/></div>
                 <div
                 className='font-unsaid font-extrabold mb-2'
                 style={{ color: "#A1CDD9", fontSize: "18px" }}
@@ -35,7 +35,7 @@ const getInTouch: React.FC = () => {
                 </div>
             </div>
             <div className='flex-1 flex flex-col items-start p-0 m-0'>
-                <div className='rounded-full mb-4 w-10 h-10 bg-[#F0F2E8]'></div>
+                <div className='flex items-center justify-center rounded-full mb-4 w-10 h-10 bg-[#F0F2E8]'><img src="/getInTouch/contact_logo.svg" alt="Contact" className="w-6 h-6 bg-transparent"/></div>
                 <div
                 className='font-unsaid font-extrabold mb-2'
                 style={{ color: "#A1CDD9", fontSize: "18px" }}
