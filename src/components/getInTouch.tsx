@@ -1,6 +1,13 @@
+"use client";
+
 import React from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 
 const getInTouch: React.FC = () => {
+  const { scrollYProgress } = useScroll();
+  const opacity = useTransform(scrollYProgress, [0.575, 0.65], [0, 1]);
+  const scale = useTransform(scrollYProgress, [0.6, 0.675], [0.5, 1]);
+  
   return (
     <div className='relative min-h-screen flex flex-row items-center m-4 p-28 bg-transparent gap-36'>
       <div className="flex-1 flex flex-col h-full items-start justify-center">
@@ -64,10 +71,28 @@ const getInTouch: React.FC = () => {
 
       <div className="flex-1 flex h-full items-center justify-center">
         <div className='flex items-center justify-center rounded-full bg-[#A1CDD9] w-[500px] h-[500px]'>
-            <img src="/getInTouch/unsaid_mockup.svg" alt="Arrow" className="absolute rounded-4xl translate-y-40 w-115 z-2" />
+            <motion.img 
+            src="/getInTouch/unsaid_mockup.svg" 
+            alt="Arrow" 
+            className="absolute rounded-4xl translate-y-40 w-115 z-2" 
+            style={{opacity}}
+            initial={{opacity: 0}}
+            />
             <div className='flex flex-col'>
-                <img src="/getInTouch/patient_reply.svg" alt="Arrow" className="absoulte translate-x-14 w-96 z-3" />
-                <img src="/getInTouch/doctor_reply.png" alt="Arrow" className="absoulte -translate-x-12 w-96 z-3" />
+              <motion.img 
+              src="/getInTouch/patient_reply.svg" 
+              alt="Arrow" 
+              className="absolute -translate-x-32 -translate-y-36 w-96 z-3" 
+              style={{scale, opacity}}
+              initial={{scale: 0.5, opacity:0}}
+              />
+              <motion.img 
+              src="/getInTouch/doctor_reply.png" 
+              alt="Arrow" 
+              className="absolute -translate-x-60 translate-y-0 w-96 z-3" 
+              style={{scale, opacity}}
+              initial={{scale: 0.5, opacity:0}}
+              />
             </div>
         </div>
       </div>

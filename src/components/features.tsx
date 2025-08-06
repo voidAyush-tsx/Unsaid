@@ -1,6 +1,12 @@
+"use client"
+
 import React from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 
 const Features: React.FC = () => {
+  const { scrollYProgress } = useScroll();
+  const opacity = useTransform(scrollYProgress, [0.3, 0.4], [0, 1]);
+  const scale = useTransform(scrollYProgress, [0.3, 0.4], [0.5, 1]);
   return (
     <div className='relative min-h-screen flex flex-col items-center m-4 px-28 py-24 rounded-4xl bg-[#FB8728]'>
       <div className='rounded-full px-4 py-2 bg-transparent border-2 border-white font-unsaid font-bold text-white'>
@@ -13,7 +19,11 @@ const Features: React.FC = () => {
         Our Core Values
       </div>
       <div className="grid grid-cols-3 gap-4 mb-4 mt-16">
-        <div className="rounded-4xl bg-white p-6 flex flex-col items-start justify-center">
+        <motion.div 
+        className="rounded-4xl bg-white p-6 flex flex-col items-start justify-center"
+        style={{opacity, scale}}
+        initial={{opacity:0, scale:0.5}}
+        >
           <img src="/features/logo_feature_1.svg" alt="feature_1" className="rounded-full w-24 h-24" />
           <div className='mt-12 text-left'>
             <div 
@@ -29,8 +39,12 @@ const Features: React.FC = () => {
               A place where you can be yourself without fear or judgment.
             </div>
           </div>
-        </div>
-        <div className="rounded-4xl bg-white p-6 flex flex-col items-start justify-center">
+        </motion.div>
+        <motion.div 
+        className="rounded-4xl bg-white p-6 flex flex-col items-start justify-center"
+        style={{opacity, scale}}
+        initial={{opacity:0, scale:0.5}}
+        >
           <img src="/features/logo_feature_2.svg" alt="feature_2" className="rounded-full w-24 h-24" />
           <div className='mt-12 text-left'>
             <div 
@@ -46,8 +60,12 @@ const Features: React.FC = () => {
               Every emotion matters, and every story is heard.
             </div>
           </div>
-        </div>
-        <div className="rounded-4xl bg-white p-6 flex flex-col items-start justify-center">
+        </motion.div>
+        <motion.div 
+        className="rounded-4xl bg-white p-6 flex flex-col items-start justify-center"
+        style={{opacity, scale}}
+        initial={{opacity:0, scale:0.5}}
+        >
           <img src="/features/logo_feature_3.svg" alt="feature_3" className="rounded-full w-24 h-24" />
           <div className='mt-12 text-left'>
             <div 
@@ -63,11 +81,15 @@ const Features: React.FC = () => {
               You're never alone in your journey toward healing.
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       <div className="grid grid-cols-3 gap-4">
-        <div className="rounded-4xl bg-white p-6 flex flex-col items-start justify-center">
+        <motion.div 
+        className="rounded-4xl bg-white p-6 flex flex-col items-start justify-center"
+        style={{opacity, scale}}
+        initial={{opacity:0, scale:0.5}}
+        >
           <img src="/features/logo_feature_4.svg" alt="feature_4" className="rounded-full w-24 h-24" />
           <div className='mt-12 text-left'>
             <div 
@@ -83,8 +105,12 @@ const Features: React.FC = () => {
               Helping you regain control and confidence in life.
             </div>
           </div>
-        </div>
-        <div className="rounded-4xl bg-white p-6 flex flex-col items-start justify-center">
+        </motion.div>
+        <motion.div 
+        className="rounded-4xl bg-white p-6 flex flex-col items-start justify-center"
+        style={{opacity, scale}}
+        initial={{opacity:0, scale:0.5}}
+        >
           <img src="/features/logo_feature_5.svg" alt="feature_5" className="rounded-full w-24 h-24" />
           <div className='mt-12 text-left'>
             <div 
@@ -100,8 +126,12 @@ const Features: React.FC = () => {
               Guiding you toward self-awareness and inner peace.
             </div>
           </div>
-        </div>
-        <div className="rounded-4xl bg-white p-6 flex flex-col items-start justify-center">
+        </motion.div>
+        <motion.div 
+        className="rounded-4xl bg-white p-6 flex flex-col items-start justify-center"
+        style={{opacity, scale}}
+        initial={{opacity:0, scale:0.5}}
+        >
           <img src="/features/logo_feature_6.svg" alt="feature_6" className="rounded-full w-24 h-24" />
           <div className='mt-12 text-left'>
             <div 
@@ -117,7 +147,7 @@ const Features: React.FC = () => {
               A reminder that better days are always ahead.
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
