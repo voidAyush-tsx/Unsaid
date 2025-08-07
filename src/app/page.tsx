@@ -14,7 +14,7 @@ export default function Home() {
         <Image
           src="/home/home_page_pc.png"
           alt="Landing Page"
-          layout="responsive"
+          // layout="responsive"
           width={1920}
           height={1080}
           style={{ width: "100%", height: "auto" }}
@@ -37,7 +37,7 @@ export default function Home() {
           >
             Get In Touch
           </div>
-          <img src="/right_arrow.svg" alt="Arrow" className="w-5" />
+          <Image src="/right_arrow.svg" alt="Arrow" width={20} height={27} className="w-5" />
         </button>
       </div>
 
@@ -51,7 +51,7 @@ export default function Home() {
       <div className="flex flex-row items-center rounded-4xl m-6 px-28 py-16 gap-24 bg-[#F4A258]">
         <div className="flex flex-1">
           <div className="flex flex-col rounded-full px-32 py-8 gap-4 items-center bg-white">
-            <img src="/Fprint.svg" alt="fingerPrint" className="w-28" />
+            <Image src="/Fprint.svg" alt="fingerPrint" width={112} height={102} className="w-28" />
             <div
             className="font-unsaid font-bold"
             style={{ color: "#A1CDD9", fontSize:"16px"}}
