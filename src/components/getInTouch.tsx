@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import Image from "next/image";
 
 const getInTouch: React.FC = () => {
   const { scrollYProgress } = useScroll();
@@ -27,36 +26,36 @@ const getInTouch: React.FC = () => {
         <div
         className='flex flex-row w-full gap-4 mt-12'
         >
-          <div className='flex-1 flex flex-col items-start p-0 m-0'>
-            <div className='flex items-center justify-center rounded-full mb-4 w-10 h-10 bg-[#F0F2E8]'><Image src="/getInTouch/location_logo.svg" alt="Location" width={24} height={24} className="w-6 h-6 bg-transparent"/></div>
-            <div
-            className='font-unsaid font-extrabold mb-2'
-            style={{ color: "#A1CDD9", fontSize: "18px" }}
-            >
-                Our Address
+            <div className='flex-1 flex flex-col items-start p-0 m-0'>
+                <div className='flex items-center justify-center rounded-full mb-4 w-10 h-10 bg-[#F0F2E8]'><img src="/getInTouch/location_logo.svg" alt="Location" className="w-6 h-6 bg-transparent"/></div>
+                <div
+                className='font-unsaid font-extrabold mb-2'
+                style={{ color: "#A1CDD9", fontSize: "18px" }}
+                >
+                    Our Address
+                </div>
+                <div
+                className='font-unsaid font-medium'
+                style={{ color: "#736B66", fontSize: "18px" }}
+                >
+                    abcd
+                </div>
             </div>
-            <div
-            className='font-unsaid font-medium'
-            style={{ color: "#736B66", fontSize: "18px" }}
-            >
-                abcd
+            <div className='flex-1 flex flex-col items-start p-0 m-0'>
+                <div className='flex items-center justify-center rounded-full mb-4 w-10 h-10 bg-[#F0F2E8]'><img src="/getInTouch/contact_logo.svg" alt="Contact" className="w-6 h-6 bg-transparent"/></div>
+                <div
+                className='font-unsaid font-extrabold mb-2'
+                style={{ color: "#A1CDD9", fontSize: "18px" }}
+                >
+                    Our Contact Info
+                </div>
+                <div
+                className='font-unsaid font-medium'
+                style={{ color: "#736B66", fontSize: "18px" }}
+                >
+                    123456789
+                </div>
             </div>
-          </div>
-          <div className='flex-1 flex flex-col items-start p-0 m-0'>
-            <div className='flex items-center justify-center rounded-full mb-4 w-10 h-10 bg-[#F0F2E8]'><Image src="/getInTouch/contact_logo.svg" alt="Contact" width={24} height={24} className="w-6 h-6 bg-transparent"/></div>
-            <div
-            className='font-unsaid font-extrabold mb-2'
-            style={{ color: "#A1CDD9", fontSize: "18px" }}
-            >
-                Our Contact Info
-            </div>
-            <div
-            className='font-unsaid font-medium'
-            style={{ color: "#736B66", fontSize: "18px" }}
-            >
-                123456789
-            </div>
-          </div>
         </div>
         <button className='flex flex-row rounded-full font-unsaid font-extrabold bg-[#A1CDD9] mt-12 px-8 py-4 gap-3'>
           <div 
@@ -65,36 +64,36 @@ const getInTouch: React.FC = () => {
           >
             Or Fill the Form
           </div>
-          <Image src="/right_arrow.svg" alt="Arrow" width={20} height={27} className="w-5" />
+          <img src="/right_arrow.svg" alt="Arrow" className="w-5" />
         </button>
       </div>
 
 
       <div className="flex-1 flex h-full items-center justify-center">
         <div className='flex items-center justify-center rounded-full bg-[#A1CDD9] w-[500px] h-[500px]'>
-          <motion.img 
-          src="/getInTouch/unsaid_mockup.svg" 
-          alt="Arrow" 
-          className="absolute rounded-4xl translate-y-40 w-115 z-2" 
-          style={{opacity}}
-          initial={{opacity: 0}}
-          />
-          <div className='flex flex-col'>
-            <motion.img
-            src="/getInTouch/patient_reply.svg" 
-            alt="Arrow" 
-            className="absolute -translate-x-32 -translate-y-36 w-96 z-3" 
-            style={{scale, opacity}}
-            initial={{scale: 0.5, opacity:0}}
-            />
             <motion.img 
-            src="/getInTouch/doctor_reply.png" 
+            src="/getInTouch/unsaid_mockup.svg" 
             alt="Arrow" 
-            className="absolute -translate-x-60 translate-y-0 w-96 z-3" 
-            style={{scale, opacity}}
-            initial={{scale: 0.5, opacity:0}}
+            className="absolute rounded-4xl translate-y-40 w-115 z-2" 
+            style={{opacity}}
+            initial={{opacity: 0}}
             />
-          </div>
+            <div className='flex flex-col'>
+              <motion.img 
+              src="/getInTouch/patient_reply.svg" 
+              alt="Arrow" 
+              className="absolute -translate-x-32 -translate-y-36 w-96 z-3" 
+              style={{scale, opacity}}
+              initial={{scale: 0.5, opacity:0}}
+              />
+              <motion.img 
+              src="/getInTouch/doctor_reply.png" 
+              alt="Arrow" 
+              className="absolute -translate-x-60 translate-y-0 w-96 z-3" 
+              style={{scale, opacity}}
+              initial={{scale: 0.5, opacity:0}}
+              />
+            </div>
         </div>
       </div>
     </div>
