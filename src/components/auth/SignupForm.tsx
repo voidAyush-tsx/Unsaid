@@ -108,7 +108,7 @@ export default function SignUpForm() {
           </div>
         </div>
         
-        <div className="flex flex-row justify-center items-center gap-3 rounded-full mt-4 w-full bg-[#F4A258] py-3 px-6">
+        <div className="flex flex-row justify-center items-center gap-2 rounded-full mt-4 w-full bg-[#F4A258] py-3 px-6">
           <div
             className="font-unsaid font-extrabold"
             style={{ color: "#FFFFFF", fontSize: "18px" }}

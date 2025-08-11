@@ -4,7 +4,7 @@ import Image from 'next/image';
 
 export default function SignUp() {
   return (
-    <div className="flex sm:flex-row flex-col-reverse min-h-screen w-full overflow-hidden p-6">
+    <div className="flex sm:flex-row flex-col-reverse min-h-screen w-full overflow-hidden p-2">
 
 
         {/* Left column */}
@@ -21,7 +21,7 @@ export default function SignUp() {
                 width={1920}
                 height={1080}
                 style={{ 
-                width: "75%", 
+                width: "60%", 
                 height: "auto", 
                 marginTop: 30, 
                 zIndex: 10 
@@ -41,6 +41,73 @@ export default function SignUp() {
                 zIndex: 20,
                 }}
             />
+            <div className="flex flex-col z-30 p-4 gap-8">
+                <div 
+                    className="font-unsaid font-semibold px-2"
+                    style={{ color: "#fff", fontSize:"24px"}}
+                >
+                    I was hesitant about online counseling, but Unsaid made the process so easy and comfortable. The GAD assessment gave me clarity, and the counselor’s guidance has made a huge difference in my life. Highly recommend!
+
+                </div>
+                <div className="flex flex-row items-center justify-between px-0">
+                    <div className="flex flex-row gap-2 ml-2">
+                        <Image
+                            src="/auth/rating_star.svg"
+                            alt="rating"
+                            width={24}
+                            height={24}
+                            className="w-6"
+                        />
+                        <Image
+                            src="/auth/rating_star.svg"
+                            alt="rating"
+                            width={24}
+                            height={24}
+                            className="w-6"
+                        />
+                        <Image
+                            src="/auth/rating_star.svg"
+                            alt="rating"
+                            width={24}
+                            height={24}
+                            className="w-6"
+                        />
+                        <Image
+                            src="/auth/rating_star.svg"
+                            alt="rating"
+                            width={24}
+                            height={24}
+                            className="w-6"
+                        />
+                        <Image
+                            src="/auth/rating_star.svg"
+                            alt="rating"
+                            width={24}
+                            height={24}
+                            className="w-6"
+                        />
+                    </div>
+                    <div className="flex flex-row gap-2">
+                        <div className="bg-[#F4A258] rounded-full p-3 rotate-180">
+                            <Image
+                                src="/right_arrow.svg"
+                                alt="right arrow"
+                                width={24}
+                                height={24}
+                            />
+                        </div>
+                        <div className="bg-[#F4A258] rounded-full p-3">
+                            <Image
+                                src="/right_arrow.svg"
+                                alt="right arrow"
+                                width={24}
+                                height={24}
+                            />
+                        </div>
+                    </div>
+
+                </div>
+            </div>
         </div>
     </div>
   );
