@@ -1,0 +1,97 @@
+"use client"
+
+import React, { useState } from 'react';
+import Image from 'next/image';
+
+export default function LogInForm() {
+  const [showPassword, setShowPassword] = useState(false);
+
+  return (
+    <div className="relative flex flex-col items-center overflow-hidden p-0">
+        <Image
+        src="/Fprint.svg"
+        alt='fingerprint_logo'
+        width={64}
+        height={64}
+        />
+        <div 
+        className='font-unsaid font-extrabold mt-8 mb-3'
+        style={{ color: "#A1CDD9", fontSize:"36px"}}
+        >
+            Sign In to Unsaid
+        </div>
+        <div 
+        className='font-unsaid font-medium'
+        style={{ color: "#736B66", fontSize:"18px"}}
+        >
+            Let's get your mental health personalized with us.
+        </div>
+
+
+        <div className='flex flex-col items-start w-full mt-10 gap-4'>
+
+            <div className='flex flex-col gap-2 w-full'>
+                <div
+                className='font-unsaid font-extrabold'
+                style={{ color: "#A1CDD9", fontSize:"14px"}}
+                >
+                    Email
+                </div>
+                <div className='flex flex-row rounded-full w-full border-2 border-[#F4A258] px-4 py-3 gap-2'>
+                    <Image
+                    src="/auth/email_icon.svg"
+                    alt='email'
+                    width={24}
+                    height={24}
+                    />
+                    <input
+                        type="email"
+                        placeholder="Enter your email"
+                        className="bg-transparent outline-none font-unsaid font-bold rounded-r-full w-full"
+                        style={{ color: "#736B66", fontSize:"16px"}}
+                    />
+                </div>
+            </div>
+            <div className='flex flex-col gap-2 w-full'>
+                <div
+                className='font-unsaid font-extrabold'
+                style={{ color: "#A1CDD9", fontSize:"14px"}}
+                >
+                    Password
+                </div>
+                <div className='flex flex-row rounded-full w-full border-2 border-[#F4A258] px-4 py-3 gap-2 items-center'>
+                    <Image
+                        src="/auth/lock_icon.svg"
+                        alt='lock'
+                        width={24}
+                        height={24}
+                    />
+                    <input
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Enter your password"
+                        className="bg-transparent outline-none font-unsaid font-bold rounded-r-full w-full"
+                        style={{ color: "#736B66", fontSize:"16px"}}
+                    />
+                    <button
+                        type="button"
+                        onClick={() => setShowPassword((prev) => !prev)}
+                        className="focus:outline-none"
+                        tabIndex={-1}
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                        <Image
+                            src={showPassword ? "/auth/lock_eye_show.svg" : "/auth/lock_eye_hide.svg"}
+                            alt={showPassword ? "Hide password" : "Show password"}
+                            className='cursor-pointer'
+                            width={24}
+                            height={24}
+                        />
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+  );
+}
