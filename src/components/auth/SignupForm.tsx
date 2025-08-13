@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useAuthContext } from "@/contexts/AuthContext"; // same as first code
+import { useAuthContext } from "@/contexts/AuthContext";
 
 export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -26,7 +26,8 @@ export default function SignUpForm() {
     }));
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     setError("");
     setLoading(true);
 
@@ -38,15 +39,15 @@ export default function SignUpForm() {
       setLoading(false);
       return;
     }
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
+    
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters long");
       setLoading(false);
       return;
     }
 
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters long");
+    if (password !== confirmPassword) {
+      setError("Passwords do not match");
       setLoading(false);
       return;
     }
@@ -82,7 +83,6 @@ export default function SignUpForm() {
         Create your account & treat yourself today.
       </div>
 
-      {/* Error Message */}
       {error && (
         <div className="mt-4 p-3 text-red-500 bg-red-50 border border-red-200 rounded-md text-sm w-full text-center">
           {error}
@@ -90,7 +90,6 @@ export default function SignUpForm() {
       )}
 
       <div className="flex flex-col items-start w-full mt-10 gap-4">
-        {/* Email Field */}
         <div className="flex flex-col gap-2 w-full">
           <div
             className="font-unsaid font-extrabold"
@@ -113,7 +112,6 @@ export default function SignUpForm() {
           </div>
         </div>
 
-        {/* Password Field */}
         <div className="flex flex-col gap-2 w-full">
           <div
             className="font-unsaid font-extrabold"
@@ -155,7 +153,6 @@ export default function SignUpForm() {
           </div>
         </div>
 
-        {/* Confirm Password Field */}
         <div className="flex flex-col gap-2 w-full">
           <div
             className="font-unsaid font-extrabold"
@@ -197,7 +194,6 @@ export default function SignUpForm() {
           </div>
         </div>
 
-        {/* Sign Up Button */}
         <button
           type="button"
           onClick={handleSubmit}
@@ -223,13 +219,12 @@ export default function SignUpForm() {
           />
         </button>
 
-        {/* Sign In Link */}
         <div className="flex flex-row items-center justify-center font-unsaid font-semibold w-full gap-2 mt-6">
           <div style={{ color: "#A1CDD9", fontSize: "16px" }}>
             Already have an account?
           </div>
           <div
-            className="cursor-pointer"
+            className="cursor-pointer hover:underline"
             style={{ color: "#F4A258", fontSize: "16px" }}
             onClick={() => window.location.href = "/signin"}
           >

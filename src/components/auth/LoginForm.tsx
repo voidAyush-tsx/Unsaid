@@ -28,6 +28,12 @@ export default function LogInForm() {
       setLoading(false);
       return;
     }
+    
+    if (!email.includes("@")) {
+      setError("Please enter a valid email address with '@' symbol.");
+      setLoading(false);
+      return;
+    }
 
     try {
       const { user, error: signInError } = await signIn(email, password);
@@ -71,7 +77,6 @@ export default function LogInForm() {
           </div>
         )}
 
-        {/* Email */}
         <div className="flex flex-col gap-2 w-full">
           <div
             className="font-unsaid font-extrabold"
@@ -93,7 +98,6 @@ export default function LogInForm() {
           </div>
         </div>
 
-        {/* Password */}
         <div className="flex flex-col gap-2 w-full">
           <div
             className="font-unsaid font-extrabold"
@@ -134,13 +138,12 @@ export default function LogInForm() {
           </div>
         </div>
 
-        {/* Remember Me + Forgot */}
         <div className="flex flex-row mt-4 w-full justify-between">
           <div className="flex flex-row gap-2 items-center relative">
             <input
               type="checkbox"
               id="rememberMe"
-              className="w-6 h-6 rounded-full border-2 border-[#F4A258] appearance-none checked:bg-[#F7F4F2] focus:cursor-pointer relative"
+              className="w-6 h-6 rounded-full border-2 border-[#F4A258] appearance-none checked:bg-[#F7F4F2] cursor-pointer focus:cursor-pointer relative"
               checked={rememberMe}
               onChange={(e) => setRememberMe(e.target.checked)}
             />
@@ -172,7 +175,6 @@ export default function LogInForm() {
           </div>
         </div>
 
-        {/* Sign In Button */}
         <button
           type="submit"
           disabled={loading}
@@ -199,16 +201,15 @@ export default function LogInForm() {
           )}
         </button>
 
-        {/* Sign Up Link */}
         <div className="flex flex-row items-center justify-center font-unsaid font-semibold w-full gap-2 mt-6">
           <div style={{ color: "#A1CDD9", fontSize: "16px" }}>
             Don't have an account?
           </div>
           <div
-            className="cursor-pointer"
+            className="cursor-pointer hover:underline"
             style={{ color: "#F4A258", fontSize: "16px" }}
             onClick={() => router.push("/signup")}
-          >
+            >
             Sign Up
           </div>
         </div>
