@@ -51,6 +51,12 @@ export default function SignUpForm() {
       setLoading(false);
       return;
     }
+    
+    if (!email.includes("@")) {
+      setError("Please enter a valid email address with '@' symbol.");
+      setLoading(false);
+      return;
+    }
 
     try {
       const { user, error } = await signUp(email, password);
