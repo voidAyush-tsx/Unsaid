@@ -180,7 +180,7 @@ export default function SignUpForm() {
       } else if (user) {
         router.push("/dashboard");
       }
-    } catch (err) {
+    } catch {
       setErrors((prev) => ({ ...prev, form: "An unexpected error occurred" }));
     } finally {
       setLoading(false);

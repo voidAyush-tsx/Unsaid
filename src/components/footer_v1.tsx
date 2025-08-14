@@ -1,4 +1,7 @@
+"use client"
+
 import React from 'react';
+import Image from 'next/image';
 
 const Footer: React.FC = () => {
   return (
@@ -6,16 +9,34 @@ const Footer: React.FC = () => {
 
         <div className='flex flex-col items-center px-32 py-28 z-50'>
             <div className='flex flex-col items-center justify-center gap-16 p-4 w-full'>
-                <img src="/unsaid_logo_white.svg" alt="Unsaid Logo" className="w-44"/>
+                <Image 
+                  src="/unsaid_logo_white.svg" 
+                  alt="Unsaid Logo" 
+                  width={176}
+                  height={176}
+                  className="w-44"
+                />
                 <div className='flex flex-row gap-2'>
                     <div className='flex flex-row font-unsaid font-medium rounded-full p-4 pr-40 items-center justify-center bg-[#372315] text-white w-full'
                     style={{ color: "#C9C7C5", fontSize:"18px"}}
                     >
-                        <img src="/footer/mail_icon.svg" alt="mail" className="mr-2" />
+                        <Image 
+                          src="/footer/mail_icon.svg" 
+                          alt="mail" 
+                          width={24}
+                          height={24}
+                          className="mr-2" 
+                        />
                         Leave a Message
                     </div>
                     <div className='flex items-center justify-center rounded-full p-8 bg-[#E48A39]'>
-                        <img src="/right_arrow.svg" alt="Arrow" className="absolute" />
+                        <Image 
+                          src="/right_arrow.svg" 
+                          alt="Arrow" 
+                          width={24}
+                          height={24}
+                          className="absolute" 
+                        />
                     </div>
                 </div>
                 <div 
@@ -68,9 +89,27 @@ const Footer: React.FC = () => {
                     </button>
                 </div>
                 <div className='flex flex-row gap-4'>
-                    <img src="/footer/insta_icon.svg" alt="Social Icons" className="rounded-full p-4 border-2 border-white" />
-                    <img src="/footer/facebook_icon.svg" alt="Social Icons" className="rounded-full p-4 border-2 border-white" />
-                    <img src="/footer/twitter_icon.svg" alt="Social Icons" className="rounded-full p-4 border-2 border-white" />
+                    <Image 
+                      src="/footer/insta_icon.svg" 
+                      alt="Instagram Icon" 
+                      width={48}
+                      height={48}
+                      className="rounded-full p-4 border-2 border-white" 
+                    />
+                    <Image 
+                      src="/footer/facebook_icon.svg" 
+                      alt="Facebook Icon" 
+                      width={48}
+                      height={48}
+                      className="rounded-full p-4 border-2 border-white" 
+                    />
+                    <Image 
+                      src="/footer/twitter_icon.svg" 
+                      alt="Twitter Icon" 
+                      width={48}
+                      height={48}
+                      className="rounded-full p-4 border-2 border-white" 
+                    />
                 </div>
             </div>
         </div>
@@ -84,9 +123,11 @@ const Footer: React.FC = () => {
             <div className='rounded-full bg-[#926247] w-2 h-2'></div>
             PRIVACY POLICY
         </div>
-        <img
+        <Image
             src="/footer/footer_bg.svg"
             alt="footer bg"
+            width={1200}
+            height={400}
             className="absolute inset-0 w-full h-full object-cover rounded-t-4xl"
             style={{ zIndex: 0 }}
         />

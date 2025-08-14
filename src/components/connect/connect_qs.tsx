@@ -3,7 +3,7 @@
 import React from 'react';
 import Image from "next/image";
 
-const connect_qs: React.FC = () => {
+const ConnectQs: React.FC = () => {
   
   return (
     <div className='relative min-h-screen flex flex-col items-center px-34 py-24 bg-transparent gap-12'>
@@ -42,7 +42,7 @@ const connect_qs: React.FC = () => {
             className='flex items-center justify-center w-full font-unsaid font-extrabold px-8 py-4 rounded-4xl border-2 border-[#74B7C9] bg-transparent'
             style={{ color: "#A1CDD9", fontSize: "18px"}}
             >
-              Family- The Pressure Push?
+              Family- The Pressure Push&apos;s?
             </div>
           </div>
           <div className="flex flex-col w-full items-center justify-center gap-4 p-4 bg-[#F7F4F2] rounded-4xl">
@@ -72,7 +72,7 @@ const connect_qs: React.FC = () => {
             className='flex items-center justify-center w-full font-unsaid font-extrabold px-8 py-4 rounded-4xl border-2 border-[#74B7C9] bg-transparent'
             style={{ color: "#A1CDD9", fontSize: "18px"}}
             >
-              Tired of Society's Outdated Rules?
+              Tired of Society&apos;s Outdated Rules?
             </div>
           </div>
         </div>
@@ -159,7 +159,7 @@ const connect_qs: React.FC = () => {
         </div>
         
         <button 
-          className='flex items-center justify-center mt-2 bg-[#A1CDD9] px-8 py-4 rounded-4xl'
+          className='flex items-center justify-center mt-2 bg-[#A1CDD9] px-8 py-4 gap-2 rounded-4xl'
         >
           <div 
             className='font-unsaid font-extrabold'
@@ -179,4 +179,4 @@ const connect_qs: React.FC = () => {
   );
 };
 
-export default connect_qs;
+export default ConnectQs;

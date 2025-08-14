@@ -37,7 +37,7 @@ export default function LogInForm() {
       } else if (user) {
         router.push("/dashboard");
       }
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred");
     } finally {
       setLoading(false);
@@ -60,7 +60,7 @@ export default function LogInForm() {
         className="font-unsaid font-medium"
         style={{ color: "#736B66", fontSize: "18px" }}
       >
-        Let's get your mental health personalized with us.
+        Let&apos;s get your mental health personalized with us.
       </div>
 
       <div className="flex flex-col items-start w-full mt-10 gap-4">
@@ -197,7 +197,7 @@ export default function LogInForm() {
 
         <div className="flex flex-row items-center justify-center font-unsaid font-semibold w-full gap-2 mt-6">
           <div style={{ color: "#A1CDD9", fontSize: "16px" }}>
-            Don't have an account?
+            Don&apos;t have an account?
           </div>
           <div
             className="cursor-pointer hover:underline"
