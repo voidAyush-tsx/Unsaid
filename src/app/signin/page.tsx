@@ -5,13 +5,10 @@ import Image from 'next/image';
 export default function SignIn() {
   return (
     <div className="flex sm:flex-row flex-col-reverse min-h-screen w-full overflow-hidden p-2">
-
-
         {/* Left column */}
         <div className="flex flex-3/5 bg-transparent items-center justify-center p-0">
             <LogInForm/>
         </div>
-
 
         {/* Right column */}
         <div className="flex flex-col flex-2/5 bg-[#F7F4F2] items-center justify-between rounded-4xl relative">
@@ -46,8 +43,7 @@ export default function SignIn() {
                     className="font-unsaid font-semibold px-8"
                     style={{ color: "#fff", fontSize:"24px"}}
                 >
-                    Unsaid has been a game-changer for me. Talking to a counselor from the comfort of my home gave me the support I didn't know I needed.  Truly grateful!
-
+                    Unsaid has been a game-changer for me. Talking to a counselor from the comfort of my home gave me the support I didn&apos;t know I needed.  Truly grateful!
                 </div>
                 <div className="flex flex-row items-center justify-between px-0">
                     <div className="flex flex-row gap-2 ml-8">
@@ -105,7 +101,6 @@ export default function SignIn() {
                             />
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>

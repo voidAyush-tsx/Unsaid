@@ -23,14 +23,14 @@ export default function Connect() {
               className='flex flex-row font-unsaid font-extrabold gap-1'
               style={{fontSize: "60px"}}
             >
-              <div style={{color: "#A1CDD9"}}>It's</div>
+              <div style={{color: "#A1CDD9"}}>It&apos;s</div>
               <div style={{color: "#E48A39"}}>OKAY!</div>
             </div>
             <div
               className='font-unsaid font-extrabold'
               style={{color: "#A1CDD9", fontSize: "60px"}}
             >
-              Let's untangle it
+              Let&apos;s untangle it
             </div>
             <div
               className='font-unsaid font-extrabold'

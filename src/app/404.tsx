@@ -28,10 +28,10 @@ export default function Home() {
           style={{ color: "#736B66", fontSize: "20px" }}
         >
           <div className="w-full text-left">
-            It's not you, it's us
+            It&apos;s not you, it&apos;s us
           </div>
           <div className="w-full text-left">
-            We're looking into it. Please wait a few moments and try again.
+            We&apos;re looking into it. Please wait a few moments and try again.
           </div>
         </div>
       </div>
