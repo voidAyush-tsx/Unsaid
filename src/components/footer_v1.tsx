@@ -22,12 +22,50 @@ const Footer: React.FC = () => {
                 className='flex flex-row min-w-full font-unsaid font-medium gap-16'
                 style={{ color: "#fff", fontSize:"36px"}}
                 >
-                    <div>Homepage</div>
-                    <div>Connect</div>
-                    <div>Assessment</div>
-                    <div>About Us</div>
-                    <div>Contact Us</div>
-                    <div>Blog</div>
+                    <button
+                    className='cursor-pointer'
+                    onClick={() => window.location.href = "/connect"}
+                    >
+                        <div>
+                            Connect
+                        </div>
+                    </button>
+
+                    <button
+                    className='cursor-pointer'
+                    onClick={() => window.location.href = "/assessment"}
+                    >
+                        <div>
+                            Assessment
+                        </div>
+                    </button>
+
+                    <button
+                    className='cursor-pointer'
+                    onClick={() => window.location.href = "/about"}
+                    >
+                        <div>
+                            About Us
+                        </div>
+                    </button>
+
+                    <button
+                    className='cursor-pointer'
+                    onClick={() => window.location.href = "/support"}
+                    >
+                        <div>
+                            Support
+                        </div>
+                    </button>
+
+                    <button
+                    className='cursor-pointer'
+                    onClick={() => window.location.href = "/blog"}
+                    >
+                        <div>
+                            Blog
+                        </div>
+                    </button>
                 </div>
                 <div className='flex flex-row gap-4'>
                     <img src="/footer/insta_icon.svg" alt="Social Icons" className="rounded-full p-4 border-2 border-white" />
