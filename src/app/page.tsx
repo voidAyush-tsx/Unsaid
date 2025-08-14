@@ -1,3 +1,5 @@
+"use client"
+
 import Image from "next/image";
 import Navbar from "../components/navBar_v1";
 import Features from "../components/features";
@@ -28,15 +30,18 @@ export default function Home() {
           className="flex flex-col justify-center items-center text-center px-50 font-unsaid"
           style={{ color: "#736B66", fontSize: "20px" }}
         >
-          At Unsaid, we believe that every emotion, every struggle, and every unspoken thought deserves to be acknowledged. Our journey began with a simple yet powerful idea—to create a safe and supportive platform for those navigating anxiety, stress, and mental well-being. We understand that sometimes, words fail us, but feelings remain. That's why we built Unsaid—a space where guidance, support, and healing come together.
+          At Unsaid, we believe that every emotion, every struggle, and every unspoken thought deserves to be acknowledged. Our journey began with a simple yet powerful idea—to create a safe and supportive platform for those navigating anxiety, stress, and mental well-being. We understand that sometimes, words fail us, but feelings remain. That&apos;s why we built Unsaid—a space where guidance, support, and healing come together.
         </p>
-        <button className="flex flex-row bg-[#A1CDD9] rounded-full font-unsaid mt-16 px-8 py-4 gap-3">
-          <div 
-          className="font-unsaid font-extrabold text-left" 
-          style={{ color: "#fff", fontSize:"18px"}}
-          >
-            Get In Touch
-          </div>
+        <button 
+        className="flex flex-row bg-[#A1CDD9] rounded-full font-unsaid mt-16 px-8 py-4 gap-3 cursor-pointer"
+        onClick={() => window.location.href = "/signin"}
+        >
+            <div 
+              className="font-unsaid font-extrabold text-left" 
+              style={{ color: "#fff", fontSize:"18px"}}
+            >
+            Get Started
+            </div>
           <Image src="/right_arrow.svg" alt="Arrow" width={20} height={27} className="w-5" />
         </button>
       </div>
@@ -56,7 +61,7 @@ export default function Home() {
             className="font-unsaid font-bold"
             style={{ color: "#A1CDD9", fontSize:"16px"}}
             >
-              Every fingerprint has it's own  story to tell.
+              Every fingerprint has it&apos;s own  story to tell.
             </div>
           </div>
         </div>

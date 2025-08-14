@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
+import Image from 'next/image';
 
 const Features: React.FC = () => {
   const { scrollYProgress } = useScroll();
@@ -24,7 +25,13 @@ const Features: React.FC = () => {
         style={{opacity, scale}}
         initial={{opacity:0, scale:0.5}}
         >
-          <img src="/features/logo_feature_1.svg" alt="feature_1" className="rounded-full w-24 h-24" />
+          <Image 
+            src="/features/logo_feature_1.svg" 
+            alt="feature_1" 
+            width={96}
+            height={96}
+            className="rounded-full"
+          />
           <div className='mt-12 text-left'>
             <div 
             className='font-unsaid font-extrabold'
@@ -45,7 +52,13 @@ const Features: React.FC = () => {
         style={{opacity, scale}}
         initial={{opacity:0, scale:0.5}}
         >
-          <img src="/features/logo_feature_2.svg" alt="feature_2" className="rounded-full w-24 h-24" />
+          <Image 
+            src="/features/logo_feature_2.svg" 
+            alt="feature_2" 
+            width={96}
+            height={96}
+            className="rounded-full"
+          />
           <div className='mt-12 text-left'>
             <div 
             className='font-unsaid font-extrabold'
@@ -66,7 +79,13 @@ const Features: React.FC = () => {
         style={{opacity, scale}}
         initial={{opacity:0, scale:0.5}}
         >
-          <img src="/features/logo_feature_3.svg" alt="feature_3" className="rounded-full w-24 h-24" />
+          <Image 
+            src="/features/logo_feature_3.svg" 
+            alt="feature_3" 
+            width={96}
+            height={96}
+            className="rounded-full"
+          />
           <div className='mt-12 text-left'>
             <div 
             className='font-unsaid font-extrabold'
@@ -78,7 +97,7 @@ const Features: React.FC = () => {
             className='font-unsaid font-medium'
             style={{ color: "#736B66", fontSize: "20px" }}
             >
-              You're never alone in your journey toward healing.
+              You&apos;re never alone in your journey toward healing.
             </div>
           </div>
         </motion.div>
@@ -90,7 +109,13 @@ const Features: React.FC = () => {
         style={{opacity, scale}}
         initial={{opacity:0, scale:0.5}}
         >
-          <img src="/features/logo_feature_4.svg" alt="feature_4" className="rounded-full w-24 h-24" />
+          <Image 
+            src="/features/logo_feature_4.svg" 
+            alt="feature_4" 
+            width={96}
+            height={96}
+            className="rounded-full"
+          />
           <div className='mt-12 text-left'>
             <div 
             className='font-unsaid font-extrabold'
@@ -111,7 +136,13 @@ const Features: React.FC = () => {
         style={{opacity, scale}}
         initial={{opacity:0, scale:0.5}}
         >
-          <img src="/features/logo_feature_5.svg" alt="feature_5" className="rounded-full w-24 h-24" />
+          <Image 
+            src="/features/logo_feature_5.svg" 
+            alt="feature_5" 
+            width={96}
+            height={96}
+            className="rounded-full"
+          />
           <div className='mt-12 text-left'>
             <div 
             className='font-unsaid font-extrabold'
@@ -132,7 +163,13 @@ const Features: React.FC = () => {
         style={{opacity, scale}}
         initial={{opacity:0, scale:0.5}}
         >
-          <img src="/features/logo_feature_6.svg" alt="feature_6" className="rounded-full w-24 h-24" />
+          <Image 
+            src="/features/logo_feature_6.svg" 
+            alt="feature_6" 
+            width={96}
+            height={96}
+            className="rounded-full"
+          />
           <div className='mt-12 text-left'>
             <div 
             className='font-unsaid font-extrabold'
