@@ -59,26 +59,93 @@ export default function Connect() {
         <CounsellingMode />
       </div>
       <div className='w-full py-2 px-4'>
-        <div className='flex flex-col py-24 rounded-4xl bg-[#FACC15] overflow-hidden'>
-          <div className="scrolling-text font-unsaid font-extrabold text-lg text-gray-900 px-4">
-            Welcome to the Connect Page!
+        <div className='flex flex-col py-24 gap-10 rounded-4xl bg-[#FACC15] overflow-hidden'>
+          <div className='scrolling-text_1 flex flex-row gap-4'>
+            <div 
+            className='font-unsaid font-extrabold bg-[#EAB308] rounded-full px-8 py-4'
+            style={{color: "#FFFFFF", fontSize: "72px"}}
+            >
+              How
+            </div>
+            <div 
+            className='font-unsaid font-extrabold bg-[#EAB308] rounded-full px-8 py-4'
+            style={{color: "#FFFFFF", fontSize: "72px"}}
+            >
+              Our
+            </div>
+            <div className='flex items-center justify-center bg-white py-6 px-10 rounded-full'>
+              <Image
+                src="Fprint.svg"
+                alt='Fingerprint Logo'
+                width={112}
+                height={102}
+                className='w-16'
+              />
+            </div>
+            <div 
+            className='font-unsaid font-extrabold bg-[#EAB308] rounded-full px-8 py-4'
+            style={{color: "#FFFFFF", fontSize: "72px"}}
+            >
+              Counselling
+            </div>
+          </div>
+          <div className='scrolling-text_2 flex flex-row gap-4'>
+            <div 
+            className='font-unsaid font-extrabold bg-[#EAB308] rounded-full px-8 py-4'
+            style={{color: "#FFFFFF", fontSize: "72px"}}
+            >
+              How
+            </div>
+            <div 
+            className='font-unsaid font-extrabold bg-[#EAB308] rounded-full px-8 py-4'
+            style={{color: "#FFFFFF", fontSize: "72px"}}
+            >
+              Our
+            </div>
+            <div className='flex items-center justify-center bg-white py-6 px-10 rounded-full'>
+              <Image
+                src="Fprint.svg"
+                alt='Fingerprint Logo'
+                width={112}
+                height={102}
+                className='w-16'
+              />
+            </div>
+            <div 
+            className='font-unsaid font-extrabold bg-[#EAB308] rounded-full px-8 py-4'
+            style={{color: "#FFFFFF", fontSize: "72px"}}
+            >
+              Counselling
+            </div>
           </div>
         </div>
       </div>
 
       <style jsx>{`
-        .scrolling-text {
+        .scrolling-text_1 {
           white-space: nowrap;
           overflow: hidden;
-          display: inline-block;
-          animation: scroll 10s linear infinite;
+          animation: scroll_1 10s linear infinite;
         }
-        @keyframes scroll {
+        .scrolling-text_2 {
+          white-space: nowrap;
+          overflow: hidden;
+          animation: scroll_2 10s linear infinite;
+        }
+        @keyframes scroll_1 {
           0% {
             transform: translateX(100%);
           }
           100% {
             transform: translateX(-100%);
+          }
+        }
+        @keyframes scroll_2 {
+          0% {
+            transform: translateX(-100%);
+          }
+          100% {
+            transform: translateX(100%);
           }
         }
         .scrolling-text:hover {
