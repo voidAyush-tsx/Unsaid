@@ -1,11 +1,13 @@
+"use client"
+
 import React from 'react';
 import Image from 'next/image';
 import Connect_QS from "@/components/connect/connect_qs";
+import CounsellingMode from "@/components/connect/mode_counselling";
 
 export default function Connect() {
   return (
     <div className="relative w-full flex flex-col items-center justify-center min-h-screen overflow-hidden">
-
       <div className='w-full'>
         <Image
           src="/connect/connect_hero_bg.svg"
@@ -24,7 +26,6 @@ export default function Connect() {
               <div style={{color: "#A1CDD9"}}>It's</div>
               <div style={{color: "#E48A39"}}>OKAY!</div>
             </div>
-
             <div
               className='font-unsaid font-extrabold'
               style={{color: "#A1CDD9", fontSize: "60px"}}
@@ -54,6 +55,42 @@ export default function Connect() {
       <div className='w-full'>
         <Connect_QS />
       </div>
+      <div className='w-full'>
+        <CounsellingMode />
+      </div>
+      <div className='w-full py-2 px-4'>
+        <div className='flex flex-col py-24 rounded-4xl bg-[#FACC15] overflow-hidden'>
+          <div className="scrolling-text font-unsaid font-extrabold text-lg text-gray-900 px-4">
+            Welcome to the Connect Page!
+          </div>
+        </div>
+      </div>
+
+      <style jsx>{`
+        .scrolling-text {
+          white-space: nowrap;
+          overflow: hidden;
+          display: inline-block;
+          animation: scroll 10s linear infinite;
+        }
+        @keyframes scroll {
+          0% {
+            transform: translateX(100%);
+          }
+          100% {
+            transform: translateX(-100%);
+          }
+        }
+        .scrolling-text:hover {
+          animation-play-state: paused;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .scrolling-text {
+            animation: none;
+            transform: translateX(0);
+          }
+        }
+      `}</style>
     </div>
   );
 }

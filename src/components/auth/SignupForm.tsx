@@ -4,77 +4,194 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuthContext } from "@/contexts/AuthContext";
+import DOMPurify from "dompurify";
 
 export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    confirmPassword: ""
+    confirmPassword: "",
   });
-  const [error, setError] = useState("");
+  const [errors, setErrors] = useState({
+    email: "",
+    password: "",
+    form: "",
+  });
+  const [passwordStrength, setPasswordStrength] = useState<
+    "Weak" | "Medium" | "Strong" | ""
+  >("");
   const [loading, setLoading] = useState(false);
 
   const { signUp } = useAuthContext();
   const router = useRouter();
 
+  // Email validation regex
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // Password strength regex components
+  const hasNumber = /[0-9]/;
+  const hasSpecialChar = /[!@#$%^&*]/;
+  const hasUpperCase = /[A-Z]/;
+
+  const evaluatePasswordStrength = (password: string): "Weak" | "Medium" | "Strong" | "" => {
+    if (!password) return "";
+    const length = password.length;
+    const hasNum = hasNumber.test(password);
+    const hasSpecial = hasSpecialChar.test(password);
+    const hasUpper = hasUpperCase.test(password);
+    const strengthScore = [hasNum, hasSpecial, hasUpper].filter(Boolean).length;
+
+    if (length < 8) return "Weak";
+    if (length >= 12 && strengthScore >= 3) return "Strong";
+    if (length >= 8 && strengthScore >= 2) return "Medium";
+    return "Weak";
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
+
+    // Real-time email validation
+    if (name === "email") {
+      if (value && !emailRegex.test(value)) {
+        setErrors((prev) => ({
+          ...prev,
+          email: "Please enter a valid email address",
+        }));
+      } else {
+        setErrors((prev) => ({
+          ...prev,
+          email: "",
+        }));
+      }
+    }
+
+    // Real-time password validation and strength evaluation
+    if (name === "password") {
+      const strength = evaluatePasswordStrength(value);
+      setPasswordStrength(strength);
+      if (value && value.length < 6) {
+        setErrors((prev) => ({
+          ...prev,
+          password: "Password must be atleast 6 characters long",
+        }));
+      } else if (value && !hasNumber.test(value)) {
+        setErrors((prev) => ({
+          ...prev,
+          password: "Password must include number",
+        }));
+      } else if (value && !hasSpecialChar.test(value)) {
+        setErrors((prev) => ({
+          ...prev,
+          password: "Password must include special character",
+        }));
+      } else if (value && !hasUpperCase.test(value)) {
+        setErrors((prev) => ({
+          ...prev,
+          password: "Password must include uppercase letter",
+        }));
+      } else {
+        setErrors((prev) => ({
+          ...prev,
+          password: "",
+        }));
+      }
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
+    setErrors({ email: "", password: "", form: "" });
     setLoading(true);
 
     const { email, password, confirmPassword } = formData;
 
+    // Sanitize inputs
+    const sanitizedEmail = DOMPurify.sanitize(email);
+    const sanitizedPassword = DOMPurify.sanitize(password);
+
     // Validation
-    if (!email || !password || !confirmPassword) {
-      setError("Please fill in all fields");
-      setLoading(false);
-      return;
-    }
-    
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters long");
+    if (!sanitizedEmail || !sanitizedPassword || !confirmPassword) {
+      setErrors((prev) => ({ ...prev, form: "Please fill in all fields" }));
       setLoading(false);
       return;
     }
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
+    if (!emailRegex.test(sanitizedEmail)) {
+      setErrors((prev) => ({
+        ...prev,
+        email: "Please enter a valid email address (e.g., example@domain.com)",
+      }));
       setLoading(false);
       return;
     }
-    
-    if (!email.includes("@")) {
-      setError("Please enter a valid email address with '@' symbol.");
+
+    if (password.length < 8) {
+      setErrors((prev) => ({
+        ...prev,
+        password: "Password must be at least 8 characters long",
+      }));
+      setLoading(false);
+      return;
+    }
+
+    if (!hasNumber.test(sanitizedPassword)) {
+      setErrors((prev) => ({
+        ...prev,
+        password: "Password must include at least 1 number",
+      }));
+      setLoading(false);
+      return;
+    }
+
+    if (!hasSpecialChar.test(sanitizedPassword)) {
+      setErrors((prev) => ({
+        ...prev,
+        password: "Password must include at least 1 special character (!@#$%^&*)",
+      }));
+      setLoading(false);
+      return;
+    }
+
+    if (!hasUpperCase.test(sanitizedPassword)) {
+      setErrors((prev) => ({
+        ...prev,
+        password: "Password must include at least 1 uppercase letter",
+      }));
+      setLoading(false);
+      return;
+    }
+
+    if (sanitizedPassword !== confirmPassword) {
+      setErrors((prev) => ({ ...prev, form: "Passwords do not match" }));
       setLoading(false);
       return;
     }
 
     try {
-      const { user, error } = await signUp(email, password);
+      const { user, error } = await signUp(sanitizedEmail, sanitizedPassword);
 
       if (error) {
-        setError(error);
+        setErrors((prev) => ({ ...prev, form: error }));
       } else if (user) {
         router.push("/dashboard");
       }
     } catch (err) {
-      setError("An unexpected error occurred");
+      setErrors((prev) => ({ ...prev, form: "An unexpected error occurred" }));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="relative flex flex-col items-center overflow-hidden p-0">
+    <form
+      className="relative flex flex-col items-center overflow-hidden p-0 max-w-md mx-auto"
+      onSubmit={handleSubmit}
+    >
       <Image src="/Fprint.svg" alt="fingerprint_logo" width={64} height={64} />
       <div
         className="font-unsaid font-extrabold mt-8 mb-3"
@@ -89,9 +206,9 @@ export default function SignUpForm() {
         Create your account & treat yourself today.
       </div>
 
-      {error && (
+      {errors.form && (
         <div className="mt-4 p-3 text-red-500 bg-red-50 border border-red-200 rounded-md text-sm w-full text-center">
-          {error}
+          {errors.form}
         </div>
       )}
 
@@ -103,19 +220,33 @@ export default function SignUpForm() {
           >
             Email
           </div>
-          <div className="flex flex-row rounded-full w-full border-2 border-[#F4A258] px-4 py-3 gap-2">
+          <div
+            className={`flex flex-row rounded-full w-full border-2 ${
+              errors.email ? "border-red-500" : "border-[#F4A258]"
+            } px-4 py-3 gap-2`}
+          >
             <Image src="/auth/email_icon.svg" alt="email" width={24} height={24} />
             <input
               type="email"
+              placeholder="Enter your email"
               name="email"
               value={formData.email}
               onChange={handleInputChange}
-              placeholder="Enter your email"
-              disabled={loading}
               className="bg-transparent outline-none font-unsaid font-bold rounded-r-full w-full"
               style={{ color: "#736B66", fontSize: "16px" }}
+              disabled={loading}
+              aria-invalid={errors.email ? "true" : "false"}
+              aria-describedby={errors.email ? "email-error" : undefined}
             />
           </div>
+          {errors.email && (
+            <div
+              id="email-error"
+              className="text-red-500 text-sm font-unsaid font-medium"
+            >
+              {errors.email}
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-2 w-full">
@@ -125,7 +256,11 @@ export default function SignUpForm() {
           >
             Password
           </div>
-          <div className="flex flex-row rounded-full w-full border-2 border-[#F4A258] px-4 py-3 gap-2 items-center">
+          <div
+            className={`flex flex-row rounded-full w-full border-2 ${
+              errors.password ? "border-red-500" : "border-[#F4A258]"
+            } px-4 py-3 gap-2 items-center`}
+          >
             <Image src="/auth/lock_icon.svg" alt="lock" width={24} height={24} />
             <input
               type={showPassword ? "text" : "password"}
@@ -136,6 +271,14 @@ export default function SignUpForm() {
               disabled={loading}
               className="bg-transparent outline-none font-unsaid font-bold rounded-r-full w-full"
               style={{ color: "#736B66", fontSize: "16px" }}
+              aria-invalid={errors.password ? "true" : "false"}
+              aria-describedby={
+                errors.password
+                  ? "password-error"
+                  : passwordStrength
+                  ? "password-strength"
+                  : undefined
+              }
             />
             <button
               type="button"
@@ -157,6 +300,28 @@ export default function SignUpForm() {
               />
             </button>
           </div>
+          {errors.password && (
+            <div
+              id="password-error"
+              className="text-red-500 text-sm font-unsaid font-medium"
+            >
+              {errors.password}
+            </div>
+          )}
+          {passwordStrength && !errors.password && (
+            <div
+              id="password-strength"
+              className={`text-sm font-unsaid font-medium ${
+                passwordStrength === "Weak"
+                  ? "text-red-500"
+                  : passwordStrength === "Medium"
+                  ? "text-yellow-500"
+                  : "text-green-500"
+              }`}
+            >
+              Password Strength: {passwordStrength}
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-2 w-full">
@@ -169,7 +334,7 @@ export default function SignUpForm() {
           <div className="flex flex-row rounded-full w-full border-2 border-[#F4A258] px-4 py-3 gap-2 items-center">
             <Image src="/auth/lock_icon.svg" alt="lock" width={24} height={24} />
             <input
-              type={showPassword ? "text" : "password"}
+              type={showConfirmPassword ? "text" : "password"}
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleInputChange}
@@ -180,18 +345,18 @@ export default function SignUpForm() {
             />
             <button
               type="button"
-              onClick={() => setShowPassword((prev) => !prev)}
+              onClick={() => setShowConfirmPassword((prev) => !prev)}
               className="focus:outline-none"
               tabIndex={-1}
-              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
             >
               <Image
                 src={
-                  showPassword
+                  showConfirmPassword
                     ? "/auth/lock_eye_show.svg"
                     : "/auth/lock_eye_hide.svg"
                 }
-                alt={showPassword ? "Hide password" : "Show password"}
+                alt={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
                 className="cursor-pointer"
                 width={24}
                 height={24}
@@ -201,8 +366,7 @@ export default function SignUpForm() {
         </div>
 
         <button
-          type="button"
-          onClick={handleSubmit}
+          type="submit"
           disabled={loading}
           className={`flex flex-row justify-center items-center gap-2 rounded-full mt-4 w-full py-3 px-6 transition-colors ${
             loading
@@ -232,12 +396,12 @@ export default function SignUpForm() {
           <div
             className="cursor-pointer hover:underline"
             style={{ color: "#F4A258", fontSize: "16px" }}
-            onClick={() => window.location.href = "/signin"}
+            onClick={() => router.push("/signin")}
           >
             Sign In
           </div>
         </div>
       </div>
-    </div>
+    </form>
   );
 }

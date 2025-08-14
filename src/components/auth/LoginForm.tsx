@@ -28,12 +28,6 @@ export default function LogInForm() {
       setLoading(false);
       return;
     }
-    
-    if (!email.includes("@")) {
-      setError("Please enter a valid email address with '@' symbol.");
-      setLoading(false);
-      return;
-    }
 
     try {
       const { user, error: signInError } = await signIn(email, password);
