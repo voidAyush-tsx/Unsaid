@@ -8,7 +8,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   signUp: (email: string, password: string) => Promise<{ user: User | null; error: string | null }>;
-  signIn: (email: string, password: string) => Promise<{ user: User | null; error: string | null }>;
+  signIn: (email: string, password: string, rememberFor30Days?: boolean) => Promise<{ user: User | null; error: string | null }>;
   logout: () => Promise<{ error: string | null }>;
 }
 

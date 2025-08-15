@@ -30,7 +30,7 @@ export default function LogInForm() {
     }
 
     try {
-      const { user, error: signInError } = await signIn(email, password);
+      const { user, error: signInError } = await signIn(email, password, rememberMe);
 
       if (signInError) {
         setError(signInError);
