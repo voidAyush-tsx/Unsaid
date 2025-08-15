@@ -49,7 +49,14 @@ export default function LogInForm() {
       className="relative flex flex-col items-center overflow-hidden p-0 w-full max-w-md mx-auto"
       onSubmit={handleSubmit}
     >
-      <Image src="/Fprint.svg" alt="fingerprint_logo" width={64} height={64} />
+      <Image 
+      src="/Fprint.svg" 
+      alt="fingerprint_logo" 
+      width={64} 
+      height={64} 
+      className="cursor-pointer"
+      onClick={() => window.location.href = "/"} 
+      />
       <div
         className="font-unsaid font-extrabold mt-8 mb-3"
         style={{ color: "#A1CDD9", fontSize: "36px" }}
@@ -172,9 +179,9 @@ export default function LogInForm() {
         <button
           type="submit"
           disabled={loading}
-          className={`flex flex-row justify-center items-center gap-2 rounded-full mt-4 w-full py-4 px-6 transition-colors ${
+          className={`flex flex-row justify-center items-center gap-2 rounded-full mt-4 w-full py-4 px-6 transition-colors cursor-pointer ${
             loading
-              ? "bg-gray-400 cursor-not-allowed"
+              ? "bg-[#F4A258] cursor-not-allowed"
               : "bg-[#F4A258] hover:bg-[#e69548]"
           }`}
         >
