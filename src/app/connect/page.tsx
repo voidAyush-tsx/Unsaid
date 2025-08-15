@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Connect_QS from "@/components/connect/connect_qs";
 import CounsellingMode from "@/components/connect/mode_counselling";
 import Navbar_v2 from '@/components/navBar_v2';
+import Footer_v2 from "@/components/footer_v2";
 
 export default function Connect() {
   return (
@@ -162,6 +163,10 @@ export default function Connect() {
           }
         }
       `}</style>
+
+      <div className="w-full">
+        <Footer_v2/>
+      </div>
     </div>
   );
 }

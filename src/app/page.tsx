@@ -1,10 +1,10 @@
 "use client"
 
 import Image from "next/image";
-import Navbar from "../components/navBar_v1";
-import Features from "../components/features";
-import GetInTouch from "../components/getInTouch";
-import Footer from "../components/footer_v1";
+import Navbar from "@/components/navBar_v1";
+import Features from "@/components/features";
+import GetInTouch from "@/components/getInTouch";
+import Footer from "@/components/footer_v1";
 
 export default function Home() {
   return (

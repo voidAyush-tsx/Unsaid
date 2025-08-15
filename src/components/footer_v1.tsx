@@ -94,21 +94,24 @@ const Footer: React.FC = () => {
                       alt="Instagram Icon" 
                       width={48}
                       height={48}
-                      className="rounded-full p-4 border-2 border-white" 
+                      className="rounded-full w-16 cursor-pointer p-4 border-2 border-white"
+                      onClick={() => window.location.href = "/insta"} 
                     />
                     <Image 
                       src="/footer/facebook_icon.svg" 
                       alt="Facebook Icon" 
                       width={48}
                       height={48}
-                      className="rounded-full p-4 border-2 border-white" 
+                      className="rounded-full w-16 cursor-pointer p-4 border-2 border-white"
+                      onClick={() => window.location.href = "/meta"} 
                     />
                     <Image 
                       src="/footer/twitter_icon.svg" 
                       alt="Twitter Icon" 
                       width={48}
                       height={48}
-                      className="rounded-full p-4 border-2 border-white" 
+                      className="rounded-full w-16 cursor-pointer p-4 border-2 border-white"
+                      onClick={() => window.location.href = "/twitter"} 
                     />
                 </div>
             </div>
