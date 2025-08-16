@@ -120,11 +120,25 @@ const Footer: React.FC = () => {
         className='flex flex-row items-center gap-4 mb-8 font-unsaid font-black z-50'
         style={{ color: "#fff", fontSize:"14px"}}
         >
-            COPYRIGHT 2025, ALL RIGHTS RESERVED
+            <div 
+            className="text-left"
+            >
+                COPYRIGHT 2025, ALL RIGHTS RESERVED
+            </div>
             <div className='rounded-full bg-[#926247] w-2 h-2'></div>
-            TERMS & CONDITIONS
+            <div 
+            className="text-left cursor-pointer"
+            onClick={() => window.location.href = "/privacy"}
+            >
+                TERMS & CONDITIONS
+            </div>
             <div className='rounded-full bg-[#926247] w-2 h-2'></div>
-            PRIVACY POLICY
+            <div 
+            className="text-left cursor-pointer"
+            onClick={() => window.location.href = "/privacy"}
+            >
+                PRIVACY POLICY
+            </div>
         </div>
         <Image
             src="/footer/footer_bg.svg"

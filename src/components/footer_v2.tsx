@@ -11,21 +11,21 @@ const Footer_v2: React.FC = () => {
       <div
         className="absolute bg-[#74B7C9A3] rounded-full"
         style={{
-          width: "min(90vw, 2050px)", // Scales to 50% of viewport width, capped at 400px
-          height: "min(90vw, 2050px)", // Same for height to maintain circle shape
+          width: "min(90vw, 2050px)",
+          height: "min(90vw, 2050px)",
           transform: "translate(-50%, -50%)",
-          left: "-15%", // Positions circle towards left side
-          top: "8%", // Positions circle towards top
+          left: "-15%",
+          top: "8%",
         }}
       ></div>
       <div
         className="absolute bg-[#74B7C9A3] rounded-full"
         style={{
-          width: "min(150vw)", // Scales to 50% of viewport width, capped at 400px
-          height: "min(150vw)", // Same for height to maintain circle shape
-          transform: "translate(50%, 50%)", // Centers circle relative to its own size
-          right: "22%", // Positions circle towards right side
-          bottom: "-90%", // Positions circle towards bottom
+          width: "min(150vw)",
+          height: "min(150vw)",
+          transform: "translate(50%, 50%)",
+          right: "22%",
+          bottom: "-90%",
         }}
       ></div>
 
@@ -90,12 +90,28 @@ const Footer_v2: React.FC = () => {
                     height={176}
                     className="w-50"
                     />
-                    <div
-                    className="font-unsaid font-black text-[#FFFFFFA3]"
-                    style={{fontSize: "12px" }}
+                    <div 
+                    className='flex flex-col items-start gap-4 mb-8 font-unsaid font-black z-50'
+                    style={{ color: "#fff", fontSize:"12px"}}
                     >
-                        COPYRIGHT 2025, ALL RIGHTS RESERVED
+                        <div
+                        className="font-unsaid font-black text-[#FFFFFFA3]"
+                        >
+                            COPYRIGHT 2025, ALL RIGHTS RESERVED
 
+                        </div>
+                        <div 
+                        className="text-left cursor-pointer"
+                        onClick={() => window.location.href = "/privacy"}
+                        >
+                            TERMS & CONDITIONS
+                        </div>
+                        <div 
+                        className="text-left cursor-pointer"
+                        onClick={() => window.location.href = "/privacy"}
+                        >
+                            PRIVACY POLICY
+                        </div>
                     </div>
                 </div>
 
@@ -108,32 +124,33 @@ const Footer_v2: React.FC = () => {
                 </div>
             </div>
 
-
-            <div className='flex flex-row gap-4'>
-                <Image 
-                    src="/footer/insta_icon.svg" 
-                    alt="Instagram Icon" 
-                    width={48}
-                    height={48}
-                    className="rounded-full w-16 cursor-pointer p-4 border-2 border-white"
-                    onClick={() => window.location.href = "/insta"} 
-                />
-                <Image 
-                    src="/footer/facebook_icon.svg" 
-                    alt="Facebook Icon" 
-                    width={48}
-                    height={48}
-                    className="rounded-full w-16 cursor-pointer p-4 border-2 border-white"
-                    onClick={() => window.location.href = "/meta"} 
-                />
-                <Image 
-                    src="/footer/twitter_icon.svg" 
-                    alt="Twitter Icon" 
-                    width={48}
-                    height={48}
-                    className="rounded-full w-16 cursor-pointer p-4 border-2 border-white"
-                    onClick={() => window.location.href = "/twitter"} 
-                />
+            <div className="flex flex-col gap-8 items-start">
+                <div className='flex flex-row gap-4'>
+                    <Image 
+                        src="/footer/insta_icon.svg" 
+                        alt="Instagram Icon" 
+                        width={48}
+                        height={48}
+                        className="rounded-full w-16 cursor-pointer p-4 border-2 border-white"
+                        onClick={() => window.location.href = "/insta"} 
+                    />
+                    <Image 
+                        src="/footer/facebook_icon.svg" 
+                        alt="Facebook Icon" 
+                        width={48}
+                        height={48}
+                        className="rounded-full w-16 cursor-pointer p-4 border-2 border-white"
+                        onClick={() => window.location.href = "/meta"} 
+                    />
+                    <Image 
+                        src="/footer/twitter_icon.svg" 
+                        alt="Twitter Icon" 
+                        width={48}
+                        height={48}
+                        className="rounded-full w-16 cursor-pointer p-4 border-2 border-white"
+                        onClick={() => window.location.href = "/twitter"} 
+                    />
+                </div>
             </div>
 
         </div>
