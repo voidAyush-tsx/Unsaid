@@ -41,8 +41,8 @@ const counselling_mode: React.FC = () => {
                                     Chat (Text-Based Support)
                                 </div>
                                 <div 
-                                className='font-unsaid font-semibold'
-                                style={{ color: "#F0F2E8", fontSize: "18px"}}
+                                className='font-unsaid font-semibold text-white'
+                                style={{fontSize: "18px"}}
                                 >
                                     We provide personalized support AI
                                 </div>
@@ -66,8 +66,8 @@ const counselling_mode: React.FC = () => {
                                     Voice Call
                                 </div>
                                 <div 
-                                className='font-unsaid font-semibold'
-                                style={{ color: "#F0F2E8", fontSize: "18px"}}
+                                className='font-unsaid font-semibold text-white'
+                                style={{fontSize: "18px"}}
                                 >
                                     As well as weekly articles for your health
                                 </div>
@@ -91,8 +91,8 @@ const counselling_mode: React.FC = () => {
                                     Video Call
                                 </div>
                                 <div 
-                                className='font-unsaid font-semibold'
-                                style={{ color: "#F0F2E8", fontSize: "18px"}}
+                                className='font-unsaid font-semibold text-white'
+                                style={{fontSize: "18px"}}
                                 >
                                     We provide personalized support AI
                                 </div>
