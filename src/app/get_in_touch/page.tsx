@@ -158,6 +158,69 @@ export default function getInTouch() {
 
       <FAQ/>
 
+      <div className='flex flex-col items-center justify-center px-3 py-10 gap-4'>
+
+        <div className='flex flex-row w-full gap-4'>
+          <div className='flex flex-col justify-between flex-1 bg-[#F4A258] rounded-4xl p-6'>
+            <div
+            className='font-unsaid text-left font-extrabold text-white'
+            style={{fontSize: "48px"}}
+            >
+              Live Chat
+            </div>
+            <div className='flex flex-col items-end'>
+              <div className='flex bg-white rounded-full p-5 w-fit cursor-pointer hover:rotate-45 transition-all duration-200'>
+                <Image 
+                src="/right_blue_arrow.svg" 
+                alt="Chat Link" 
+                className='w-6 -rotate-45'
+                width={64} 
+                height={64} 
+                />
+              </div>
+            </div>
+          </div>
+          <div className='flex flex-col justify-between flex-1 bg-[#FB8728] rounded-4xl p-6'>
+            <div
+            className='font-unsaid text-left font-extrabold text-white'
+            style={{fontSize: "48px"}}
+            >
+              Audio Call
+            </div>
+            <div className='flex flex-col items-end'>
+              <div className='flex bg-white rounded-full p-5 w-fit cursor-pointer hover:rotate-45 transition-all duration-200'>
+                <Image 
+                src="/right_blue_arrow.svg" 
+                alt="Audio Link" 
+                className='w-6 -rotate-45'
+                width={64} 
+                height={64} 
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className='flex flex-col items-start justify-between w-full bg-[#FACC15] rounded-4xl px-32 py-12 cursor-pointer hover:scale-101 transition-all duration-200'>
+          <div
+            className='font-unsaid w-full text-left font-extrabold text-[#74B7C9]'
+            style={{fontSize: "48px"}}
+            >
+              Video Call
+          </div>
+          <div className='flex flex-row w-full'>
+            <div
+              className='flex flex-1/2 w-fit font-unsaid text-left font-medium text-[#736B66]'
+              style={{fontSize: "20px"}}
+              >
+                You can connect with professional counselors via video call, ensuring a safe and confidential environment for support.
+            </div>
+            <div className='flex flex-1/2'></div>
+          </div>
+        </div>
+
+      </div>
+
       <div className="w-full">
         <Footer />
       </div>
