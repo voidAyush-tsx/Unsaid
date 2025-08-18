@@ -74,10 +74,11 @@ const GetInTouch: React.FC = () => {
             </div>
           </div>
         </div>
-        <button className='flex flex-row rounded-full font-unsaid font-extrabold bg-[#A1CDD9] mt-12 px-8 py-4 gap-3'>
+        <button className='flex flex-row rounded-full font-unsaid font-extrabold bg-[#A1CDD9] mt-12 px-8 py-4 gap-3 cursor-pointer'>
           <div 
           className="font-unsaid font-extrabold text-left" 
           style={{ color: "#fff", fontSize:"18px"}}
+          onClick={() => (window.location.href = "/get_in_touch?scroll=form")}
           >
             Or Fill the Form
           </div>

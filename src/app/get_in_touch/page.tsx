@@ -22,9 +22,17 @@ export default function GetInTouch() {
   const CounsellorRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (searchParams.get("scroll") === "counsellor") {
+    if (searchParams.get("scroll") === "contact_counsellor") {
       setTimeout(() => {
         CounsellorRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 500); // delay so page renders first
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (searchParams.get("scroll") === "form") {
+      setTimeout(() => {
+        formRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 500); // delay so page renders first
     }
   }, [searchParams]);
@@ -32,7 +40,7 @@ export default function GetInTouch() {
   // Scroll handler
   const handleScrollToForm = () => {
     formRef.current?.scrollIntoView({ behavior: "smooth" });
-    CounsellorRef.current?.scrollIntoView({ behavior: "smooth" });
+    // CounsellorRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   // Trigger animations
@@ -115,6 +123,7 @@ export default function GetInTouch() {
           
           {/* Scroll button */}
           <button 
+            // onClick={() => (window.location.href = "/get_in_touch?scroll=form")}
             onClick={handleScrollToForm}
             className='flex flex-row rounded-full font-unsaid font-extrabold bg-[#A1CDD9] mt-12 px-8 py-4 gap-3 cursor-pointer'
           >

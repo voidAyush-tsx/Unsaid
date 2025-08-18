@@ -1,13 +1,32 @@
 "use client"
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import Image from 'next/image';
+import { useSearchParams } from "next/navigation";
 import { motion, useScroll, useTransform } from 'framer-motion';
 import Navbar_v2 from '@/components/navBar_v2';
 import Footer_v1 from "@/components/footer_v1";
 import Counsellor_Grid from '@/components/about/counsellor_grid';
 
 export default function About() {
+  const searchParams = useSearchParams();
+
+  // Ref for form section
+  const AllCounsellorRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (searchParams.get("scroll") === "allcounsellors") {
+      setTimeout(() => {
+        AllCounsellorRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 500); // delay so page renders first
+    }
+  }, [searchParams]);
+
+  // Scroll handler
+  const handleScrollToAllCounsellor = () => {
+    AllCounsellorRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   const { scrollYProgress } = useScroll();
   const opacity = useTransform(scrollYProgress, [0.3, 0.4], [0, 1]);
   const scale = useTransform(scrollYProgress, [0.3, 0.4], [0.5, 1]);
@@ -241,7 +260,9 @@ export default function About() {
         </div>
         </div>
 
-      <Counsellor_Grid/>
+      <div ref={AllCounsellorRef} >
+        <Counsellor_Grid/>
+      </div>
 
       <div className="flex w-full p-5">
         <div className="relative w-full h-[500px] rounded-4xl overflow-hidden">

@@ -220,7 +220,7 @@ const CounsellorCard: React.FC<typeof counsellors[0]> = ({ name, title, img, soc
         <div
           className="font-unsaid font-extrabold text-[#A1CDD9] group-hover:text-white transition-all duration-300 cursor-pointer"
           style={{ fontSize: "20px" }}
-          onClick={() => (window.location.href = "/")}
+          onClick={() => (window.location.href = "/counsellor")}
         >
           {name}
         </div>
@@ -264,6 +264,7 @@ const Counsellor_Grid: React.FC = () => {
       {/* Grid */}
       <div
         className="grid grid-cols-2 md:grid-cols-4 gap-6 w-full overflow-y-auto p-10 custom-scrollbar"
+        // onClick={() => (window.location.href = "/counsellor")}
         style={{ maxHeight: "calc(2 * 370px)" }}
       >
         {counsellors.map((c, index) => (

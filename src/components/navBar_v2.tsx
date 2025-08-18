@@ -10,13 +10,13 @@ const Navbar_v2: React.FC = () => {
   const [showRelative, setShowRelative] = useState(true);
   const hideTimerRef = useRef<number | null>(null);
 
-  // Ref for form section
-  const CounsellorRef = useRef<HTMLDivElement | null>(null);
+  // // Ref for form section
+  // const CounsellorRef = useRef<HTMLDivElement | null>(null);
 
-  // Scroll handler
-  const handleScrollToForm = () => {
-    CounsellorRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  // // Scroll handler
+  // const handleScrollToForm = () => {
+  //   CounsellorRef.current?.scrollIntoView({ behavior: "smooth" });
+  // };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -62,7 +62,7 @@ const Navbar_v2: React.FC = () => {
       <button
         className="font-unsaid font-semibold cursor-pointer text-[#251404] hover:text-[#E48A39] px-4 py-2 transition-colors"
         style={{ fontSize: "18px" }}
-        onClick={() => (window.location.href = "/counsellor")}
+        onClick={() => (window.location.href = "/about?scroll=allcounsellors")}
       >
         Counsellor
       </button>
@@ -100,7 +100,7 @@ const Navbar_v2: React.FC = () => {
         <NavItems />
         <button 
         className="flex items-center justify-center bg-[#A1CDD9] px-6 py-3 gap-2 rounded-full hover:bg-[#E48A39] transition-colors cursor-pointer"
-        onClick={() => (window.location.href = "/get_in_touch?scroll=counsellor")}
+        onClick={() => (window.location.href = "/get_in_touch?scroll=contact_counsellor")}
         >
           <div
             className="font-unsaid font-extrabold"
@@ -128,7 +128,7 @@ const Navbar_v2: React.FC = () => {
         <NavItems />
         <button 
         className="flex items-center justify-center bg-[#A1CDD9] px-6 py-3 gap-2 rounded-full hover:bg-[#E48A39] transition-colors cursor-pointer"
-        onClick={() => (window.location.href = "/get_in_touch?scroll=counsellor")}
+        onClick={() => (window.location.href = "/get_in_touch?scroll=contact_counsellor")}
         >
           <div
             className="font-unsaid font-extrabold"
