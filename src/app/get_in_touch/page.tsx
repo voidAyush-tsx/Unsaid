@@ -4,11 +4,11 @@ import GetInTouchClient from "@/app/get_in_touch/GetInTouchClient";
 
 // Export metadata with metadataBase
 export const metadata: Metadata = {
-  metadataBase: new URL('https://unsaid-drab.vercel.app'), // Replace with your production URL
-  title: 'Get In Touch - Unsaid',
+  metadataBase: new URL('https://unsaid-drab.vercel.app/get_in_touch'), // Replace with your production URL
+  title: 'Unsaid - Get In Touch',
   description: 'Contact our team for support and inquiries. Fill out the form or reach out directly.',
   openGraph: {
-    title: 'Get In Touch - Unsaid',
+    title: 'Unsaid - Get In Touch',
     description: 'Contact our team for support and inquiries. Fill out the form or reach out directly.',
     url: '/get_in_touch',
     images: [
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Get In Touch - Unsaid',
+    title: 'Unsaid - Get In Touch',
     description: 'Contact our team for support and inquiries.',
     images: ['/twitter-image.jpg'], // Replace with your Twitter image path
   },
