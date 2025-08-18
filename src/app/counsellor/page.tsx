@@ -1,19 +1,19 @@
 "use client"
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect } from "react";
 import Image from "next/image";
 import Navbar from "@/components/navBar_v1";
 import Footer from "@/components/footer_v1";
 
 export default function Counsellor() {
   const rightSectionRef = useRef<HTMLDivElement>(null);
-  const [rightSectionHeight, setRightSectionHeight] = useState<number>(0);
 
   // Measure the height of the right section on mount and resize
   useEffect(() => {
     const updateHeight = () => {
       if (rightSectionRef.current) {
-        setRightSectionHeight(rightSectionRef.current.offsetHeight);
+        // Height calculation logic retained for potential future use
+        // const height = rightSectionRef.current.offsetHeight;
       }
     };
 
@@ -62,7 +62,7 @@ export default function Counsellor() {
                 className="font-unsaid font-medium"
                 style={{ color: "#736B66", fontSize: "24px" }}
                 >
-                Hi, I'm Dr. Priya Sharma, a licensed clinical psychologist specializing in anxiety, depression, and trauma recovery. My approach is warm, empathetic, and empowering, and I'm here to help you navigate life's challenges with confidence and calm.
+                Hi, I&apos;m Dr. Priya Sharma, a licensed clinical psychologist specializing in anxiety, depression, and trauma recovery. My approach is warm, empathetic, and empowering, and I&apos;m here to help you navigate life&apos;s challenges with confidence and calm.
                 </div>
             </div>
         </div>

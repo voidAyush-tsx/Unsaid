@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Navbar_v2 from '@/components/navBar_v2';
 import Footer_v2 from "@/components/footer_v2";
 
-export default function Connect() {
+export default function PrivacyPolicy() {
 
   const Privacy = useRef<HTMLDivElement | null>(null);
 

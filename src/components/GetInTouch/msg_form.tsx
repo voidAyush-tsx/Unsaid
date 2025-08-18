@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Image from "next/image";
-import { motion, useAnimationControls } from 'framer-motion';
 
-const msgForm: React.FC = () => {
+const MsgForm: React.FC = () => {
   // Form state
   const [formData, setFormData] = useState({
     name: '',
@@ -233,4 +232,4 @@ const msgForm: React.FC = () => {
   );
 };
 
-export default msgForm;
+export default MsgForm;
