@@ -10,6 +10,14 @@ const Navbar_v2: React.FC = () => {
   const [showRelative, setShowRelative] = useState(true);
   const hideTimerRef = useRef<number | null>(null);
 
+  // Ref for form section
+  const CounsellorRef = useRef<HTMLDivElement | null>(null);
+
+  // Scroll handler
+  const handleScrollToForm = () => {
+    CounsellorRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
   useEffect(() => {
     const handleScroll = () => {
       setIsFixed(window.scrollY > 100);
@@ -90,7 +98,10 @@ const Navbar_v2: React.FC = () => {
         }`}
       >
         <NavItems />
-        <button className="flex items-center justify-center bg-[#A1CDD9] px-6 py-3 gap-2 rounded-full hover:bg-[#E48A39] transition-colors">
+        <button 
+        className="flex items-center justify-center bg-[#A1CDD9] px-6 py-3 gap-2 rounded-full hover:bg-[#E48A39] transition-colors cursor-pointer"
+        onClick={() => (window.location.href = "/get_in_touch?scroll=counsellor")}
+        >
           <div
             className="font-unsaid font-extrabold"
             style={{ color: "#FFFFFF", fontSize: "18px" }}
@@ -115,7 +126,10 @@ const Navbar_v2: React.FC = () => {
         }`}
       >
         <NavItems />
-        <button className="flex items-center justify-center bg-[#A1CDD9] px-6 py-3 gap-2 rounded-full hover:bg-[#E48A39] transition-colors">
+        <button 
+        className="flex items-center justify-center bg-[#A1CDD9] px-6 py-3 gap-2 rounded-full hover:bg-[#E48A39] transition-colors cursor-pointer"
+        onClick={() => (window.location.href = "/get_in_touch?scroll=counsellor")}
+        >
           <div
             className="font-unsaid font-extrabold"
             style={{ color: "#FFFFFF", fontSize: "18px" }}

@@ -1,6 +1,7 @@
 "use client"
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { motion, useAnimationControls } from 'framer-motion';
 import MsgForm from "@/components/GetInTouch/msg_form";
@@ -8,11 +9,31 @@ import FAQ from "@/components/GetInTouch/faqs"
 import Navbar from "@/components/navBar_v1";
 import Footer from "@/components/footer_v1";
 
-export default function getInTouch() {
+export default function GetInTouch() {
+  const searchParams = useSearchParams();
+  
   // Animation controls
   const mockupControls = useAnimationControls();
   const patientReplyControls = useAnimationControls();
   const doctorReplyControls = useAnimationControls();
+
+  // Ref for form section
+  const formRef = useRef<HTMLDivElement | null>(null);
+  const CounsellorRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (searchParams.get("scroll") === "counsellor") {
+      setTimeout(() => {
+        CounsellorRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 500); // delay so page renders first
+    }
+  }, [searchParams]);
+
+  // Scroll handler
+  const handleScrollToForm = () => {
+    formRef.current?.scrollIntoView({ behavior: "smooth" });
+    CounsellorRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   // Trigger animations
   useEffect(() => {
@@ -91,7 +112,12 @@ export default function getInTouch() {
               </div>
             </div>
           </div>
-          <button className='flex flex-row rounded-full font-unsaid font-extrabold bg-[#A1CDD9] mt-12 px-8 py-4 gap-3 cursor-pointer'>
+          
+          {/* Scroll button */}
+          <button 
+            onClick={handleScrollToForm}
+            className='flex flex-row rounded-full font-unsaid font-extrabold bg-[#A1CDD9] mt-12 px-8 py-4 gap-3 cursor-pointer'
+          >
             <div 
               className="font-unsaid font-extrabold text-left" 
               style={{ color: "#fff", fontSize: "18px" }}
@@ -154,11 +180,14 @@ export default function getInTouch() {
         </div>
       </div>
 
-      <MsgForm />
+      {/* Wrap MsgForm with ref */}
+      <div ref={formRef}>
+        <MsgForm />
+      </div>
 
-      <FAQ/>
+      <FAQ />
 
-      <div className='flex flex-col items-center justify-center px-3 py-10 gap-4'>
+      <div ref={CounsellorRef} className='flex flex-col items-center justify-center px-3 py-10 gap-4'>
 
         <div className='flex flex-row w-full gap-4'>
           <div className='flex flex-col justify-between flex-1 bg-[#F4A258] rounded-4xl p-6'>

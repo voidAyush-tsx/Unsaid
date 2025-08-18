@@ -1,66 +1,163 @@
-"use client"
+"use client";
 
-import React, { useRef, useEffect, useState } from 'react';
-import Image from 'next/image';
-import Navbar_v2 from '@/components/navBar_v2';
+import React, { useRef, useEffect, useState } from "react";
+import Image from "next/image";
+import Navbar_v2 from "@/components/navBar_v2";
 import Footer_v2 from "@/components/footer_v2";
 
 export default function Connect() {
-  // Get the date from two days ago
+  // Two days ago date
   const twoDaysAgo = new Date();
   twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-
-  // Format the date as "14 August, 2025"
-  const formattedDate = new Intl.DateTimeFormat('en-GB', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
+  const formattedDate = new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
   }).format(twoDaysAgo);
 
-  // References for content sections
-  const sectionRefs = {
-    information: useRef<HTMLDivElement>(null),
-    usage: useRef<HTMLDivElement>(null),
-    security: useRef<HTMLDivElement>(null),
-    sharing: useRef<HTMLDivElement>(null),
-    compliance: useRef<HTMLDivElement>(null),
-    choices: useRef<HTMLDivElement>(null),
-    contact: useRef<HTMLDivElement>(null),
-  };
+  // Refs for each section
+  const sectionRefs: Record<string, React.MutableRefObject<HTMLDivElement | null>> = {};
+  const sections = [
+    {
+      key: "information",
+      title: "Information we Collect",
+      heading: "What personal information do we collect?",
+      content: [
+        "<b>Personal Details:</b> We collect basic information like your name, email, and age to personalize your counseling experience.",
+        "<b>Chat Data:</b> Your conversations with counselors are analyzed to enhance service quality while maintaining confidentiality.",
+        "<b>Usage Patterns:</b> We track session frequency and duration to improve platform performance and user experience.",
+        "<b>Assessment Data:</b> If you take the GAD-7 anxiety screening test, your responses may be used to tailor support. Stored securely.",
+      ],
+    },
+    {
+      key: "usage",
+      title: "How We Use Information",
+      heading: "How we use your information",
+      content: [
+        "<b>Personalized Support:</b> Your info helps us provide tailored mental health guidance.",
+        "<b>Service Enhancement:</b> We analyze chat data and usage patterns to improve effectiveness.",
+        "<b>Communication:</b> We may send updates or service info (you can opt out).",
+      ],
+    },
+    {
+      key: "security",
+      title: "Data Security",
+      heading: "Data Security",
+      content: [
+        "We employ industry-standard security measures to protect your data. No system is 100% secure, but we strive to safeguard your information.",
+      ],
+    },
+    {
+      key: "sharing",
+      title: "Data Sharing",
+      heading: "Data Sharing",
+      content: [
+        "We do not sell or rent your information. We may share anonymized data for research/statistics, without identifying you personally.",
+      ],
+    },
+    {
+      key: "compliance",
+      title: "Legal Compliance",
+      heading: "Legal Compliance",
+      content: [
+        "We may share information if legally required, or to protect rights, safety, and compliance obligations.",
+      ],
+    },
+    {
+      key: "choices",
+      title: "Your Choices",
+      heading: "Your Choices",
+      content: [
+        "You may access, correct, or delete your data anytime. You can also opt out of promotional emails.",
+      ],
+    },
+    {
+      key: "contact",
+      title: "Contact Us",
+      heading: "Contact Us",
+      content: [
+        `If you have concerns, email us at <a href="mailto:contact@unsaid.com" 
+          class="font-bold hover:underline">contact@unsaid.com</a>.`,
+      ],
+    },
+  ];
 
-  // References for index and content containers
+  // Initialize refs for each section
+  sections.forEach((s) => {
+  sectionRefs[s.key] = useRef<HTMLDivElement | null>(null);
+});
+
+  // For scroll syncing and active section tracking
   const indexRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const [indexHeight, setIndexHeight] = useState<number | null>(null);
+  const [activeSection, setActiveSection] = useState<string | null>(null);
 
-  // Scroll handler for smooth scrolling with 100px offset
-  const scrollToSection = (section: keyof typeof sectionRefs) => {
-    const element = sectionRefs[section].current;
+  // Scroll to section with smooth behavior
+  const scrollToSection = (key: string) => {
+    const element = sectionRefs[key]?.current;
     if (element && contentRef.current) {
       const elementRect = element.getBoundingClientRect();
       const containerRect = contentRef.current.getBoundingClientRect();
-      const offsetTop = elementRect.top - containerRect.top + contentRef.current.scrollTop;
-      contentRef.current.scrollTo({
-        top: offsetTop,
-        behavior: 'smooth',
-      });
+      const offsetTop =
+        elementRect.top - containerRect.top + contentRef.current.scrollTop;
+      contentRef.current.scrollTo({ top: offsetTop, behavior: "smooth" });
+      setActiveSection(key); // Set active section on click
     }
   };
 
-  // Update content height to match index height
+  // Debounced height update for performance
   useEffect(() => {
-    const updateHeight = () => {
+    const debounce = (fn: Function, ms: number) => {
+      let timeoutId: NodeJS.Timeout;
+      return () => {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(() => fn(), ms);
+      };
+    };
+
+    const updateHeight = debounce(() => {
       if (indexRef.current) {
-        const height = indexRef.current.getBoundingClientRect().height;
-        setIndexHeight(height);
+        setIndexHeight(indexRef.current.getBoundingClientRect().height);
+      }
+    }, 100);
+
+    updateHeight();
+    window.addEventListener("resize", updateHeight);
+    return () => window.removeEventListener("resize", updateHeight);
+  }, []);
+
+  // Track active section on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      if (contentRef.current) {
+        const scrollPosition = contentRef.current.scrollTop;
+        let closestSection: string | null = null;
+        let minDistance = Infinity;
+
+        Object.entries(sectionRefs).forEach(([key, ref]) => {
+          const element = ref.current;
+          if (element) {
+            const elementRect = element.getBoundingClientRect();
+            const containerRect = contentRef.current!.getBoundingClientRect();
+            const elementTop =
+              elementRect.top - containerRect.top + contentRef.current!.scrollTop;
+            const distance = Math.abs(scrollPosition - elementTop);
+            if (distance < minDistance && elementRect.top <= 100) {
+              minDistance = distance;
+              closestSection = key;
+            }
+          }
+        });
+
+        if (closestSection) {
+          setActiveSection(closestSection);
+        }
       }
     };
 
-    updateHeight(); // Initial height calculation
-    window.addEventListener('resize', updateHeight); // Update on window resize
-
-    // Cleanup listener on unmount
-    return () => window.removeEventListener('resize', updateHeight);
+    contentRef.current?.addEventListener("scroll", handleScroll);
+    return () => contentRef.current?.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
@@ -68,375 +165,141 @@ export default function Connect() {
       <div className="w-full z-50">
         <Navbar_v2 />
       </div>
-      <div className='flex flex-row items-center px-32 py-28'>
-        <div className='flex flex-1 flex-col items-start gap-7'>
-          <div
-            className='font-unsaid font-extrabold text-left'
-            style={{ color: "#A1CDD9", fontSize: "60px" }}
-          >
+
+      {/* Header */}
+      <div className="flex flex-row items-center px-32 py-28">
+        <div className="flex flex-1 flex-col items-start gap-7">
+          <h1 className="font-unsaid font-extrabold text-left text-[60px] text-[#A1CDD9]">
             Privacy Policy
-          </div>
-          <div className='flex flex-row font-unsaid font-medium gap-12 items-center'>
-            <div className='flex flex-row items-center gap-2'>
-              <Image
-                src="/clock_logo.svg"
-                alt="Clock Icon"
-                width={24}
-                height={24}
-                className='w-5'
-              />
-              <div
-                className='font-unsaid font-semibold'
-                style={{ color: "#A1CDD9", fontSize: "18px" }}
-              >
-                Updated 2d ago
+          </h1>
+          <div className="flex flex-row font-unsaid font-medium gap-12 items-center">
+            {[
+              { icon: "/clock_logo.svg", text: "Updated 2d ago" },
+              { icon: "/calendar_logo.svg", text: formattedDate },
+            ].map((item, i) => (
+              <div key={i} className="flex flex-row items-center gap-2">
+                <Image src={item.icon} alt="icon" width={24} height={24} />
+                <span className="font-unsaid font-semibold text-[18px] text-[#A1CDD9]">
+                  {item.text}
+                </span>
               </div>
-            </div>
-            <div className='flex flex-row items-center gap-2'>
-              <Image
-                src="/calendar_logo.svg"
-                alt="Calendar Icon"
-                width={24}
-                height={24}
-                className='w-5'
-              />
-              <div
-                className='font-unsaid font-semibold'
-                style={{ color: "#A1CDD9", fontSize: "18px" }}
-              >
-                {formattedDate}
-              </div>
-            </div>
+            ))}
           </div>
         </div>
-        <div className='flex flex-1 flex-col items-start gap-8'>
-          <div
-            className='font-unsaid font-medium text-left'
-            style={{ color: "#736B66", fontSize: "24px" }}
+
+        <div className="flex flex-1 flex-col items-start gap-8">
+          <p className="font-unsaid font-medium text-left text-[24px] text-[#736B66]">
+            We take your privacy seriously and are committed to protecting your
+            personal information.
+          </p>
+          <button
+            onClick={() => scrollToSection("information")}
+            className="flex flex-row items-center rounded-4xl px-8 py-4 gap-4 bg-[#F4A258] cursor-pointer"
+            aria-label="View our Privacy Policy details"
           >
-            We take your privacy seriously and are committed to protecting your personal information. This privacy policy explains how we collect.
-          </div>
-          <button className='flex flex-row items-center rounded-4xl px-8 py-4 gap-4 bg-[#F4A258] cursor-pointer'>
-            <div
-              className='font-unsaid font-extrabold text-left'
-              style={{ color: "#fff", fontSize: "18px" }}
-            >
+            <span className="font-unsaid font-extrabold text-[18px] text-white">
               See Our Privacy
-            </div>
+            </span>
             <Image
               src="/right_arrow.svg"
               alt="Down Arrow Icon"
-              width={48}
-              height={48}
+              width={24}
+              height={24}
               className="rotate-90 w-6"
-              onClick={() => window.location.href = "/privacy"}
             />
           </button>
         </div>
       </div>
 
-      <div className='flex flex-row m-5 py-24 px-30 gap-32 rounded-4xl bg-[#F7F4F2]'>
-        {/* Privacy Index */}
-        <div ref={indexRef} className='flex flex-1/3 flex-col px-10 py-6 gap-10 rounded-4xl bg-white sticky top-0 self-start h-fit'>
-          <div className='flex flex-row items-center justify-center gap-2'>
-            <Image
-              src="/doc_logo.svg"
-              alt="Document Logo"
-              width={48}
-              height={48}
-              className='w-8'
-            />
-            <div
-              className='font-unsaid font-extrabold'
-              style={{ color: "#A1CDD9", fontSize: "24px" }}
-            >
+      {/* Main Content */}
+      <div className="flex flex-row m-5 py-24 px-30 gap-32 rounded-4xl bg-[#F7F4F2]">
+        {/* Sidebar Index */}
+        <div
+          ref={indexRef}
+          className="flex flex-1/3 flex-col px-10 py-6 gap-10 rounded-4xl bg-white sticky top-0 self-start h-fit"
+        >
+          <div className="flex flex-row items-center justify-center gap-2">
+            <Image src="/doc_logo.svg" alt="doc" width={32} height={32} />
+            <h2 className="font-unsaid font-extrabold text-[24px] text-[#A1CDD9]">
               Unsaid Privacy
-            </div>
+            </h2>
           </div>
 
-          {/* Bullet Points */}
-          <div className='flex flex-col items-start justify-center gap-2'>
-            <div
-              className="group flex flex-row gap-3 items-center justify-start w-full p-3 cursor-pointer rounded-4xl hover:bg-[#FFEDD5] transition-colors duration-200"
-              onClick={() => scrollToSection('information')}
-            >
+          {/* Map Index */}
+          <div className="flex flex-col gap-2">
+            {sections.map((s, i) => (
               <div
-                className="flex items-center justify-center rounded-full font-unsaid font-extrabold py-3 px-5 bg-[#F7F4F2] group-hover:bg-[#FB8728] transition-colors duration-200"
-                style={{ color: '#A1CDD9', fontSize: '12px' }}
+                key={s.key}
+                onClick={() => scrollToSection(s.key)}
+                className={`group flex flex-row gap-3 items-center w-full p-3 cursor-pointer rounded-4xl hover:bg-[#FFEDD5] transition ${
+                  activeSection === s.key ? "bg-[#FFEDD5]" : ""
+                }`}
               >
-                1
+                <div
+                  className={`flex items-center justify-center rounded-full font-unsaid font-extrabold py-3 px-5 bg-[#F7F4F2] ${
+                    activeSection === s.key
+                      ? "bg-[#FB8728]"
+                      : "group-hover:bg-[#FB8728]"
+                  } transition`}
+                  style={{ fontSize: "12px", color: "#A1CDD9" }}
+                >
+                  {i + 1}
+                </div>
+                <span className="font-unsaid font-bold text-[18px] text-[#A1CDD9]">
+                  {s.title}
+                </span>
               </div>
-              <div
-                className="font-unsaid font-bold"
-                style={{ color: '#A1CDD9', fontSize: '18px' }}
-              >
-                Information we Collect
-              </div>
-            </div>
-            <div
-              className='group flex flex-row gap-3 items-center justify-start w-full p-3 cursor-pointer rounded-4xl hover:bg-[#FFEDD5] transition-colors duration-200'
-              onClick={() => scrollToSection('usage')}
-            >
-              <div
-                className='flex items-center justify-center rounded-full font-unsaid font-extrabold py-3 px-5 bg-[#F7F4F2] group-hover:bg-[#FB8728] transition-colors duration-200'
-                style={{ color: "#A1CDD9", fontSize: "12px" }}
-              >
-                2
-              </div>
-              <div
-                className='font-unsaid font-bold'
-                style={{ color: "#A1CDD9", fontSize: "18px" }}
-              >
-                How We Use Information
-              </div>
-            </div>
-            <div
-              className='group flex flex-row gap-3 items-center justify-start w-full p-3 cursor-pointer rounded-4xl hover:bg-[#FFEDD5] transition-colors duration-200'
-              onClick={() => scrollToSection('security')}
-            >
-              <div
-                className='flex items-center justify-center rounded-full font-unsaid font-extrabold py-3 px-5 bg-[#F7F4F2] group-hover:bg-[#FB8728] transition-colors duration-200'
-                style={{ color: "#A1CDD9", fontSize: "12px" }}
-              >
-                3
-              </div>
-              <div
-                className='font-unsaid font-bold'
-                style={{ color: "#A1CDD9", fontSize: "18px" }}
-              >
-                Data Security
-              </div>
-            </div>
-            <div
-              className='group flex flex-row gap-3 items-center justify-start w-full p-3 cursor-pointer rounded-4xl hover:bg-[#FFEDD5] transition-colors duration-200'
-              onClick={() => scrollToSection('sharing')}
-            >
-              <div
-                className='flex items-center justify-center rounded-full font-unsaid font-extrabold py-3 px-5 bg-[#F7F4F2] group-hover:bg-[#FB8728] transition-colors duration-200'
-                style={{ color: "#A1CDD9", fontSize: "12px" }}
-              >
-                4
-              </div>
-              <div
-                className='font-unsaid font-bold'
-                style={{ color: "#A1CDD9", fontSize: "18px" }}
-              >
-                Data Sharing
-              </div>
-            </div>
-            <div
-              className='group flex flex-row gap-3 items-center justify-start w-full p-3 cursor-pointer rounded-4xl hover:bg-[#FFEDD5] transition-colors duration-200'
-              onClick={() => scrollToSection('compliance')}
-            >
-              <div
-                className='flex items-center justify-center rounded-full font-unsaid font-extrabold py-3 px-5 bg-[#F7F4F2] group-hover:bg-[#FB8728] transition-colors duration-200'
-                style={{ color: "#A1CDD9", fontSize: "12px" }}
-              >
-                5
-              </div>
-              <div
-                className='font-unsaid font-bold'
-                style={{ color: "#A1CDD9", fontSize: "18px" }}
-              >
-                Legal Compliance
-              </div>
-            </div>
-            <div
-              className='group flex flex-row gap-3 items-center justify-start w-full p-3 cursor-pointer rounded-4xl hover:bg-[#FFEDD5] transition-colors duration-200'
-              onClick={() => scrollToSection('choices')}
-            >
-              <div
-                className='flex items-center justify-center rounded-full font-unsaid font-extrabold py-3 px-5 bg-[#F7F4F2] group-hover:bg-[#FB8728] transition-colors duration-200'
-                style={{ color: "#A1CDD9", fontSize: "12px" }}
-              >
-                6
-              </div>
-              <div
-                className='font-unsaid font-bold'
-                style={{ color: "#A1CDD9", fontSize: "18px" }}
-              >
-                Your Choices
-              </div>
-            </div>
-            <div
-              className='group flex flex-row gap-3 items-center justify-start w-full p-3 cursor-pointer rounded-4xl hover:bg-[#FFEDD5] transition-colors duration-200'
-              onClick={() => scrollToSection('contact')}
-            >
-              <div
-                className='flex items-center justify-center rounded-full font-unsaid font-extrabold py-3 px-5 bg-[#F7F4F2] group-hover:bg-[#FB8728] transition-colors duration-200'
-                style={{ color: "#A1CDD9", fontSize: "12px" }}
-              >
-                7
-              </div>
-              <div
-                className='font-unsaid font-bold'
-                style={{ color: "#A1CDD9", fontSize: "18px" }}
-              >
-                Contact Us
-              </div>
-            </div>
+            ))}
           </div>
         </div>
 
         {/* Privacy Content */}
         <div
           ref={contentRef}
-          className='flex flex-2/3 flex-col p-0 gap-16 overflow-y-auto scrollbar-hide'
-          style={{ height: indexHeight ? `${indexHeight}px` : 'auto' }}
+          className="flex flex-2/3 flex-col px-4 gap-16 overflow-y-auto custom-scrollbar"
+          style={{ height: indexHeight ? `${indexHeight}px` : "auto" }}
         >
+          {/* Custom Scrollbar */}
           <style jsx>{`
-            .scrollbar-hide {
-              -ms-overflow-style: none; /* IE and Edge */
-              scrollbar-width: none; /* Firefox */
+            .custom-scrollbar::-webkit-scrollbar {
+              width: 10px;
             }
-            .scrollbar-hide::-webkit-scrollbar {
-              display: none; /* Chrome, Safari, and other WebKit browsers */
+            .custom-scrollbar::-webkit-scrollbar-track {
+              background: #f7f4f2;
+              border-radius: 10px;
+            }
+            .custom-scrollbar::-webkit-scrollbar-thumb {
+              background: #a1cdd9;
+              border-radius: 10px;
+              border: 2px solid #f7f4f2;
+            }
+            .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+              background: #7db7c7;
+            }
+            .custom-scrollbar {
+              scrollbar-width: thin;
+              scrollbar-color: #a1cdd9 #f7f4f2;
             }
           `}</style>
 
-          <div
-            className='font-unsaid font-medium'
-            style={{ color: "#736B66", fontSize: "24px" }}
-          >
-            This privacy policy explains how we collect, use, and share your personal information when you use our chatbot.
-          </div>
-
-          <hr className='border-[#C9C7C5]' />
-
-          <div className='flex flex-col gap-4' ref={sectionRefs.information}>
-            <div
-              className='font-unsaid font-extrabold'
-              style={{ color: "#A1CDD9", fontSize: "24px" }}
-            >
-              What personal information do we collect?
+          {sections.map((s) => (
+            <div key={s.key} ref={sectionRefs[s.key]} className="flex flex-col gap-4">
+              <h3 className="font-unsaid font-extrabold text-[24px] text-[#A1CDD9]">
+                {s.heading}
+              </h3>
+              <div
+                className="font-unsaid font-medium text-[20px] text-[#736B66] flex flex-col gap-2"
+                dangerouslySetInnerHTML={{
+                  __html: s.content.map((c) => `<div>${c}</div>`).join(""),
+                }}
+              />
+              <hr className="border-[#C9C7C5]" />
             </div>
-
-            <div
-              className='flex flex-col font-unsaid font-medium gap-2'
-              style={{ color: "#736B66", fontSize: "20px" }}
-            >
-              <div><span className='font-bold'>Personal Details:</span> We collect basic information like your name, email, and age to personalize your counseling experience.</div>
-              <div><span className='font-bold'>Chat Data:</span> Your conversations with counselors are analyzed to enhance service quality while maintaining confidentiality.</div>
-              <div><span className='font-bold'>Usage Patterns:</span> We track session frequency and duration to improve platform performance and user experience.</div>
-              <div><span className='font-bold'>Assessment Data:</span> If you choose to take the GAD-7 anxiety screening test (developed by Drs. Robert L. Spitzer, Kurt Kroenke, Janet B.W. Williams, and Bernd Löwe), your responses may be used to tailor your counseling support. This data is stored securely and treated with strict confidentiality.</div>
-            </div>
-          </div>
-
-          <hr className='border-[#C9C7C5]' />
-
-          <div className='flex flex-col gap-4' ref={sectionRefs.usage}>
-            <div
-              className='font-unsaid font-extrabold'
-              style={{ color: "#A1CDD9", fontSize: "24px" }}
-            >
-              How we use your information
-            </div>
-
-            <div
-              className='flex flex-col font-unsaid font-medium gap-2'
-              style={{ color: "#736B66", fontSize: "20px" }}
-            >
-              <div><span className='font-bold'>Personalized Support:</span> Your information helps us provide tailored mental health guidance and counseling.</div>
-              <div><span className='font-bold'>Service Enhancement:</span> We analyze chat data and usage patterns to improve platform performance and effectiveness.</div>
-              <div><span className='font-bold'>Communication:</span> We may send updates or important service information, with the option to opt out anytime.</div>
-            </div>
-          </div>
-
-          <hr className='border-[#C9C7C5]' />
-
-          <div className='flex flex-col gap-4' ref={sectionRefs.security}>
-            <div
-              className='font-unsaid font-extrabold'
-              style={{ color: "#A1CDD9", fontSize: "24px" }}
-            >
-              Data Security
-            </div>
-
-            <div
-              className='font-unsaid font-medium'
-              style={{ color: "#736B66", fontSize: "20px" }}
-            >
-              We employ industry-standard security measures to protect your data from unauthorized access, disclosure, alteration, and destruction. However, no data transmission or storage method can guarantee absolute security. We do our best to protect your information, but we cannot guarantee its security.
-            </div>
-          </div>
-
-          <hr className='border-[#C9C7C5]' />
-
-          <div className='flex flex-col gap-4' ref={sectionRefs.sharing}>
-            <div
-              className='font-unsaid font-extrabold'
-              style={{ color: "#A1CDD9", fontSize: "24px" }}
-            >
-              Data Sharing
-            </div>
-
-            <div
-              className='font-unsaid font-medium'
-              style={{ color: "#736B66", fontSize: "20px" }}
-            >
-              Unsaid does not sell, trade, or rent your personal information to third parties. We may share aggregated and anonymized data for research and statistical purposes, but this data will not identify you personally.
-            </div>
-          </div>
-
-          <hr className='border-[#C9C7C5]' />
-
-          <div className='flex flex-col gap-4' ref={sectionRefs.compliance}>
-            <div
-              className='font-unsaid font-extrabold'
-              style={{ color: "#A1CDD9", fontSize: "24px" }}
-            >
-              Legal Compliance
-            </div>
-
-            <div
-              className='font-unsaid font-medium'
-              style={{ color: "#736B66", fontSize: "20px" }}
-            >
-              Unsaid does not sell, trade, or rent your personal information to third parties. We may share aggregated and anonymized data for research and statistical purposes, but this data will not identify you personally.
-            </div>
-          </div>
-
-          <hr className='border-[#C9C7C5]' />
-
-          <div className='flex flex-col gap-4' ref={sectionRefs.choices}>
-            <div
-              className='font-unsaid font-extrabold'
-              style={{ color: "#A1CDD9", fontSize: "24px" }}
-            >
-              Your Choices
-            </div>
-
-            <div
-              className='font-unsaid font-medium'
-              style={{ color: "#736B66", fontSize: "20px" }}
-            >
-              You can access, correct, or delete your personal information at any time by contacting us. You can also opt-out of receiving promotional emails from us.
-            </div>
-          </div>
-
-          <hr className='border-[#C9C7C5]' />
-
-          <div className='flex flex-col gap-4' ref={sectionRefs.contact}>
-            <div
-              className='font-unsaid font-extrabold'
-              style={{ color: "#A1CDD9", fontSize: "24px" }}
-            >
-              Contact Us
-            </div>
-
-            <div
-              className='font-unsaid font-medium'
-              style={{ color: "#736B66", fontSize: "20px" }}
-            >
-              If you have questions or concerns about our Privacy Policy, please contact us at contact@unsaid.com.
-            </div>
-          </div>
+          ))}
         </div>
       </div>
 
-      <div className="w-full">
-        <Footer_v2 />
-      </div>
+      <Footer_v2 />
     </div>
   );
 }
