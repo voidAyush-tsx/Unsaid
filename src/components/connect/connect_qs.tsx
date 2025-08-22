@@ -159,7 +159,8 @@ const ConnectQs: React.FC = () => {
         </div>
         
         <button 
-          className='flex items-center justify-center mt-2 bg-[#A1CDD9] px-8 py-4 gap-2 rounded-4xl'
+          className='flex items-center justify-center mt-2 bg-[#A1CDD9] px-8 py-4 gap-2 rounded-4xl hover:bg-[#E48A39] transition-colors cursor-pointer'
+          onClick={() => (window.location.href = "/get_in_touch?scroll=contact_counsellor")}
         >
           <div 
             className='font-unsaid font-extrabold'

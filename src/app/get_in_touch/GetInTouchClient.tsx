@@ -154,12 +154,19 @@ export default function GetInTouchClient() {
 
       <div ref={CounsellorRef} className="flex flex-col items-center justify-center px-3 py-10 gap-4">
         <div className="flex flex-row w-full gap-4">
-          <div className="flex flex-col justify-between flex-1 bg-[#F4A258] rounded-4xl p-6">
+          <div 
+          className="group flex flex-col justify-between flex-1 bg-[#F4A258] rounded-4xl p-6 hover:scale-101 transition-all duration-200 bg-no-repeat min-h-80"
+          style={{
+            backgroundImage: "url('/getInTouch/chat_vector.svg')",
+            backgroundSize: "auto 110%",
+            backgroundPosition: "95% -95%"
+          }}
+          >
             <div className="font-unsaid text-left font-extrabold text-white" style={{ fontSize: '48px' }}>
               Live Chat
             </div>
             <div className="flex flex-col items-end">
-              <div className="flex bg-white rounded-full p-5 w-fit cursor-pointer hover:rotate-45 transition-all duration-200">
+              <div className="flex bg-white rounded-full p-5 w-fit cursor-pointer group-hover:scale-110 hover:rotate-45 transition-all duration-200">
                 <Image
                   src="/right_blue_arrow.svg"
                   alt="Chat Link"
@@ -170,12 +177,19 @@ export default function GetInTouchClient() {
               </div>
             </div>
           </div>
-          <div className="flex flex-col justify-between flex-1 bg-[#FB8728] rounded-4xl p-6">
+          <div 
+          className="group flex flex-col justify-between flex-1 bg-[#FB8728] rounded-4xl p-6 hover:scale-101 transition-all duration-200 bg-no-repeat min-h-80"
+          style={{
+            backgroundImage: "url('/getInTouch/calling_vector.svg')",
+            backgroundSize: "auto 110%",
+            backgroundPosition: "95% -95%",
+          }}
+          >
             <div className="font-unsaid text-left font-extrabold text-white" style={{ fontSize: '48px' }}>
               Audio Call
             </div>
             <div className="flex flex-col items-end">
-              <div className="flex bg-white rounded-full p-5 w-fit cursor-pointer hover:rotate-45 transition-all duration-200">
+              <div className="flex bg-white rounded-full p-5 w-fit cursor-pointer group-hover:scale-110 hover:rotate-45 transition-all duration-200">
                 <Image
                   src="/right_blue_arrow.svg"
                   alt="Audio Link"
@@ -188,7 +202,14 @@ export default function GetInTouchClient() {
           </div>
         </div>
 
-        <div className="flex flex-col items-start justify-between w-full bg-[#FACC15] rounded-4xl px-32 py-12 cursor-pointer hover:scale-101 transition-all duration-200">
+        <div 
+        className="flex flex-col items-start justify-between w-full bg-[#FACC15] rounded-4xl px-32 py-12 cursor-pointer hover:scale-101 transition-all duration-200 bg-no-repeat"
+        style={{
+          backgroundImage: "url('/getInTouch/video_vector.svg')",
+          backgroundSize: "auto 120%",
+          backgroundPosition: "95% -95%"
+        }}
+        >
           <div className="font-unsaid w-full text-left font-extrabold text-[#74B7C9]" style={{ fontSize: '48px' }}>
             Video Call
           </div>
@@ -203,6 +224,13 @@ export default function GetInTouchClient() {
           </div>
         </div>
       </div>
+          {/* <div
+            className="group flex flex-col flex-1 items-start justify-between rounded-4xl p-6 gap-4 bg-[#A1CDD9] hover:scale-105 transition-transform bg-no-repeat bg-right bg-contain"
+            style={{
+              backgroundImage: "url('/assessment/ready_talk_image.svg')",
+              backgroundSize: "auto 100%",
+            }}
+          ></div> */}
 
       <div className="w-full">
         <Footer />

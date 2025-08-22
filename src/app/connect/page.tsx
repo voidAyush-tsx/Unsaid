@@ -4,6 +4,7 @@ import React from 'react';
 import Image from 'next/image';
 import Connect_QS from "@/components/connect/connect_qs";
 import CounsellingMode from "@/components/connect/mode_counselling";
+import HealingJourney from "@/components/connect/healing_journey";
 import Navbar_v2 from '@/components/navBar_v2';
 import Footer_v2 from "@/components/footer_v2";
 
@@ -63,6 +64,11 @@ export default function Connect() {
       <div className='w-full'>
         <CounsellingMode />
       </div>
+
+      <div className='w-full px-4'>
+        <HealingJourney />
+      </div>
+
       <div className='w-full py-2 px-4'>
         <div className='flex flex-col py-24 gap-10 rounded-4xl bg-[#FACC15] overflow-hidden'>
           <div className='scrolling-text_1 flex flex-row gap-4'>

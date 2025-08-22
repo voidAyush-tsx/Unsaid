@@ -99,7 +99,7 @@ const Navbar_v2: React.FC = () => {
       >
         <NavItems />
         <button 
-        className="flex items-center justify-center bg-[#A1CDD9] px-6 py-3 gap-2 rounded-full hover:bg-[#E48A39] transition-colors cursor-pointer"
+        className="flex items-center justify-center bg-[#A1CDD9] px-6 py-3 gap-2 rounded-4xl hover:bg-[#E48A39] transition-colors cursor-pointer"
         onClick={() => (window.location.href = "/get_in_touch?scroll=contact_counsellor")}
         >
           <div
@@ -127,7 +127,7 @@ const Navbar_v2: React.FC = () => {
       >
         <NavItems />
         <button 
-        className="flex items-center justify-center bg-[#A1CDD9] px-6 py-3 gap-2 rounded-full hover:bg-[#E48A39] transition-colors cursor-pointer"
+        className="flex items-center justify-center bg-[#A1CDD9] px-6 py-3 gap-2 rounded-4xl hover:bg-[#E48A39] transition-colors cursor-pointer"
         onClick={() => (window.location.href = "/get_in_touch?scroll=contact_counsellor")}
         >
           <div
