@@ -1,0 +1,28 @@
+.vibrateOnHover:hover {
+  animation: vibrate 0.5s linear;
+}
+
+@keyframes vibrate {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  20% {
+    transform: rotate(-20deg);
+  }
+  40% {
+    transform: rotate(20deg);
+  }
+  60% {
+    transform: rotate(-20deg);
+  }
+  80% {
+    transform: rotate(20deg);
+  }
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .vibrateOnHover:hover {
+    animation: none;
+  }
+}

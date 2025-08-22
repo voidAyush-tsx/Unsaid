@@ -14,7 +14,8 @@ export default function Home() {
         alt="Fingerprint Logo"
         width={112}
         height={102}
-        className="w-24 mb-2"
+        className="w-24 mb-2 cursor-pointer"
+        onClick={() => (window.location.href = "/")}
       />
       <div className="flex flex-col items-start gap-0">
         <div
