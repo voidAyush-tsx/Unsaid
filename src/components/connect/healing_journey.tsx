@@ -21,6 +21,10 @@ const HealingJourney: React.FC = () => {
   const emojiRef = useRef<HTMLDivElement>(null);
   const smileRefs = useRef<HTMLDivElement[]>([]);
   const barRefs = useRef<HTMLDivElement[]>([]);
+  const connectContainerRef = useRef<HTMLDivElement>(null);
+  const parentConnectRef = useRef<HTMLDivElement>(null);
+  const childConnect1Ref = useRef<HTMLDivElement>(null);
+  const childConnect2Ref = useRef<HTMLDivElement>(null);
 
   // Helper to collect bar refs
   const setBarRef = (el: HTMLDivElement | null, index: number) => {
@@ -47,6 +51,10 @@ const HealingJourney: React.FC = () => {
     const emoji = emojiRef.current;
     const bars = barRefs.current;
     const smiles = smileRefs.current;
+    const connectContainer = connectContainerRef.current;
+    const parentConnect = parentConnectRef.current;
+    const childConnect1 = childConnect1Ref.current;
+    const childConnect2 = childConnect2Ref.current;
 
     // Log refs for debugging
     console.log('Refs:', {
@@ -61,11 +69,16 @@ const HealingJourney: React.FC = () => {
       emoji,
       barsLength: bars.length,
       smilesLength: smiles.length,
+      connectContainer,
+      parentConnect,
+      childConnect1,
+      childConnect2,
     });
 
     // Check if all refs are valid
     if (!parentCircle || !childCircle1 || !childCircle2 || !container || !mentalHealth || 
-        !percentage || !progressBar || !mood || !emoji || bars.length !== 12 || smiles.length !== 7) {
+        !percentage || !progressBar || !mood || !emoji || bars.length !== 12 || smiles.length !== 7 ||
+        !connectContainer || !parentConnect || !childConnect1 || !childConnect2) {
       console.error('Missing refs or incorrect number of bars/smiles:', {
         parentCircle: !!parentCircle,
         childCircle1: !!childCircle1,
@@ -78,11 +91,15 @@ const HealingJourney: React.FC = () => {
         emoji: !!emoji,
         bars: bars.length,
         smiles: smiles.length,
+        connectContainer: !!connectContainer,
+        parentConnect: !!parentConnect,
+        childConnect1: !!childConnect1,
+        childConnect2: !!childConnect2,
       });
       return;
     }
 
-    // Set initial states
+    // Set initial states for Healing Journey
     gsap.set(parentCircle, { scale: 0, transformOrigin: "center center" });
     gsap.set([childCircle1, childCircle2], { x: 0, y: 0 });
     gsap.set(mentalHealth, { scale: 0, transformOrigin: "center center" });
@@ -92,7 +109,11 @@ const HealingJourney: React.FC = () => {
     gsap.set(smiles, { scale: 0, transformOrigin: "center center" });
     gsap.set(bars, { height: 0, transformOrigin: "bottom center" });
 
-    // Create a GSAP timeline for coordinated animations
+    // Set initial states for Connect
+    gsap.set(parentConnect, { scale: 0, transformOrigin: "center center" });
+    gsap.set([childConnect1, childConnect2], { x: 0, y: 0 });
+
+    // Create a GSAP timeline for Healing Journey animations
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: container,
@@ -202,6 +223,67 @@ const HealingJourney: React.FC = () => {
       "-=1.0" // Start slightly before Emoji section completes
     );
 
+    // Create a separate GSAP timeline for Connect animations
+    const tlConnect = gsap.timeline({
+      scrollTrigger: {
+        trigger: connectContainer,
+        start: "top 80%",
+        end: "top 80%",
+        once: true,
+        markers: true,
+        onEnter: () => console.log('ScrollTrigger Connect entered'),
+      },
+      defaults: { ease: "power2.out", duration: 1.5 },
+    });
+
+    // Timeline (children synced with parent)
+    tlConnect.to(
+      parentConnect,
+      {
+        scale: 1,
+        duration: 1.5,
+        ease: "power2.out", // ease-out curve for smooth deceleration
+        onUpdate: function () {
+          // Use eased progress instead of raw progress
+          const eased = this.ratio; // GSAP provides eased progress (0→1 with easing)
+
+          // child 1
+          const angle1 = startAngle1 + 360 * revolutions * eased;
+          const rad1 = (angle1 * Math.PI) / 180;
+          gsap.set(childConnect1, {
+            x: finalRadius1 * eased * Math.cos(rad1),
+            y: finalRadius1 * eased * Math.sin(rad1),
+          });
+
+          // child 2
+          const angle2 = startAngle2 + 360 * revolutions * eased;
+          const rad2 = (angle2 * Math.PI) / 180;
+          gsap.set(childConnect2, {
+            x: finalRadius2 * eased * Math.cos(rad2),
+            y: finalRadius2 * eased * Math.sin(rad2),
+          });
+        },
+        onComplete: () => console.log("Parent + Children eased sync animation complete"),
+      },
+      0
+    );
+
+    // Define revolutions for orbiting effect
+    const revolutions = 1/2;
+
+    // Final positions
+    const finalX1 = 232; // 58 * 4
+    const finalY1 = 64;  // 16 * 4
+    const finalRadius1 = Math.sqrt(finalX1 * finalX1 + finalY1 * finalY1);
+    const finalAngle1 = Math.atan2(finalY1, finalX1) * (180 / Math.PI);
+    const startAngle1 = finalAngle1 - 360 * revolutions;
+
+    const finalX2 = -224; // -56 * 4
+    const finalY2 = -80;  // -20 * 4
+    const finalRadius2 = Math.sqrt(finalX2 * finalX2 + finalY2 * finalY2);
+    const finalAngle2 = Math.atan2(finalY2, finalX2) * (180 / Math.PI);
+    const startAngle2 = finalAngle2 - 360 * revolutions;
+
     // Cleanup
     return () => {
       console.log('Cleaning up GSAP animations');
@@ -217,6 +299,9 @@ const HealingJourney: React.FC = () => {
         emoji,
         ...bars,
         ...smiles,
+        parentConnect,
+        childConnect1,
+        childConnect2,
       ]);
     };
   }, []);
@@ -447,6 +532,26 @@ const HealingJourney: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      <div ref={connectContainerRef} className="flex items-center justify-center">
+        {/* Parent Circle for Connect */}
+        <div
+          ref={parentConnectRef}
+          className="p-60 bg-[#F4A258] rounded-full"
+        ></div>
+
+        {/* Child Circle 1 for Connect */}
+        <div
+          ref={childConnect1Ref}
+          className="p-8 bg-[#F4A258] absolute rounded-full border-8 border-white"
+        ></div>
+
+        {/* Child Circle 2 for Connect */}
+        <div
+          ref={childConnect2Ref}
+          className="p-12 bg-[#F4A258] absolute rounded-full border-8 border-white"
+        ></div>
       </div>
     </div>
   );
