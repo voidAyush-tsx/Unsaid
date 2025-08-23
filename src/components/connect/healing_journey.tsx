@@ -552,6 +552,129 @@ const HealingJourney: React.FC = () => {
           ref={childConnect2Ref}
           className="p-12 bg-[#F4A258] absolute rounded-full border-8 border-white"
         ></div>
+
+        {/* Doctor Details */}
+        <div className='p-4 gap-4 flex flex-row absolute translate-x-36 -translate-y-24 rounded-3xl bg-white shadow-2xl'>
+          <div className="relative w-[100px] h-[100px] overflow-hidden rounded-2xl">
+            <Image
+              src="/counsellors/counsellor.png"
+              alt="Counsellor"
+              fill
+              className="object-cover object-top" 
+              sizes="150px"
+            />
+          </div>
+          <div className='flex flex-col justify-between'>
+            <div className='flex flex-col gap-2'>
+              <div className='flex flex-row items-center gap-10 justify-between w-full'>
+                <div 
+                className='font-unsaid font-extrabold' 
+                style={{ color: "#A1CDD9", fontSize: "18px" }}
+                >
+                  Dr. Priya Sharma
+                </div>
+                <Image
+                  src="/healthJourney/verified.svg"
+                  alt="Verified"
+                  width={32}
+                  height={32}
+                  className="w-5"
+                />
+              </div>
+              <div className='flex flex-row items-center gap-10 justify-between w-full'>
+                <div className='flex flex-row items-center gap-2'>
+                  <Image
+                    src="/healthJourney/job_icon.svg"
+                    alt="Job"
+                    width={32}
+                    height={32}
+                    className="w-4"
+                  />
+                  <div 
+                  className='font-unsaid font-bold' 
+                  style={{ color: "#736B66", fontSize: "14px" }}
+                  >
+                    Psychologist
+                  </div>
+                </div>
+                <div className='flex flex-row items-center gap-2'>
+                  <Image
+                    src="/healthJourney/location.svg"
+                    alt="Location"
+                    width={32}
+                    height={32}
+                    className="w-4"
+                  />
+                  <div 
+                  className='font-unsaid font-bold' 
+                  style={{ color: "#736B66", fontSize: "14px" }}
+                  >
+                    1.1 km
+                  </div>
+                </div>
+
+              </div>
+            </div>
+            <div className='flex flex-row items-center justify-between'>
+              <div className='flex flex-row items-center gap-3'>
+                <div className='flex flex-row items-center mb-0.5 gap-1'>
+                  <Image
+                    src="/healthJourney/rated_star.svg"
+                    alt="Rate"
+                    width={32}
+                    height={32}
+                    className="w-4"
+                  />
+                  <Image
+                    src="/healthJourney/rated_star.svg"
+                    alt="Rate"
+                    width={32}
+                    height={32}
+                    className="w-4"
+                  />
+                  <Image
+                    src="/healthJourney/rated_star.svg"
+                    alt="Rate"
+                    width={32}
+                    height={32}
+                    className="w-4"
+                  />
+                  <Image
+                    src="/healthJourney/rated_star.svg"
+                    alt="Rate"
+                    width={32}
+                    height={32}
+                    className="w-4"
+                  />
+                  <Image
+                    src="/healthJourney/blank_star.svg"
+                    alt="Rate"
+                    width={32}
+                    height={32}
+                    className="w-4"
+                  />
+                </div>
+                <div
+                  className='font-unsaid font-extrabold'
+                  style={{ color: "#A1CDD9", fontSize: "14px" }}
+                >
+                  4.1
+                </div>
+              </div>
+              <div className='w-0.5 h-full bg-[#E8DDD9]'></div>
+              <div
+                className='font-unsaid font-semibold'
+                style={{ color: "#ACA9A5", fontSize: "14px" }}
+              >
+                241 users
+              </div>
+            </div>
+
+
+          </div>
+
+        </div>
+
       </div>
     </div>
   );
