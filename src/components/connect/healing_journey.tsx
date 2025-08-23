@@ -25,6 +25,9 @@ const HealingJourney: React.FC = () => {
   const parentConnectRef = useRef<HTMLDivElement>(null);
   const childConnect1Ref = useRef<HTMLDivElement>(null);
   const childConnect2Ref = useRef<HTMLDivElement>(null);
+  const doctorDetailsRef = useRef<HTMLDivElement>(null);
+  const starRefs = useRef<HTMLDivElement[]>([]);
+  const userCountRef = useRef<HTMLDivElement>(null);
 
   // Helper to collect bar refs
   const setBarRef = (el: HTMLDivElement | null, index: number) => {
@@ -34,6 +37,11 @@ const HealingJourney: React.FC = () => {
   // Helper to collect smile refs
   const setSmileRef = (el: HTMLDivElement | null, index: number) => {
     if (el) smileRefs.current[index] = el;
+  };
+
+  // Helper to collect star refs
+  const setStarRef = (el: HTMLDivElement | null, index: number) => {
+    if (el) starRefs.current[index] = el;
   };
 
   useEffect(() => {
@@ -55,6 +63,9 @@ const HealingJourney: React.FC = () => {
     const parentConnect = parentConnectRef.current;
     const childConnect1 = childConnect1Ref.current;
     const childConnect2 = childConnect2Ref.current;
+    const doctorDetails = doctorDetailsRef.current;
+    const stars = starRefs.current;
+    const userCount = userCountRef.current;
 
     // Log refs for debugging
     console.log('Refs:', {
@@ -73,13 +84,17 @@ const HealingJourney: React.FC = () => {
       parentConnect,
       childConnect1,
       childConnect2,
+      doctorDetails,
+      starsLength: stars.length,
+      userCount,
     });
 
     // Check if all refs are valid
     if (!parentCircle || !childCircle1 || !childCircle2 || !container || !mentalHealth || 
         !percentage || !progressBar || !mood || !emoji || bars.length !== 12 || smiles.length !== 7 ||
-        !connectContainer || !parentConnect || !childConnect1 || !childConnect2) {
-      console.error('Missing refs or incorrect number of bars/smiles:', {
+        !connectContainer || !parentConnect || !childConnect1 || !childConnect2 || !doctorDetails ||
+        stars.length !== 5 || !userCount) {
+      console.error('Missing refs or incorrect number of bars/smiles/stars:', {
         parentCircle: !!parentCircle,
         childCircle1: !!childCircle1,
         childCircle2: !!childCircle2,
@@ -95,6 +110,9 @@ const HealingJourney: React.FC = () => {
         parentConnect: !!parentConnect,
         childConnect1: !!childConnect1,
         childConnect2: !!childConnect2,
+        doctorDetails: !!doctorDetails,
+        stars: stars.length,
+        userCount: !!userCount,
       });
       return;
     }
@@ -112,6 +130,9 @@ const HealingJourney: React.FC = () => {
     // Set initial states for Connect
     gsap.set(parentConnect, { scale: 0, transformOrigin: "center center" });
     gsap.set([childConnect1, childConnect2], { x: 0, y: 0 });
+    gsap.set(doctorDetails, { scale: 0, opacity: 0, transformOrigin: "center center" });
+    gsap.set(stars, { scale: 0, transformOrigin: "center center" });
+    gsap.set(userCount, { textContent: 0 });
 
     // Create a GSAP timeline for Healing Journey animations
     const tl = gsap.timeline({
@@ -198,7 +219,7 @@ const HealingJourney: React.FC = () => {
       "<"
     );
 
-    // Animate Emoji section - scale to 1.5 and make visible
+    // Animate Emoji section - scale to 1.3 and make visible
     tl.to(
       emoji,
       {
@@ -268,18 +289,59 @@ const HealingJourney: React.FC = () => {
       0
     );
 
+    // Animate Doctor Details section after parent and child animations
+    tlConnect.to(
+      doctorDetails,
+      {
+        scale: 1,
+        opacity: 1,
+        duration: 1.5,
+        ease: "elastic.out(1, 0.5)",
+        onComplete: () => console.log('Doctor Details section animation complete'),
+      },
+      ">"
+    );
+
+    // Animate stars - pop-up effect similar to emojis
+    tlConnect.to(
+      stars,
+      {
+        scale: 1,
+        duration: 0.5,
+        stagger: 0.1,
+        ease: "back.out(1.7)",
+      },
+      ">"
+    );
+
+    // Animate user count from 0 to 241
+    tlConnect.to(
+      userCount,
+      {
+        textContent: 241,
+        duration: 1.5,
+        snap: { textContent: 1 },
+        onUpdate: function () {
+          if (userCount) {
+            userCount.textContent = `${Math.round(Number(this.targets()[0].textContent))} users`;
+          }
+        },
+      },
+      "<"
+    );
+
     // Define revolutions for orbiting effect
     const revolutions = 1/2;
 
     // Final positions
-    const finalX1 = 232; // 58 * 4
-    const finalY1 = 64;  // 16 * 4
+    const finalX1 = 232;
+    const finalY1 = 64;
     const finalRadius1 = Math.sqrt(finalX1 * finalX1 + finalY1 * finalY1);
     const finalAngle1 = Math.atan2(finalY1, finalX1) * (180 / Math.PI);
     const startAngle1 = finalAngle1 - 360 * revolutions;
 
-    const finalX2 = -224; // -56 * 4
-    const finalY2 = -80;  // -20 * 4
+    const finalX2 = -224;
+    const finalY2 = -80;
     const finalRadius2 = Math.sqrt(finalX2 * finalX2 + finalY2 * finalY2);
     const finalAngle2 = Math.atan2(finalY2, finalX2) * (180 / Math.PI);
     const startAngle2 = finalAngle2 - 360 * revolutions;
@@ -302,6 +364,9 @@ const HealingJourney: React.FC = () => {
         parentConnect,
         childConnect1,
         childConnect2,
+        doctorDetails,
+        ...stars,
+        userCount,
       ]);
     };
   }, []);
@@ -554,7 +619,7 @@ const HealingJourney: React.FC = () => {
         ></div>
 
         {/* Doctor Details */}
-        <div className='p-4 gap-4 flex flex-row absolute translate-x-36 -translate-y-24 rounded-3xl bg-white shadow-2xl'>
+        <div ref={doctorDetailsRef} className='p-4 gap-4 flex flex-row absolute translate-x-36 -translate-y-24 rounded-3xl bg-white shadow-2xl'>
           <div className="relative w-[100px] h-[100px] overflow-hidden rounded-2xl">
             <Image
               src="/counsellors/counsellor.png"
@@ -612,47 +677,56 @@ const HealingJourney: React.FC = () => {
                     1.1 km
                   </div>
                 </div>
-
               </div>
             </div>
             <div className='flex flex-row items-center justify-between'>
               <div className='flex flex-row items-center gap-3'>
                 <div className='flex flex-row items-center mb-0.5 gap-1'>
-                  <Image
-                    src="/healthJourney/rated_star.svg"
-                    alt="Rate"
-                    width={32}
-                    height={32}
-                    className="w-4"
-                  />
-                  <Image
-                    src="/healthJourney/rated_star.svg"
-                    alt="Rate"
-                    width={32}
-                    height={32}
-                    className="w-4"
-                  />
-                  <Image
-                    src="/healthJourney/rated_star.svg"
-                    alt="Rate"
-                    width={32}
-                    height={32}
-                    className="w-4"
-                  />
-                  <Image
-                    src="/healthJourney/rated_star.svg"
-                    alt="Rate"
-                    width={32}
-                    height={32}
-                    className="w-4"
-                  />
-                  <Image
-                    src="/healthJourney/blank_star.svg"
-                    alt="Rate"
-                    width={32}
-                    height={32}
-                    className="w-4"
-                  />
+                  <div ref={(el) => setStarRef(el, 0)}>
+                    <Image
+                      src="/healthJourney/rated_star.svg"
+                      alt="Rate"
+                      width={32}
+                      height={32}
+                      className="w-4"
+                    />
+                  </div>
+                  <div ref={(el) => setStarRef(el, 1)}>
+                    <Image
+                      src="/healthJourney/rated_star.svg"
+                      alt="Rate"
+                      width={32}
+                      height={32}
+                      className="w-4"
+                    />
+                  </div>
+                  <div ref={(el) => setStarRef(el, 2)}>
+                    <Image
+                      src="/healthJourney/rated_star.svg"
+                      alt="Rate"
+                      width={32}
+                      height={32}
+                      className="w-4"
+                    />
+                  </div>
+                  <div ref={(el) => setStarRef(el, 3)}>
+                    <Image
+                      src="/healthJourney/rated_star.svg"
+                      alt="Rate"
+                      width={32}
+                      height={32}
+                      className="w-4"
+                    />
+                  </div>
+                  <div ref={(el) => setStarRef(el, 4)}>
+                    <Image
+                      src="/healthJourney/blank_star.svg"
+                      alt="Rate"
+                      width={32}
+                      height={32}
+                      className="w-4"
+                    />
+                  </div>
                 </div>
                 <div
                   className='font-unsaid font-extrabold'
@@ -663,18 +737,15 @@ const HealingJourney: React.FC = () => {
               </div>
               <div className='w-0.5 h-full bg-[#E8DDD9]'></div>
               <div
+                ref={userCountRef}
                 className='font-unsaid font-semibold'
                 style={{ color: "#ACA9A5", fontSize: "14px" }}
               >
-                241 users
+                0 users
               </div>
             </div>
-
-
           </div>
-
         </div>
-
       </div>
     </div>
   );
