@@ -35,7 +35,7 @@ export default function LogInForm() {
       if (signInError) {
         setError(signInError);
       } else if (user) {
-        router.push("/dashboard");
+        window.location.href = "/connect"; // ✅ Redirect + Refresh
       }
     } catch {
       setError("An unexpected error occurred");

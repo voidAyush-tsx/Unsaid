@@ -178,7 +178,7 @@ export default function SignUpForm() {
       if (error) {
         setErrors((prev) => ({ ...prev, form: error }));
       } else if (user) {
-        router.push("/dashboard");
+        window.location.href = "/connect"; // ✅ Redirect + Refresh
       }
     } catch {
       setErrors((prev) => ({ ...prev, form: "An unexpected error occurred" }));
