@@ -747,6 +747,104 @@ const HealingJourney: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <div className="flex items-center justify-center">
+        {/* Parent Circle for Grow */}
+        <div
+          className="p-60 bg-[#A1CDD9] rounded-full"
+        ></div>
+
+        {/* Child Circle 1 for Grow */}
+        <div
+          className="p-8 bg-[#A1CDD9] absolute rounded-full border-8 border-white -translate-x-56 translate-y-20"
+        ></div>
+
+        {/* Child Circle 2 for Grow */}
+        <div
+          className="p-10 bg-[#A1CDD9] absolute rounded-full border-8 border-white translate-x-60 translate-y-8"
+        ></div>
+
+        {/* Streak */}
+        <div className='p-4 gap-4 flex flex-row items-center absolute translate-x-32 translate-y-36 rounded-3xl bg-white shadow-2xl'>
+          <div className='bg-[#F7F4F2] rounded-full h-fit p-5'>
+            <Image
+              src="/healthJourney/doc_icon.svg"
+              alt="Journal"
+              width={16}
+              height={20}
+              className="w-4"
+            />
+          </div>
+          <div className='flex flex-col items-start justify-center gap-2'>
+            <div
+              className='font-unsaid font-extrabold'
+              style={{ color: "#A1CDD9", fontSize: "18px" }}
+            >
+              Mindful Journal
+            </div>
+            <div
+              className='font-unsaid font-semibold'
+              style={{ color: "#736B66", fontSize: "16px" }}
+            >
+              64 Day Streak
+            </div>
+          </div>
+          <Image
+            src="/healthJourney/streak_icon.svg"
+            alt="Streak"
+            width={60}
+            height={60}
+            className="w-14"
+          />
+
+        </div>
+
+        <div className='flex flex-row px-6 py-4 gap-4 bg-white absolute translate-x-36 -translate-y-12 rounded-4xl shadow-2xl'>
+          <Image
+            src="/healthJourney/star_grow.svg"
+            alt="Meditation"
+            width={24}
+            height={24}
+            className="w-6"
+          />
+          <div
+            className='font-unsaid font-bold'
+            style={{ color: "#A1CDD9", fontSize: "18px" }}
+          >
+            Positive
+          </div>
+        </div>
+        <div className='flex flex-row px-6 py-4 gap-4 bg-white absolute -translate-x-36 -translate-y-8 rounded-4xl shadow-2xl'>
+          <Image
+            src="/healthJourney/smile_grow.svg"
+            alt="Meditation"
+            width={24}
+            height={24}
+            className="w-6"
+          />
+          <div
+            className='font-unsaid font-bold'
+            style={{ color: "#A1CDD9", fontSize: "18px" }}
+          >
+            Fun
+          </div>
+        </div>
+        <div className='flex flex-row px-6 py-4 gap-4 bg-white absolute -translate-x-52 -translate-y-28 rounded-4xl shadow-2xl'>
+          <Image
+            src="/healthJourney/supportive_grow.svg"
+            alt="Meditation"
+            width={24}
+            height={24}
+            className="w-6"
+          />
+          <div
+            className='font-unsaid font-bold'
+            style={{ color: "#A1CDD9", fontSize: "18px" }}
+          >
+            Supportive
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
