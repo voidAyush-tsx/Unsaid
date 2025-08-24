@@ -28,6 +28,15 @@ const HealingJourney: React.FC = () => {
   const doctorDetailsRef = useRef<HTMLDivElement>(null);
   const starRefs = useRef<HTMLDivElement[]>([]);
   const userCountRef = useRef<HTMLDivElement>(null);
+  const growContainerRef = useRef<HTMLDivElement>(null);
+  const parentGrowRef = useRef<HTMLDivElement>(null);
+  const childGrow1Ref = useRef<HTMLDivElement>(null);
+  const childGrow2Ref = useRef<HTMLDivElement>(null);
+  const streakRef = useRef<HTMLDivElement>(null);
+  const streakNumberRef = useRef<HTMLSpanElement>(null);
+  const badge1Ref = useRef<HTMLDivElement>(null);
+  const badge2Ref = useRef<HTMLDivElement>(null);
+  const badge3Ref = useRef<HTMLDivElement>(null);
 
   // Helper to collect bar refs
   const setBarRef = (el: HTMLDivElement | null, index: number) => {
@@ -66,6 +75,15 @@ const HealingJourney: React.FC = () => {
     const doctorDetails = doctorDetailsRef.current;
     const stars = starRefs.current;
     const userCount = userCountRef.current;
+    const growContainer = growContainerRef.current;
+    const parentGrow = parentGrowRef.current;
+    const childGrow1 = childGrow1Ref.current;
+    const childGrow2 = childGrow2Ref.current;
+    const streak = streakRef.current;
+    const streakNumber = streakNumberRef.current;
+    const badge1 = badge1Ref.current;
+    const badge2 = badge2Ref.current;
+    const badge3 = badge3Ref.current;
 
     // Log refs for debugging
     console.log('Refs:', {
@@ -87,13 +105,23 @@ const HealingJourney: React.FC = () => {
       doctorDetails,
       starsLength: stars.length,
       userCount,
+      growContainer,
+      parentGrow,
+      childGrow1,
+      childGrow2,
+      streak,
+      streakNumber,
+      badge1,
+      badge2,
+      badge3,
     });
 
     // Check if all refs are valid
     if (!parentCircle || !childCircle1 || !childCircle2 || !container || !mentalHealth || 
         !percentage || !progressBar || !mood || !emoji || bars.length !== 12 || smiles.length !== 7 ||
         !connectContainer || !parentConnect || !childConnect1 || !childConnect2 || !doctorDetails ||
-        stars.length !== 5 || !userCount) {
+        stars.length !== 5 || !userCount || !growContainer || !parentGrow || !childGrow1 || 
+        !childGrow2 || !streak || !streakNumber || !badge1 || !badge2 || !badge3) {
       console.error('Missing refs or incorrect number of bars/smiles/stars:', {
         parentCircle: !!parentCircle,
         childCircle1: !!childCircle1,
@@ -113,6 +141,15 @@ const HealingJourney: React.FC = () => {
         doctorDetails: !!doctorDetails,
         stars: stars.length,
         userCount: !!userCount,
+        growContainer: !!growContainer,
+        parentGrow: !!parentGrow,
+        childGrow1: !!childGrow1,
+        childGrow2: !!childGrow2,
+        streak: !!streak,
+        streakNumber: !!streakNumber,
+        badge1: !!badge1,
+        badge2: !!badge2,
+        badge3: !!badge3,
       });
       return;
     }
@@ -133,6 +170,13 @@ const HealingJourney: React.FC = () => {
     gsap.set(doctorDetails, { scale: 0, opacity: 0, transformOrigin: "center center" });
     gsap.set(stars, { scale: 0, transformOrigin: "center center" });
     gsap.set(userCount, { textContent: 0 });
+
+    // Set initial states for Grow
+    gsap.set(parentGrow, { scale: 0, transformOrigin: "center center" });
+    gsap.set([childGrow1, childGrow2], { x: 0, y: 0 });
+    gsap.set(streak, { scale: 0, transformOrigin: "center center" });
+    gsap.set([badge1, badge2, badge3], { scale: 0, transformOrigin: "center center" });
+    gsap.set(streakNumber, { textContent: 0 });
 
     // Create a GSAP timeline for Healing Journey animations
     const tl = gsap.timeline({
@@ -257,7 +301,7 @@ const HealingJourney: React.FC = () => {
       defaults: { ease: "power2.out", duration: 1.5 },
     });
 
-    // Timeline (children synced with parent)
+    //Timeline (children synced with parent)
     tlConnect.to(
       parentConnect,
       {
@@ -330,6 +374,75 @@ const HealingJourney: React.FC = () => {
       "<"
     );
 
+    // Create a separate GSAP timeline for Grow animations
+    const tlGrow = gsap.timeline({
+      scrollTrigger: {
+        trigger: growContainer,
+        start: "top 80%",
+        end: "top 80%",
+        once: true,
+        markers: true,
+        onEnter: () => console.log('ScrollTrigger Grow entered'),
+      },
+      defaults: { ease: "power2.out", duration: 1.5 },
+    });
+
+    // Animate parent circle to full size
+    tlGrow.to(parentGrow, {
+      scale: 1,
+      onComplete: () => console.log('Parent Grow circle animation complete'),
+    });
+
+    // Animate child circles to their final positions
+    tlGrow.to(
+      childGrow1,
+      { x: -224, y: 80, duration: 1.5 },
+      0
+    ).to(
+      childGrow2,
+      { x: 240, y: 32, duration: 1.5 },
+      0
+    );
+
+    // Animate Streak section after circles
+    tlGrow.to(
+      streak,
+      {
+        scale: 1,
+        duration: 1.5,
+        ease: "elastic.out(1, 0.5)",
+        onComplete: () => console.log('Streak section animation complete'),
+      }
+    );
+
+    // Animate streak number from 0 to 64
+    tlGrow.to(
+      streakNumber,
+      {
+        textContent: 64,
+        duration: 1.5,
+        snap: { textContent: 1 },
+        onUpdate: function () {
+          if (streakNumber) {
+            streakNumber.textContent = `${Math.round(Number(this.targets()[0].textContent))}`;
+          }
+        },
+      },
+      "<"
+    );
+
+    // Animate badges after circles (aligned with streak start)
+    tlGrow.to(
+      [badge1, badge2, badge3],
+      {
+        scale: 1,
+        duration: 1.5,
+        ease: "elastic.out(1, 0.5)",
+        stagger: 0.2,
+      },
+      "<"
+    );
+
     // Define revolutions for orbiting effect
     const revolutions = 1/2;
 
@@ -367,6 +480,14 @@ const HealingJourney: React.FC = () => {
         doctorDetails,
         ...stars,
         userCount,
+        parentGrow,
+        childGrow1,
+        childGrow2,
+        streak,
+        streakNumber,
+        badge1,
+        badge2,
+        badge3,
       ]);
     };
   }, []);
@@ -748,24 +869,27 @@ const HealingJourney: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex items-center justify-center">
+      <div ref={growContainerRef} className="flex items-center justify-center">
         {/* Parent Circle for Grow */}
         <div
+          ref={parentGrowRef}
           className="p-60 bg-[#A1CDD9] rounded-full"
         ></div>
 
         {/* Child Circle 1 for Grow */}
         <div
-          className="p-8 bg-[#A1CDD9] absolute rounded-full border-8 border-white -translate-x-56 translate-y-20"
+          ref={childGrow1Ref}
+          className="p-8 bg-[#A1CDD9] absolute rounded-full border-8 border-white"
         ></div>
 
         {/* Child Circle 2 for Grow */}
         <div
-          className="p-10 bg-[#A1CDD9] absolute rounded-full border-8 border-white translate-x-60 translate-y-8"
+          ref={childGrow2Ref}
+          className="p-10 bg-[#A1CDD9] absolute rounded-full border-8 border-white"
         ></div>
 
         {/* Streak */}
-        <div className='p-4 gap-4 flex flex-row items-center absolute translate-x-32 translate-y-36 rounded-3xl bg-white shadow-2xl'>
+        <div ref={streakRef} className='p-4 gap-4 flex flex-row items-center absolute translate-x-32 translate-y-36 rounded-3xl bg-white shadow-2xl'>
           <div className='bg-[#F7F4F2] rounded-full h-fit p-5'>
             <Image
               src="/healthJourney/doc_icon.svg"
@@ -786,7 +910,7 @@ const HealingJourney: React.FC = () => {
               className='font-unsaid font-semibold'
               style={{ color: "#736B66", fontSize: "16px" }}
             >
-              64 Day Streak
+              <span ref={streakNumberRef}>0</span> Day Streak
             </div>
           </div>
           <Image
@@ -799,7 +923,8 @@ const HealingJourney: React.FC = () => {
 
         </div>
 
-        <div className='flex flex-row px-6 py-4 gap-4 bg-white absolute translate-x-36 -translate-y-12 rounded-4xl shadow-2xl'>
+        {/* Badge-1 */}
+        <div ref={badge1Ref} className='flex flex-row px-6 py-4 gap-4 bg-white absolute translate-x-36 -translate-y-12 rounded-4xl shadow-2xl'>
           <Image
             src="/healthJourney/star_grow.svg"
             alt="Meditation"
@@ -814,7 +939,8 @@ const HealingJourney: React.FC = () => {
             Positive
           </div>
         </div>
-        <div className='flex flex-row px-6 py-4 gap-4 bg-white absolute -translate-x-36 -translate-y-8 rounded-4xl shadow-2xl'>
+        {/* Badge-2 */}
+        <div ref={badge2Ref} className='flex flex-row px-6 py-4 gap-4 bg-white absolute -translate-x-36 -translate-y-8 rounded-4xl shadow-2xl'>
           <Image
             src="/healthJourney/smile_grow.svg"
             alt="Meditation"
@@ -829,7 +955,8 @@ const HealingJourney: React.FC = () => {
             Fun
           </div>
         </div>
-        <div className='flex flex-row px-6 py-4 gap-4 bg-white absolute -translate-x-52 -translate-y-28 rounded-4xl shadow-2xl'>
+        {/* Badge-3 */}
+        <div ref={badge3Ref} className='flex flex-row px-6 py-4 gap-4 bg-white absolute -translate-x-52 -translate-y-28 rounded-4xl shadow-2xl'>
           <Image
             src="/healthJourney/supportive_grow.svg"
             alt="Meditation"
