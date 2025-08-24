@@ -48,6 +48,10 @@ function tweenDecimal(el: Element | null, to: number, opts?: { suffix?: string; 
   });
 }
 
+interface GsapTimeline {
+  ratio: number;
+}
+
 export default function HealingJourney() {
   // Section roots only
   const healRef = useRef<HTMLDivElement>(null);
@@ -130,8 +134,8 @@ export default function HealingJourney() {
 
       tl.to(q('[data-el="parent"]'), {
         scale: 1,
-        onUpdate: function () {
-          const eased = (this as any).ratio as number;
+        onUpdate: function (this: GsapTimeline) {
+          const eased = this.ratio;
           const ang1 = startA1 + Math.PI * 2 * rev * eased;
           const ang2 = startA2 + Math.PI * 2 * rev * eased;
           gsap.set(q('[data-el="child1"]'), { x: r1 * eased * Math.cos(ang1), y: r1 * eased * Math.sin(ang1) });
@@ -173,8 +177,8 @@ export default function HealingJourney() {
 
       tl.to(q('[data-el="parent"]'), {
         scale: 1,
-        onUpdate: function () {
-          const eased = (this as any).ratio as number;
+        onUpdate: function (this: GsapTimeline) {
+          const eased = this.ratio;
           const ang1 = startA1 + Math.PI * 2 * rev * eased;
           const ang2 = startA2 + Math.PI * 2 * rev * eased;
           gsap.set(q('[data-el="child1"]'), { x: r1 * eased * Math.cos(ang1), y: r1 * eased * Math.sin(ang1) });
@@ -370,7 +374,7 @@ export default function HealingJourney() {
               className="font-unsaid font-medium"
               style={{ color: "#736B66", fontSize: "20px" }}
             >
-              Identify what's weighing on you by selecting what's not making you smile and taking the Anxiety test to help you match you with the right counsellor.
+              Identify what&apos;s weighing on you by selecting what&apos;s not making you smile and taking the Anxiety test to help you match you with the right counsellor.
             </div>
           </div>
           <div className="flex flex-row gap-4 py-4 px-8 items-center justify-center rounded-4xl bg-[#A1CDD9]">
