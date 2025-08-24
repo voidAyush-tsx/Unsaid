@@ -1,975 +1,400 @@
 "use client";
 
-import React, { useEffect, useRef } from 'react';
+import React, { useLayoutEffect, useRef } from "react";
 import Image from "next/image";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-// Register ScrollTrigger with GSAP
+// Plugins
 gsap.registerPlugin(ScrollTrigger);
 
-const HealingJourney: React.FC = () => {
-  // References for DOM elements to animate
-  const parentCircleRef = useRef<HTMLDivElement>(null);
-  const childCircle1Ref = useRef<HTMLDivElement>(null);
-  const childCircle2Ref = useRef<HTMLDivElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const mentalHealthRef = useRef<HTMLDivElement>(null);
-  const percentageRef = useRef<HTMLDivElement>(null);
-  const progressBarRef = useRef<HTMLDivElement>(null);
-  const moodRef = useRef<HTMLDivElement>(null);
-  const emojiRef = useRef<HTMLDivElement>(null);
-  const smileRefs = useRef<HTMLDivElement[]>([]);
-  const barRefs = useRef<HTMLDivElement[]>([]);
-  const connectContainerRef = useRef<HTMLDivElement>(null);
-  const parentConnectRef = useRef<HTMLDivElement>(null);
-  const childConnect1Ref = useRef<HTMLDivElement>(null);
-  const childConnect2Ref = useRef<HTMLDivElement>(null);
-  const doctorDetailsRef = useRef<HTMLDivElement>(null);
-  const starRefs = useRef<HTMLDivElement[]>([]);
-  const userCountRef = useRef<HTMLDivElement>(null);
-  const growContainerRef = useRef<HTMLDivElement>(null);
-  const parentGrowRef = useRef<HTMLDivElement>(null);
-  const childGrow1Ref = useRef<HTMLDivElement>(null);
-  const childGrow2Ref = useRef<HTMLDivElement>(null);
-  const streakRef = useRef<HTMLDivElement>(null);
-  const streakNumberRef = useRef<HTMLSpanElement>(null);
-  const badge1Ref = useRef<HTMLDivElement>(null);
-  const badge2Ref = useRef<HTMLDivElement>(null);
-  const badge3Ref = useRef<HTMLDivElement>(null);
+/**
+ * Production‑ready, DRY, and scalable animation implementation
+ * Key changes vs. original
+ * 1) Fewer refs – one container ref per section; query scoped elements with gsap.context
+ * 2) gsap.context for automatic cleanup + SSR safety
+ * 3) useLayoutEffect for layout‑sensitive animations
+ * 4) Shared helpers (number tween, bar heights, orbit sync)
+ * 5) Consistent ScrollTrigger config and no dev markers in prod
+ * 6) Smaller surface for bugs and easier maintenance
+ */
 
-  // Helper to collect bar refs
-  const setBarRef = (el: HTMLDivElement | null, index: number) => {
-    if (el) barRefs.current[index] = el;
-  };
+const BAR_HEIGHTS = [4, 12, 16, 24, 32, 28, 40, 24, 16, 20, 8, 4];
 
-  // Helper to collect smile refs
-  const setSmileRef = (el: HTMLDivElement | null, index: number) => {
-    if (el) smileRefs.current[index] = el;
-  };
+// ---- Helpers --------------------------------------------------------------
+function tweenNumber(el: Element, to: number, {
+  duration = 1,
+  snap = 1,
+  prefix = "",
+  suffix = "",
+}: { duration?: number; snap?: number; prefix?: string; suffix?: string } = {}) {
+  return gsap.to(el as unknown as {}, {
+    textContent: to,
+    duration,
+    snap: { textContent: snap },
+    onUpdate: function () {
+      const t = this.targets?.()[0] as HTMLElement | undefined;
+      if (t) t.textContent = `${prefix}${Math.round(Number((t as any).textContent))}${suffix}`;
+    },
+  });
+}
 
-  // Helper to collect star refs
-  const setStarRef = (el: HTMLDivElement | null, index: number) => {
-    if (el) starRefs.current[index] = el;
-  };
+function radians(deg: number) {
+  return (deg * Math.PI) / 180;
+}
 
-  useEffect(() => {
-    // Prevent server-side execution in Next.js
-    if (typeof window === "undefined") return;
+/**
+ * Orbit children once while parent scales up. Eased progress ensures natural slow‑down.
+ */
+function syncOrbit(
+  tl: gsap.core.Timeline,
+  parent: Element,
+  children: Array<{ el: Element; finalX: number; finalY: number }>,
+  {
+    duration = 1,
+    revolutions = 0.5,
+    ease = "power2.out",
+  }: { duration?: number; revolutions?: number; ease?: string } = {}
+) {
+  // Precompute polar coordinates for each child
+  const polar = children.map(({ finalX, finalY }) => {
+    const r = Math.hypot(finalX, finalY);
+    const finalAngle = Math.atan2(finalY, finalX) * (180 / Math.PI);
+    const startAngle = finalAngle - 360 * revolutions;
+    return { r, finalAngle, startAngle };
+  });
 
-    const parentCircle = parentCircleRef.current;
-    const childCircle1 = childCircle1Ref.current;
-    const childCircle2 = childCircle2Ref.current;
-    const container = containerRef.current;
-    const mentalHealth = mentalHealthRef.current;
-    const percentage = percentageRef.current;
-    const progressBar = progressBarRef.current;
-    const mood = moodRef.current;
-    const emoji = emojiRef.current;
-    const bars = barRefs.current;
-    const smiles = smileRefs.current;
-    const connectContainer = connectContainerRef.current;
-    const parentConnect = parentConnectRef.current;
-    const childConnect1 = childConnect1Ref.current;
-    const childConnect2 = childConnect2Ref.current;
-    const doctorDetails = doctorDetailsRef.current;
-    const stars = starRefs.current;
-    const userCount = userCountRef.current;
-    const growContainer = growContainerRef.current;
-    const parentGrow = parentGrowRef.current;
-    const childGrow1 = childGrow1Ref.current;
-    const childGrow2 = childGrow2Ref.current;
-    const streak = streakRef.current;
-    const streakNumber = streakNumberRef.current;
-    const badge1 = badge1Ref.current;
-    const badge2 = badge2Ref.current;
-    const badge3 = badge3Ref.current;
-
-    // Log refs for debugging
-    console.log('Refs:', {
-      parentCircle,
-      childCircle1,
-      childCircle2,
-      container,
-      mentalHealth,
-      percentage,
-      progressBar,
-      mood,
-      emoji,
-      barsLength: bars.length,
-      smilesLength: smiles.length,
-      connectContainer,
-      parentConnect,
-      childConnect1,
-      childConnect2,
-      doctorDetails,
-      starsLength: stars.length,
-      userCount,
-      growContainer,
-      parentGrow,
-      childGrow1,
-      childGrow2,
-      streak,
-      streakNumber,
-      badge1,
-      badge2,
-      badge3,
-    });
-
-    // Check if all refs are valid
-    if (!parentCircle || !childCircle1 || !childCircle2 || !container || !mentalHealth || 
-        !percentage || !progressBar || !mood || !emoji || bars.length !== 12 || smiles.length !== 7 ||
-        !connectContainer || !parentConnect || !childConnect1 || !childConnect2 || !doctorDetails ||
-        stars.length !== 5 || !userCount || !growContainer || !parentGrow || !childGrow1 || 
-        !childGrow2 || !streak || !streakNumber || !badge1 || !badge2 || !badge3) {
-      console.error('Missing refs or incorrect number of bars/smiles/stars:', {
-        parentCircle: !!parentCircle,
-        childCircle1: !!childCircle1,
-        childCircle2: !!childCircle2,
-        container: !!container,
-        mentalHealth: !!mentalHealth,
-        percentage: !!percentage,
-        progressBar: !!progressBar,
-        mood: !!mood,
-        emoji: !!emoji,
-        bars: bars.length,
-        smiles: smiles.length,
-        connectContainer: !!connectContainer,
-        parentConnect: !!parentConnect,
-        childConnect1: !!childConnect1,
-        childConnect2: !!childConnect2,
-        doctorDetails: !!doctorDetails,
-        stars: stars.length,
-        userCount: !!userCount,
-        growContainer: !!growContainer,
-        parentGrow: !!parentGrow,
-        childGrow1: !!childGrow1,
-        childGrow2: !!childGrow2,
-        streak: !!streak,
-        streakNumber: !!streakNumber,
-        badge1: !!badge1,
-        badge2: !!badge2,
-        badge3: !!badge3,
+  tl.to(parent, {
+    scale: 1,
+    duration,
+    ease,
+    onUpdate: function () {
+      // eased ratio aligns child motion with parent growth
+      const eased = (this as any).ratio as number;
+      children.forEach(({ el }, i) => {
+        const { r, startAngle } = polar[i];
+        const angle = startAngle + 360 * revolutions * eased;
+        gsap.set(el, {
+          x: r * eased * Math.cos(radians(angle)),
+          y: r * eased * Math.sin(radians(angle)),
+        });
       });
-      return;
-    }
+    },
+  });
+}
 
-    // Set initial states for Healing Journey
-    gsap.set(parentCircle, { scale: 0, transformOrigin: "center center" });
-    gsap.set([childCircle1, childCircle2], { x: 0, y: 0 });
-    gsap.set(mentalHealth, { scale: 0, transformOrigin: "center center" });
-    gsap.set(progressBar, { width: "0%" });
-    gsap.set(mood, { scale: 0, transformOrigin: "center center" });
-    gsap.set(emoji, { scale: 0, opacity: 0, transformOrigin: "center center" });
-    gsap.set(smiles, { scale: 0, transformOrigin: "center center" });
-    gsap.set(bars, { height: 0, transformOrigin: "bottom center" });
+// ---- Component ------------------------------------------------------------
+const HealingJourney: React.FC = () => {
+  // One ref per section for scoping + cleanup
+  const healRef = useRef<HTMLDivElement>(null);
+  const connectRef = useRef<HTMLDivElement>(null);
+  const growRef = useRef<HTMLDivElement>(null);
 
-    // Set initial states for Connect
-    gsap.set(parentConnect, { scale: 0, transformOrigin: "center center" });
-    gsap.set([childConnect1, childConnect2], { x: 0, y: 0 });
-    gsap.set(doctorDetails, { scale: 0, opacity: 0, transformOrigin: "center center" });
-    gsap.set(stars, { scale: 0, transformOrigin: "center center" });
-    gsap.set(userCount, { textContent: 0 });
+  useLayoutEffect(() => {
+    if (!healRef.current) return;
 
-    // Set initial states for Grow
-    gsap.set(parentGrow, { scale: 0, transformOrigin: "center center" });
-    gsap.set([childGrow1, childGrow2], { x: 0, y: 0 });
-    gsap.set(streak, { scale: 0, transformOrigin: "center center" });
-    gsap.set([badge1, badge2, badge3], { scale: 0, transformOrigin: "center center" });
-    gsap.set(streakNumber, { textContent: 0 });
+    const ctx = gsap.context(() => {
+      // --- Scope all selectors to healRef ---
+      const parent = gsap.utils.toArray<HTMLElement>('[data-heal="parent"]')[0];
+      const child1 = gsap.utils.toArray<HTMLElement>('[data-heal="child1"]')[0];
+      const child2 = gsap.utils.toArray<HTMLElement>('[data-heal="child2"]')[0];
 
-    // Create a GSAP timeline for Healing Journey animations
-    const tl = gsap.timeline({
-      scrollTrigger: {
-        trigger: container,
-        start: "top 80%",
-        end: "top 80%",
-        once: true,
-        markers: true,
-        onEnter: () => console.log('ScrollTrigger entered'),
-      },
-      defaults: { ease: "power2.out", duration: 1.5 },
-    });
+      const mental = gsap.utils.toArray<HTMLElement>('[data-heal="mental"]')[0];
+      const pct = gsap.utils.toArray<HTMLElement>('[data-heal="pct"]')[0];
+      const bar = gsap.utils.toArray<HTMLElement>('[data-heal="bar"]')[0];
 
-    // Animate parent circle to full size
-    tl.to(parentCircle, {
-      scale: 1,
-      onComplete: () => console.log('Parent circle animation complete'),
-    });
+      const mood = gsap.utils.toArray<HTMLElement>('[data-heal="mood"]')[0];
+      const emoji = gsap.utils.toArray<HTMLElement>('[data-heal="emoji"]')[0];
+      const bars = gsap.utils.toArray<HTMLElement>('[data-heal="meter-bar"]');
+      const smiles = gsap.utils.toArray<HTMLElement>('[data-heal="smile"]');
 
-    // Animate child circles to their final positions
-    tl.to(
-      childCircle1,
-      { x: 220, y: 80, duration: 1.5 },
-      0
-    ).to(
-      childCircle2,
-      { x: -80, y: -220, duration: 1.5 },
-      0
-    );
+      // Initial state (set only what will be animated)
+      gsap.set(parent, { scale: 0, transformOrigin: "center center" });
+      gsap.set([child1, child2], { x: 0, y: 0 });
 
-    // Animate Mental Health section
-    tl.to(mentalHealth, {
-      scale: 1.20,
-      duration: 1.5,
-      onComplete: () => console.log('Mental Health section animation complete'),
-    });
+      gsap.set([mental, mood], { scale: 0, transformOrigin: "center center" });
+      gsap.set(emoji, { scale: 0, opacity: 0, transformOrigin: "center center" });
+      gsap.set(bars, { height: 0, transformOrigin: "bottom center" });
+      gsap.set(bar, { width: "0%" });
 
-    // Animate percentage text
-    tl.to(
-      percentage,
-      {
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: healRef.current,
+          start: "top 80%",
+          once: true,
+        },
+        defaults: { ease: "power2.out", duration: 1 },
+      });
+
+      // Parent scale + children translate (no orbit here)
+      tl.to(parent, { scale: 1 });
+      tl.to(child1, { x: 220, y: 80 }, 0)
+        .to(child2, { x: -80, y: -220 }, 0);
+
+      // Mental health card
+      tl.to(mental, { scale: 1.2 });
+      // % text and progress bar in parallel
+      tl.to(bar, { width: "91.67%" }, "<");
+      tl.to(pct, {
         textContent: 98.92,
-        duration: 1.5,
+        duration: 1,
         snap: { textContent: 0.01 },
-        onUpdate: function () {
-          if (percentage) {
-            percentage.textContent = `${this.targets()[0].textContent}%`;
-          }
+        onUpdate() {
+          const t = (this as any).targets?.()[0] as HTMLElement | undefined;
+          if (t) t.textContent = `${Number(t.textContent).toFixed(2)}%`;
         },
-      },
-      "<"
-    );
+      }, "<");
 
-    // Animate progress bar
-    tl.to(
-      progressBar,
-      { width: "91.67%", duration: 1.5 },
-      "<"
-    );
-
-    // Animate Mood section
-    tl.to(
-      mood,
-      {
-        scale: 1.8,
-        duration: 1.5,
-        onComplete: () => console.log('Mood section animation complete'),
-      },
-      "<"
-    );
-
-    // Animate Mood section bars
-    tl.to(
-      bars,
-      {
-        height: (index) => {
-          const heights = [4, 12, 16, 24, 32, 28, 40, 24, 16, 20, 8, 4];
-          return `${heights[index]}px`;
+      // Mood + bars + emoji pop
+      tl.to(mood, { scale: 1.8 }, "<");
+      tl.to(
+        bars,
+        {
+          height: (i) => `${BAR_HEIGHTS[i] || 8}px`,
+          stagger: 0.06,
         },
-        duration: 1.5,
-        stagger: 0.1,
-      },
-      "<"
-    );
-
-    // Animate Emoji section - scale to 1.3 and make visible
-    tl.to(
-      emoji,
-      {
-        scale: 1.3,
-        opacity: 1,
-        duration: 1.5,
-        ease: "elastic.out(1, 0.5)",
-        onComplete: () => console.log('Emoji section animation complete'),
-      },
-      "<" // Align with mentalHealth, percentage, progressBar, mood, and bars
-    );
-
-    // Animate smiley emojis - pop-up effect
-    tl.to(
-      smiles,
-      {
-        scale: 1,
-        duration: 0.5,
-        stagger: 0.1,
-        ease: "back.out(1.7)",
-      },
-      "-=1.0" // Start slightly before Emoji section completes
-    );
-
-    // Create a separate GSAP timeline for Connect animations
-    const tlConnect = gsap.timeline({
-      scrollTrigger: {
-        trigger: connectContainer,
-        start: "top 80%",
-        end: "top 80%",
-        once: true,
-        markers: true,
-        onEnter: () => console.log('ScrollTrigger Connect entered'),
-      },
-      defaults: { ease: "power2.out", duration: 1.5 },
-    });
-
-    //Timeline (children synced with parent)
-    tlConnect.to(
-      parentConnect,
-      {
-        scale: 1,
-        duration: 1.5,
-        ease: "power2.out", // ease-out curve for smooth deceleration
-        onUpdate: function () {
-          // Use eased progress instead of raw progress
-          const eased = this.ratio; // GSAP provides eased progress (0→1 with easing)
-
-          // child 1
-          const angle1 = startAngle1 + 360 * revolutions * eased;
-          const rad1 = (angle1 * Math.PI) / 180;
-          gsap.set(childConnect1, {
-            x: finalRadius1 * eased * Math.cos(rad1),
-            y: finalRadius1 * eased * Math.sin(rad1),
-          });
-
-          // child 2
-          const angle2 = startAngle2 + 360 * revolutions * eased;
-          const rad2 = (angle2 * Math.PI) / 180;
-          gsap.set(childConnect2, {
-            x: finalRadius2 * eased * Math.cos(rad2),
-            y: finalRadius2 * eased * Math.sin(rad2),
-          });
-        },
-        onComplete: () => console.log("Parent + Children eased sync animation complete"),
-      },
-      0
-    );
-
-    // Animate Doctor Details section after parent and child animations
-    tlConnect.to(
-      doctorDetails,
-      {
-        scale: 1,
-        opacity: 1,
-        duration: 1.5,
-        ease: "elastic.out(1, 0.5)",
-        onComplete: () => console.log('Doctor Details section animation complete'),
-      },
-      ">"
-    );
-
-    // Animate stars - pop-up effect similar to emojis
-    tlConnect.to(
-      stars,
-      {
-        scale: 1,
-        duration: 0.5,
-        stagger: 0.1,
-        ease: "back.out(1.7)",
-      },
-      ">"
-    );
-
-    // Animate user count from 0 to 241
-    tlConnect.to(
-      userCount,
-      {
-        textContent: 241,
-        duration: 1.5,
-        snap: { textContent: 1 },
-        onUpdate: function () {
-          if (userCount) {
-            userCount.textContent = `${Math.round(Number(this.targets()[0].textContent))} users`;
-          }
-        },
-      },
-      "<"
-    );
-
-    // Create a separate GSAP timeline for Grow animations
-    const tlGrow = gsap.timeline({
-      scrollTrigger: {
-        trigger: growContainer,
-        start: "top 80%",
-        end: "top 80%",
-        once: true,
-        markers: true,
-        onEnter: () => console.log('ScrollTrigger Grow entered'),
-      },
-      defaults: { ease: "power2.out", duration: 1.5 },
-    });
-
-    // Animate parent circle to full size
-    tlGrow.to(parentGrow, {
-      scale: 1,
-      onComplete: () => console.log('Parent Grow circle animation complete'),
-    });
-
-    // Animate child circles to their final positions
-    tlGrow.to(
-      childGrow1,
-      { x: -224, y: 80, duration: 1.5 },
-      0
-    ).to(
-      childGrow2,
-      { x: 240, y: 32, duration: 1.5 },
-      0
-    );
-
-    // Animate Streak section after circles
-    tlGrow.to(
-      streak,
-      {
-        scale: 1,
-        duration: 1.5,
-        ease: "elastic.out(1, 0.5)",
-        onComplete: () => console.log('Streak section animation complete'),
-      }
-    );
-
-    // Animate streak number from 0 to 64
-    tlGrow.to(
-      streakNumber,
-      {
-        textContent: 64,
-        duration: 1.5,
-        snap: { textContent: 1 },
-        onUpdate: function () {
-          if (streakNumber) {
-            streakNumber.textContent = `${Math.round(Number(this.targets()[0].textContent))}`;
-          }
-        },
-      },
-      "<"
-    );
-
-    // Animate badges after circles (aligned with streak start)
-    tlGrow.to(
-      [badge1, badge2, badge3],
-      {
-        scale: 1,
-        duration: 1.5,
-        ease: "elastic.out(1, 0.5)",
-        stagger: 0.2,
-      },
-      "<"
-    );
-
-    // Define revolutions for orbiting effect
-    const revolutions = 1/2;
-
-    // Final positions
-    const finalX1 = 232;
-    const finalY1 = 64;
-    const finalRadius1 = Math.sqrt(finalX1 * finalX1 + finalY1 * finalY1);
-    const finalAngle1 = Math.atan2(finalY1, finalX1) * (180 / Math.PI);
-    const startAngle1 = finalAngle1 - 360 * revolutions;
-
-    const finalX2 = -224;
-    const finalY2 = -80;
-    const finalRadius2 = Math.sqrt(finalX2 * finalX2 + finalY2 * finalY2);
-    const finalAngle2 = Math.atan2(finalY2, finalX2) * (180 / Math.PI);
-    const startAngle2 = finalAngle2 - 360 * revolutions;
-
-    // Cleanup
-    return () => {
-      console.log('Cleaning up GSAP animations');
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-      gsap.killTweensOf([
-        parentCircle,
-        childCircle1,
-        childCircle2,
-        mentalHealth,
-        percentage,
-        progressBar,
-        mood,
+        "<"
+      );
+      tl.to(
         emoji,
-        ...bars,
-        ...smiles,
-        parentConnect,
-        childConnect1,
-        childConnect2,
-        doctorDetails,
-        ...stars,
-        userCount,
-        parentGrow,
-        childGrow1,
-        childGrow2,
-        streak,
-        streakNumber,
-        badge1,
-        badge2,
-        badge3,
-      ]);
-    };
+        { scale: 1.3, opacity: 1, ease: "elastic.out(1, 0.5)" },
+        "<"
+      );
+      tl.to(smiles, { scale: 1, duration: 0.5, stagger: 0.08, ease: "back.out(1.7)" }, "-=0.6");
+    }, healRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!connectRef.current) return;
+
+    const ctx = gsap.context(() => {
+      const parent = gsap.utils.toArray<HTMLElement>('[data-connect="parent"]')[0];
+      const c1 = gsap.utils.toArray<HTMLElement>('[data-connect="c1"]')[0];
+      const c2 = gsap.utils.toArray<HTMLElement>('[data-connect="c2"]')[0];
+
+      const card = gsap.utils.toArray<HTMLElement>('[data-connect="card"]')[0];
+      const stars = gsap.utils.toArray<HTMLElement>('[data-connect="star"]');
+      const users = gsap.utils.toArray<HTMLElement>('[data-connect="users"]')[0];
+
+      // Initials
+      gsap.set(parent, { scale: 0, transformOrigin: "center center" });
+      gsap.set([c1, c2], { x: 0, y: 0 });
+      gsap.set(card, { scale: 0, opacity: 0 });
+      gsap.set(stars, { scale: 0 });
+      gsap.set(users, { textContent: 0 });
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: connectRef.current,
+          start: "top 80%",
+          once: true,
+        },
+        defaults: { ease: "power2.out", duration: 1 },
+      });
+
+      // Parent + children synced orbit
+      syncOrbit(tl, parent, [
+        { el: c1, finalX: 232, finalY: 64 },
+        { el: c2, finalX: -224, finalY: -80 },
+      ], { duration: 1, revolutions: 0.5, ease: "power2.out" });
+
+      tl.to(card, { scale: 1, opacity: 1, ease: "elastic.out(1, 0.5)" });
+      tl.to(stars, { scale: 1, duration: 0.5, stagger: 0.08, ease: "back.out(1.7)" }, ">");
+      tl.add(() => { tweenNumber(users, 241, { suffix: " users" }); });
+    }, connectRef);
+
+    return () => ctx.revert();
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!growRef.current) return;
+
+    const ctx = gsap.context(() => {
+      const parent = gsap.utils.toArray<HTMLElement>('[data-grow="parent"]')[0];
+      const g1 = gsap.utils.toArray<HTMLElement>('[data-grow="g1"]')[0];
+      const g2 = gsap.utils.toArray<HTMLElement>('[data-grow="g2"]')[0];
+
+      const streak = gsap.utils.toArray<HTMLElement>('[data-grow="streak"]')[0];
+      const streakNum = gsap.utils.toArray<HTMLElement>('[data-grow="streak-num"]')[0];
+      const badges = gsap.utils.toArray<HTMLElement>('[data-grow="badge"]');
+
+      // Initials
+      gsap.set(parent, { scale: 0 });
+      gsap.set([g1, g2], { x: 0, y: 0 });
+      gsap.set(streak, { scale: 0 });
+      gsap.set(badges, { scale: 0 });
+      gsap.set(streakNum, { textContent: 0 });
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: growRef.current,
+          start: "top 80%",
+          once: true,
+        },
+        defaults: { ease: "power2.out", duration: 1 },
+      });
+
+      tl.to(parent, { scale: 1 });
+      tl.to(g1, { x: -224, y: 80 }, 0).to(g2, { x: 240, y: 32 }, 0);
+      tl.to(streak, { scale: 1, ease: "elastic.out(1, 0.5)" });
+      tl.add(() => { tweenNumber(streakNum, 64); });
+      tl.to(badges, { scale: 1, ease: "elastic.out(1, 0.5)", stagger: 0.2 }, "<");
+    }, growRef);
+
+    return () => ctx.revert();
   }, []);
 
   return (
-    <div ref={containerRef} className="relative min-h-screen px-6 py-10">
-      <div className="flex items-center justify-center">
-        {/* Parent Circle */}
-        <div
-          ref={parentCircleRef}
-          className="p-60 bg-[#FB8728] rounded-full"
-        ></div>
+    <div className="relative min-h-screen px-6 py-10 space-y-24">
+      {/* ANALYSE */}
+      <div ref={healRef} className="relative flex items-center justify-center">
+        {/* Parent + children */}
+        <div data-heal="parent" className="p-60 bg-[#FB8728] rounded-full" />
+        <div data-heal="child1" className="p-8 bg-[#FB8728] absolute rounded-full border-8 border-white" />
+        <div data-heal="child2" className="p-8 bg-[#FB8728] absolute rounded-full border-8 border-white" />
 
-        {/* Child Circle 1 */}
+        {/* Mental Health card */}
         <div
-          ref={childCircle1Ref}
-          className="p-8 bg-[#FB8728] absolute rounded-full border-8 border-white"
-        ></div>
-
-        {/* Child Circle 2 */}
-        <div
-          ref={childCircle2Ref}
-          className="p-8 bg-[#FB8728] absolute rounded-full border-8 border-white"
-        ></div>
-
-        {/* Mental Health */}
-        <div
-          ref={mentalHealthRef}
-          className="flex flex-col gap-2 absolute bg-white p-4 rounded-3xl translate-x-[70%] translate-y-[-95%] shadow-2xl"
+          data-heal="mental"
+          className="flex flex-col gap-2 absolute bg-white p-4 rounded-3xl translate-x-[70%] -translate-y-[95%] shadow-2xl"
         >
-          <div className="flex flex-row items-center gap-10 justify-between w-full">
-            <div
-              className="font-unsaid font-extrabold rounded-full"
-              style={{ color: "#251404A3", fontSize: "16px" }}
-            >
+          <div className="flex items-center gap-10 justify-between w-full">
+            <div className="font-unsaid font-extrabold rounded-full" style={{ color: "#251404A3", fontSize: 16 }}>
               Mental Health
             </div>
-            <Image
-              src="/healthJourney/mental_health_bracket.svg"
-              alt="Mental Health"
-              width={32}
-              height={32}
-              className="w-5"
-            />
+            <Image src="/healthJourney/mental_health_bracket.svg" alt="Mental Health" width={32} height={32} className="w-5" />
           </div>
-          <div
-            ref={percentageRef}
-            className="w-full font-unsaid font-extrabold"
-            style={{ color: "#A1CDD9", fontSize: "36px" }}
-          >
-            0%
-          </div>
+          <div data-heal="pct" className="w-full font-unsaid font-extrabold" style={{ color: "#A1CDD9", fontSize: 36 }}>0%</div>
           <div className="w-full h-2 bg-[#E8DDD9] rounded-full relative">
-            <div
-              ref={progressBarRef}
-              className="absolute h-2 bg-[#F4A258] rounded-full"
-            ></div>
+            <div data-heal="bar" className="absolute h-2 bg-[#F4A258] rounded-full" />
           </div>
         </div>
 
         {/* Mood */}
         <div
-          ref={moodRef}
-          className="flex flex-col gap-2 absolute bg-white p-4 rounded-3xl translate-x-[-175%] translate-y-[-30%] shadow-2xl"
+          data-heal="mood"
+          className="flex flex-col gap-2 absolute bg-white p-4 rounded-3xl -translate-x-[175%] -translate-y-[30%] shadow-2xl"
         >
-          <div className="flex flex-row items-center gap-2 w-full">
-            <Image
-              src="/healthJourney/mood_icon.svg"
-              alt="Mood"
-              width={32}
-              height={32}
-              className="w-3.5"
-            />
-            <div
-              className="font-unsaid font-extrabold rounded-full"
-              style={{ color: "#251404A3", fontSize: "12px" }}
-            >
-              Mood
-            </div>
+          <div className="flex items-center gap-2 w-full">
+            <Image src="/healthJourney/mood_icon.svg" alt="Mood" width={32} height={32} className="w-3.5" />
+            <div className="font-unsaid font-extrabold rounded-full" style={{ color: "#251404A3", fontSize: 12 }}>Mood</div>
           </div>
-          <div
-            className="w-full font-unsaid font-extrabold"
-            style={{ color: "#A1CDD9", fontSize: "24px" }}
-          >
-            Sad
-          </div>
-          <div className="flex flex-row items-end gap-0.5">
-            <div ref={(el) => setBarRef(el, 0)} className="w-1 bg-[#ACA9A5] rounded-full"></div>
-            <div ref={(el) => setBarRef(el, 1)} className="w-1 bg-[#ACA9A5] rounded-full"></div>
-            <div ref={(el) => setBarRef(el, 2)} className="w-1 bg-[#ACA9A5] rounded-full"></div>
-            <div ref={(el) => setBarRef(el, 3)} className="w-1 bg-[#ACA9A5] rounded-full"></div>
-            <div ref={(el) => setBarRef(el, 4)} className="w-1 bg-[#ACA9A5] rounded-full"></div>
-            <div ref={(el) => setBarRef(el, 5)} className="w-1 bg-[#ACA9A5] rounded-full"></div>
-            <div ref={(el) => setBarRef(el, 6)} className="w-1 bg-[#ACA9A5] rounded-full"></div>
-            <div ref={(el) => setBarRef(el, 7)} className="w-1 bg-[#ACA9A5] rounded-full"></div>
-            <div ref={(el) => setBarRef(el, 8)} className="w-1 bg-[#ACA9A5] rounded-full"></div>
-            <div ref={(el) => setBarRef(el, 9)} className="w-1 bg-[#ACA9A5] rounded-full"></div>
-            <div ref={(el) => setBarRef(el, 10)} className="w-1 bg-[#ACA9A5] rounded-full"></div>
-            <div ref={(el) => setBarRef(el, 11)} className="w-1 bg-[#ACA9A5] rounded-full"></div>
+          <div className="w-full font-unsaid font-extrabold" style={{ color: "#A1CDD9", fontSize: 24 }}>Sad</div>
+          <div className="flex items-end gap-0.5">
+            {Array.from({ length: 12 }).map((_, i) => (
+              <div key={i} data-heal="meter-bar" className="w-1 bg-[#ACA9A5] rounded-full" />
+            ))}
           </div>
         </div>
 
-        {/* Emoji */}
+        {/* Emoji history */}
         <div
-          ref={emojiRef}
-          className="flex flex-col gap-2 absolute bg-white p-4 rounded-3xl translate-x-[-50%] translate-y-[220%] shadow-2xl"
+          data-heal="emoji"
+          className="flex flex-col gap-2 absolute bg-white p-4 rounded-3xl -translate-x-[50%] translate-y-[220%] shadow-2xl"
         >
-          <div className="flex flex-row items-center gap-10 justify-between w-full">
-            <div
-              className="font-unsaid font-extrabold"
-              style={{ color: "#A1CDD9", fontSize: "12px" }}
-            >
-              Mood History
-            </div>
-            <Image
-              src="/healthJourney/mood_header_image.svg"
-              alt="Mood History"
-              width={32}
-              height={32}
-              className="w-3"
-            />
+          <div className="flex items-center gap-10 justify-between w-full">
+            <div className="font-unsaid font-extrabold" style={{ color: "#A1CDD9", fontSize: 12 }}>Mood History</div>
+            <Image src="/healthJourney/mood_header_image.svg" alt="Mood History" width={32} height={32} className="w-3" />
           </div>
-          <div className="flex flex-row gap-3 w-full">
-            <div ref={(el) => setSmileRef(el, 0)} className="flex flex-col items-center gap-1">
-              <Image
-                src="/healthJourney/smile_1.svg"
-                alt="Mood"
-                width={32}
-                height={32}
-                className="w-3.5"
-              />
-              <div
-                className="font-unsaid font-bold"
-                style={{ color: "#A1CDD9", fontSize: "9px" }}
-              >
-                Mon
+          <div className="flex gap-3 w-full">
+            {[
+              { src: "/healthJourney/smile_1.svg", day: "Mon" },
+              { src: "/healthJourney/smile_2.svg", day: "Tue" },
+              { src: "/healthJourney/smile_3.svg", day: "Wed" },
+              { src: "/healthJourney/smile_1.svg", day: "Thu" },
+              { src: "/healthJourney/smile_4.svg", day: "Fri" },
+              { src: "/healthJourney/smile_5.svg", day: "Sat" },
+              { src: "/healthJourney/smile_1.svg", day: "Sun" },
+            ].map((s, i) => (
+              <div key={s.day} data-heal="smile" className="flex flex-col items-center gap-1 scale-0">
+                <Image src={s.src} alt="Mood" width={32} height={32} className="w-3.5" />
+                <div className="font-unsaid font-bold" style={{ color: "#A1CDD9", fontSize: 9 }}>{s.day}</div>
               </div>
-            </div>
-            <div ref={(el) => setSmileRef(el, 1)} className="flex flex-col items-center gap-1">
-              <Image
-                src="/healthJourney/smile_2.svg"
-                alt="Mood"
-                width={32}
-                height={32}
-                className="w-3.5"
-              />
-              <div
-                className="font-unsaid font-bold"
-                style={{ color: "#A1CDD9", fontSize: "9px" }}
-              >
-                Tue
-              </div>
-            </div>
-            <div ref={(el) => setSmileRef(el, 2)} className="flex flex-col items-center gap-1">
-              <Image
-                src="/healthJourney/smile_3.svg"
-                alt="Mood"
-                width={32}
-                height={32}
-                className="w-3.5"
-              />
-              <div
-                className="font-unsaid font-bold"
-                style={{ color: "#A1CDD9", fontSize: "9px" }}
-              >
-                Wed
-              </div>
-            </div>
-            <div ref={(el) => setSmileRef(el, 3)} className="flex flex-col items-center gap-1">
-              <Image
-                src="/healthJourney/smile_1.svg"
-                alt="Mood"
-                width={32}
-                height={32}
-                className="w-3.5"
-              />
-              <div
-                className="font-unsaid font-bold"
-                style={{ color: "#A1CDD9", fontSize: "9px" }}
-              >
-                Thu
-              </div>
-            </div>
-            <div ref={(el) => setSmileRef(el, 4)} className="flex flex-col items-center gap-1">
-              <Image
-                src="/healthJourney/smile_4.svg"
-                alt="Mood"
-                width={32}
-                height={32}
-                className="w-3.5"
-              />
-              <div
-                className="font-unsaid font-bold"
-                style={{ color: "#A1CDD9", fontSize: "9px" }}
-              >
-                Fri
-              </div>
-            </div>
-            <div ref={(el) => setSmileRef(el, 5)} className="flex flex-col items-center gap-1">
-              <Image
-                src="/healthJourney/smile_5.svg"
-                alt="Mood"
-                width={32}
-                height={32}
-                className="w-3.5"
-              />
-              <div
-                className="font-unsaid font-bold"
-                style={{ color: "#A1CDD9", fontSize: "9px" }}
-              >
-                Sat
-              </div>
-            </div>
-            <div ref={(el) => setSmileRef(el, 6)} className="flex flex-col items-center gap-1">
-              <Image
-                src="/healthJourney/smile_1.svg"
-                alt="Mood"
-                width={32}
-                height={32}
-                className="w-3.5"
-              />
-              <div
-                className="font-unsaid font-bold"
-                style={{ color: "#A1CDD9", fontSize: "9px" }}
-              >
-                Sun
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </div>
 
-      <div ref={connectContainerRef} className="flex items-center justify-center">
-        {/* Parent Circle for Connect */}
-        <div
-          ref={parentConnectRef}
-          className="p-60 bg-[#F4A258] rounded-full"
-        ></div>
+      {/* CONNECT */}
+      <div ref={connectRef} className="relative flex items-center justify-center">
+        <div data-connect="parent" className="p-60 bg-[#F4A258] rounded-full" />
+        <div data-connect="c1" className="p-8 bg-[#F4A258] absolute rounded-full border-8 border-white" />
+        <div data-connect="c2" className="p-12 bg-[#F4A258] absolute rounded-full border-8 border-white" />
 
-        {/* Child Circle 1 for Connect */}
-        <div
-          ref={childConnect1Ref}
-          className="p-8 bg-[#F4A258] absolute rounded-full border-8 border-white"
-        ></div>
-
-        {/* Child Circle 2 for Connect */}
-        <div
-          ref={childConnect2Ref}
-          className="p-12 bg-[#F4A258] absolute rounded-full border-8 border-white"
-        ></div>
-
-        {/* Doctor Details */}
-        <div ref={doctorDetailsRef} className='p-4 gap-4 flex flex-row absolute translate-x-36 -translate-y-24 rounded-3xl bg-white shadow-2xl'>
+        <div data-connect="card" className="p-4 gap-4 flex flex-row absolute translate-x-36 -translate-y-24 rounded-3xl bg-white shadow-2xl">
           <div className="relative w-[100px] h-[100px] overflow-hidden rounded-2xl">
-            <Image
-              src="/counsellors/counsellor.png"
-              alt="Counsellor"
-              fill
-              className="object-cover object-top" 
-              sizes="150px"
-            />
+            <Image src="/counsellors/counsellor.png" alt="Counsellor" fill className="object-cover object-top" sizes="150px" />
           </div>
-          <div className='flex flex-col justify-between'>
-            <div className='flex flex-col gap-2'>
-              <div className='flex flex-row items-center gap-10 justify-between w-full'>
-                <div 
-                className='font-unsaid font-extrabold' 
-                style={{ color: "#A1CDD9", fontSize: "18px" }}
-                >
-                  Dr. Priya Sharma
-                </div>
-                <Image
-                  src="/healthJourney/verified.svg"
-                  alt="Verified"
-                  width={32}
-                  height={32}
-                  className="w-5"
-                />
+          <div className="flex flex-col justify-between">
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-10 justify-between w-full">
+                <div className="font-unsaid font-extrabold" style={{ color: "#A1CDD9", fontSize: 18 }}>Dr. Priya Sharma</div>
+                <Image src="/healthJourney/verified.svg" alt="Verified" width={32} height={32} className="w-5" />
               </div>
-              <div className='flex flex-row items-center gap-10 justify-between w-full'>
-                <div className='flex flex-row items-center gap-2'>
-                  <Image
-                    src="/healthJourney/job_icon.svg"
-                    alt="Job"
-                    width={32}
-                    height={32}
-                    className="w-4"
-                  />
-                  <div 
-                  className='font-unsaid font-bold' 
-                  style={{ color: "#736B66", fontSize: "14px" }}
-                  >
-                    Psychologist
-                  </div>
+              <div className="flex items-center gap-10 justify-between w-full">
+                <div className="flex items-center gap-2">
+                  <Image src="/healthJourney/job_icon.svg" alt="Job" width={32} height={32} className="w-4" />
+                  <div className="font-unsaid font-bold" style={{ color: "#736B66", fontSize: 14 }}>Psychologist</div>
                 </div>
-                <div className='flex flex-row items-center gap-2'>
-                  <Image
-                    src="/healthJourney/location.svg"
-                    alt="Location"
-                    width={32}
-                    height={32}
-                    className="w-4"
-                  />
-                  <div 
-                  className='font-unsaid font-bold' 
-                  style={{ color: "#736B66", fontSize: "14px" }}
-                  >
-                    1.1 km
-                  </div>
+                <div className="flex items-center gap-2">
+                  <Image src="/healthJourney/location.svg" alt="Location" width={32} height={32} className="w-4" />
+                  <div className="font-unsaid font-bold" style={{ color: "#736B66", fontSize: 14 }}>1.1 km</div>
                 </div>
               </div>
             </div>
-            <div className='flex flex-row items-center justify-between'>
-              <div className='flex flex-row items-center gap-3'>
-                <div className='flex flex-row items-center mb-0.5 gap-1'>
-                  <div ref={(el) => setStarRef(el, 0)}>
-                    <Image
-                      src="/healthJourney/rated_star.svg"
-                      alt="Rate"
-                      width={32}
-                      height={32}
-                      className="w-4"
-                    />
-                  </div>
-                  <div ref={(el) => setStarRef(el, 1)}>
-                    <Image
-                      src="/healthJourney/rated_star.svg"
-                      alt="Rate"
-                      width={32}
-                      height={32}
-                      className="w-4"
-                    />
-                  </div>
-                  <div ref={(el) => setStarRef(el, 2)}>
-                    <Image
-                      src="/healthJourney/rated_star.svg"
-                      alt="Rate"
-                      width={32}
-                      height={32}
-                      className="w-4"
-                    />
-                  </div>
-                  <div ref={(el) => setStarRef(el, 3)}>
-                    <Image
-                      src="/healthJourney/rated_star.svg"
-                      alt="Rate"
-                      width={32}
-                      height={32}
-                      className="w-4"
-                    />
-                  </div>
-                  <div ref={(el) => setStarRef(el, 4)}>
-                    <Image
-                      src="/healthJourney/blank_star.svg"
-                      alt="Rate"
-                      width={32}
-                      height={32}
-                      className="w-4"
-                    />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex items-center mb-0.5 gap-1">
+                  {[0, 1, 2, 3].map((i) => (
+                    <div key={i} data-connect="star">
+                      <Image src="/healthJourney/rated_star.svg" alt="Rate" width={32} height={32} className="w-4" />
+                    </div>
+                  ))}
+                  <div data-connect="star">
+                    <Image src="/healthJourney/blank_star.svg" alt="Rate" width={32} height={32} className="w-4" />
                   </div>
                 </div>
-                <div
-                  className='font-unsaid font-extrabold'
-                  style={{ color: "#A1CDD9", fontSize: "14px" }}
-                >
-                  4.1
-                </div>
+                <div className="font-unsaid font-extrabold" style={{ color: "#A1CDD9", fontSize: 14 }}>4.1</div>
               </div>
-              <div className='w-0.5 h-full bg-[#E8DDD9]'></div>
-              <div
-                ref={userCountRef}
-                className='font-unsaid font-semibold'
-                style={{ color: "#ACA9A5", fontSize: "14px" }}
-              >
-                0 users
-              </div>
+              <div className="w-0.5 h-full bg-[#E8DDD9]" />
+              <div data-connect="users" className="font-unsaid font-semibold" style={{ color: "#ACA9A5", fontSize: 14 }}>0 users</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div ref={growContainerRef} className="flex items-center justify-center">
-        {/* Parent Circle for Grow */}
-        <div
-          ref={parentGrowRef}
-          className="p-60 bg-[#A1CDD9] rounded-full"
-        ></div>
+      {/* GROW */}
+      <div ref={growRef} className="relative flex items-center justify-center">
+        <div data-grow="parent" className="p-60 bg-[#A1CDD9] rounded-full" />
+        <div data-grow="g1" className="p-8 bg-[#A1CDD9] absolute rounded-full border-8 border-white" />
+        <div data-grow="g2" className="p-10 bg-[#A1CDD9] absolute rounded-full border-8 border-white" />
 
-        {/* Child Circle 1 for Grow */}
-        <div
-          ref={childGrow1Ref}
-          className="p-8 bg-[#A1CDD9] absolute rounded-full border-8 border-white"
-        ></div>
-
-        {/* Child Circle 2 for Grow */}
-        <div
-          ref={childGrow2Ref}
-          className="p-10 bg-[#A1CDD9] absolute rounded-full border-8 border-white"
-        ></div>
-
-        {/* Streak */}
-        <div ref={streakRef} className='p-4 gap-4 flex flex-row items-center absolute translate-x-32 translate-y-36 rounded-3xl bg-white shadow-2xl'>
-          <div className='bg-[#F7F4F2] rounded-full h-fit p-5'>
-            <Image
-              src="/healthJourney/doc_icon.svg"
-              alt="Journal"
-              width={16}
-              height={20}
-              className="w-4"
-            />
+        <div data-grow="streak" className="p-4 gap-4 flex flex-row items-center absolute translate-x-32 translate-y-36 rounded-3xl bg-white shadow-2xl">
+          <div className="bg-[#F7F4F2] rounded-full h-fit p-5">
+            <Image src="/healthJourney/doc_icon.svg" alt="Journal" width={16} height={20} className="w-4" />
           </div>
-          <div className='flex flex-col items-start justify-center gap-2'>
-            <div
-              className='font-unsaid font-extrabold'
-              style={{ color: "#A1CDD9", fontSize: "18px" }}
-            >
-              Mindful Journal
-            </div>
-            <div
-              className='font-unsaid font-semibold'
-              style={{ color: "#736B66", fontSize: "16px" }}
-            >
-              <span ref={streakNumberRef}>0</span> Day Streak
+          <div className="flex flex-col items-start justify-center gap-2">
+            <div className="font-unsaid font-extrabold" style={{ color: "#A1CDD9", fontSize: 18 }}>Mindful Journal</div>
+            <div className="font-unsaid font-semibold" style={{ color: "#736B66", fontSize: 16 }}>
+              <span data-grow="streak-num">0</span> Day Streak
             </div>
           </div>
-          <Image
-            src="/healthJourney/streak_icon.svg"
-            alt="Streak"
-            width={60}
-            height={60}
-            className="w-14"
-          />
-
+          <Image src="/healthJourney/streak_icon.svg" alt="Streak" width={60} height={60} className="w-14" />
         </div>
 
-        {/* Badge-1 */}
-        <div ref={badge1Ref} className='flex flex-row px-6 py-4 gap-4 bg-white absolute translate-x-36 -translate-y-12 rounded-4xl shadow-2xl'>
-          <Image
-            src="/healthJourney/star_grow.svg"
-            alt="Meditation"
-            width={24}
-            height={24}
-            className="w-6"
-          />
-          <div
-            className='font-unsaid font-bold'
-            style={{ color: "#A1CDD9", fontSize: "18px" }}
-          >
-            Positive
-          </div>
+        <div data-grow="badge" className="flex flex-row px-6 py-4 gap-4 bg-white absolute translate-x-36 -translate-y-12 rounded-4xl shadow-2xl">
+          <Image src="/healthJourney/star_grow.svg" alt="Meditation" width={24} height={24} className="w-6" />
+          <div className="font-unsaid font-bold" style={{ color: "#A1CDD9", fontSize: 18 }}>Positive</div>
         </div>
-        {/* Badge-2 */}
-        <div ref={badge2Ref} className='flex flex-row px-6 py-4 gap-4 bg-white absolute -translate-x-36 -translate-y-8 rounded-4xl shadow-2xl'>
-          <Image
-            src="/healthJourney/smile_grow.svg"
-            alt="Meditation"
-            width={24}
-            height={24}
-            className="w-6"
-          />
-          <div
-            className='font-unsaid font-bold'
-            style={{ color: "#A1CDD9", fontSize: "18px" }}
-          >
-            Fun
-          </div>
+        <div data-grow="badge" className="flex flex-row px-6 py-4 gap-4 bg-white absolute -translate-x-36 -translate-y-8 rounded-4xl shadow-2xl">
+          <Image src="/healthJourney/smile_grow.svg" alt="Meditation" width={24} height={24} className="w-6" />
+          <div className="font-unsaid font-bold" style={{ color: "#A1CDD9", fontSize: 18 }}>Fun</div>
         </div>
-        {/* Badge-3 */}
-        <div ref={badge3Ref} className='flex flex-row px-6 py-4 gap-4 bg-white absolute -translate-x-52 -translate-y-28 rounded-4xl shadow-2xl'>
-          <Image
-            src="/healthJourney/supportive_grow.svg"
-            alt="Meditation"
-            width={24}
-            height={24}
-            className="w-6"
-          />
-          <div
-            className='font-unsaid font-bold'
-            style={{ color: "#A1CDD9", fontSize: "18px" }}
-          >
-            Supportive
-          </div>
+        <div data-grow="badge" className="flex flex-row px-6 py-4 gap-4 bg-white absolute -translate-x-52 -translate-y-28 rounded-4xl shadow-2xl">
+          <Image src="/healthJourney/supportive_grow.svg" alt="Meditation" width={24} height={24} className="w-6" />
+          <div className="font-unsaid font-bold" style={{ color: "#A1CDD9", fontSize: 18 }}>Supportive</div>
         </div>
       </div>
     </div>
