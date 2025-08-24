@@ -1,14 +1,27 @@
-<div style="text-align: center;">
+<div align="center">
 
-# UNSAID
+# UNSAID  
 
-Empowering Minds, Transforming Lives Through Innovation
+Empowering Minds, Transforming Lives Through Innovation  
 
-[![last commit today](https://img.shields.io/badge/last%20commit-today-blue)](https://github.com/Ayush007-pro/Unsaid/commits/master) [![typescript](https://img.shields.io/badge/typescript-99.3%25-blue)](https://www.typescriptlang.org/) [![languages](https://img.shields.io/github/languages/count/Ayush007-pro/Unsaid)](https://github.com/Ayush007-pro/Unsaid)
+[![last commit today](https://img.shields.io/badge/last%20commit-today-blue)](https://github.com/Ayush007-pro/Unsaid/commits/master)
+[![typescript](https://img.shields.io/badge/typescript-99.3%25-blue)](https://www.typescriptlang.org/)
+[![languages](https://img.shields.io/github/languages/count/Ayush007-pro/Unsaid)](https://github.com/Ayush007-pro/Unsaid)
 
-Built with the tools and technologies:
+---
 
-![JSON](https://img.shields.io/badge/JSON-000000?style=for-the-badge&logo=JSON&logoColor=white) ![Markdown](https://img.shields.io/badge/Markdown-000000?style=for-the-badge&logo=Markdown&logoColor=white) ![npm](https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white) ![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=Firebase&logoColor=black) ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=JavaScript&logoColor=black) ![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=React&logoColor=black) ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=TypeScript&logoColor=white) ![ESLint](https://img.shields.io/badge/ESLint-4B32C3?style=for-the-badge&logo=ESLint&logoColor=white) ![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=Next.js&logoColor=white) ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-06B6D4?style=for-the-badge&logo=Tailwind-CSS&logoColor=white)
+### Built with the tools and technologies
+
+![JSON](https://img.shields.io/badge/JSON-000000?style=for-the-badge&logo=JSON&logoColor=white)
+![Markdown](https://img.shields.io/badge/Markdown-000000?style=for-the-badge&logo=Markdown&logoColor=white)
+![npm](https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=Firebase&logoColor=black)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=JavaScript&logoColor=black)
+![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=React&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=TypeScript&logoColor=white)
+![ESLint](https://img.shields.io/badge/ESLint-4B32C3?style=for-the-badge&logo=ESLint&logoColor=white)
+![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=Next.js&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-06B6D4?style=for-the-badge&logo=Tailwind-CSS&logoColor=white)
 
 </div>
 
