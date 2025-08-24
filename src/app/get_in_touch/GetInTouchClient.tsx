@@ -155,12 +155,13 @@ export default function GetInTouchClient() {
       <div ref={CounsellorRef} className="flex flex-col items-center justify-center px-3 py-10 gap-4">
         <div className="flex flex-row w-full gap-4">
           <div 
-          className="group flex flex-col justify-between flex-1 bg-[#F4A258] rounded-4xl p-6 hover:scale-101 transition-all duration-200 bg-no-repeat min-h-80"
+          className="group flex flex-col justify-between flex-1 bg-[#F4A258] rounded-4xl p-6 hover:scale-101 transition-all duration-200 bg-no-repeat min-h-80 cursor-pointer"
           style={{
             backgroundImage: "url('/getInTouch/chat_vector.svg')",
             backgroundSize: "auto 110%",
             backgroundPosition: "95% -95%"
           }}
+          onClick={() => (window.location.href = "/")}
           >
             <div className="font-unsaid text-left font-extrabold text-white" style={{ fontSize: '48px' }}>
               Live Chat
@@ -178,12 +179,13 @@ export default function GetInTouchClient() {
             </div>
           </div>
           <div 
-          className="group flex flex-col justify-between flex-1 bg-[#FB8728] rounded-4xl p-6 hover:scale-101 transition-all duration-200 bg-no-repeat min-h-80"
+          className="group flex flex-col justify-between flex-1 bg-[#FB8728] rounded-4xl p-6 hover:scale-101 transition-all duration-200 bg-no-repeat min-h-80 cursor-pointer"
           style={{
             backgroundImage: "url('/getInTouch/calling_vector.svg')",
             backgroundSize: "auto 110%",
             backgroundPosition: "95% -95%",
           }}
+          onClick={() => (window.location.href = "/")}
           >
             <div className="font-unsaid text-left font-extrabold text-white" style={{ fontSize: '48px' }}>
               Audio Call
@@ -209,6 +211,7 @@ export default function GetInTouchClient() {
           backgroundSize: "auto 120%",
           backgroundPosition: "95% -95%"
         }}
+        onClick={() => (window.location.href = "/")}
         >
           <div className="font-unsaid w-full text-left font-extrabold text-[#74B7C9]" style={{ fontSize: '48px' }}>
             Video Call
