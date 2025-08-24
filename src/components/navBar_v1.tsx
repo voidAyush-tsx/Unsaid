@@ -7,62 +7,99 @@ import { useAuthContext } from "@/contexts/AuthContext";
 import styles from "./vibrate.module.css";
 
 const Navbar: React.FC = () => {
-  const dropdownRef = useRef<HTMLDivElement | null>(null);
-  const listRefs = useRef<(HTMLLIElement | null)[]>([]); // ✅ array of refs
   const { user, logout } = useAuthContext();
+
+  // Refs
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
+  const userLabelRef = useRef<HTMLLIElement | null>(null);
+  const logoutRef = useRef<HTMLLIElement | null>(null);
+  const tlRef = useRef<gsap.core.Timeline | null>(null);
 
   useEffect(() => {
     const dropdown = dropdownRef.current;
     if (!dropdown) return;
 
-    gsap.set(dropdown, { autoAlpha: 0, y: -10 });
-    gsap.set(listRefs.current, { autoAlpha: 0, y: -10 });
+    gsap.set(dropdown, { autoAlpha: 0, y: -10, pointerEvents: "none" });
 
-    const showDropdown = () => {
-      gsap.to(dropdown, {
-        autoAlpha: 1,
-        y: 0,
-        duration: 0.35,
-        ease: "power3.out",
-      });
+    const items = Array.from(
+      dropdown.querySelectorAll<HTMLLIElement>("li[data-anim]")
+    );
 
-      gsap.to(listRefs.current, {
-        autoAlpha: 1,
-        y: 0,
-        duration: 0.4,
-        ease: "power3.out",
-        stagger: 0.08,
-      });
-    };
+    tlRef.current = gsap.timeline({
+      paused: true,
+      defaults: { ease: "power3.out" },
+      onStart: () => { gsap.set(dropdown, { pointerEvents: "auto" }); },
+      onReverseComplete: () => {
+        gsap.set(dropdown, { pointerEvents: "none" });
+      },
+    });
 
-    const hideDropdown = () => {
-      gsap.to(dropdown, {
-        autoAlpha: 0,
-        y: -10,
-        duration: 0.25,
-        ease: "power3.in",
-      });
-
-      gsap.to(listRefs.current, {
-        autoAlpha: 0,
-        y: -10,
-        duration: 0.2,
-        ease: "power3.in",
-        stagger: 0.05,
-      });
-    };
+    tlRef.current
+      .to(dropdown, { autoAlpha: 1, y: 0, duration: 0.25 }, 0)
+      .fromTo(
+        items,
+        { autoAlpha: 0, y: -8 },
+        { autoAlpha: 1, y: 0, duration: 0.28, stagger: 0.07 },
+        0.05
+      );
 
     const parent = dropdown.parentElement;
     if (!parent) return;
 
-    parent.addEventListener("mouseenter", showDropdown);
-    parent.addEventListener("mouseleave", hideDropdown);
+    const open = () => tlRef.current?.play();
+    const close = () => tlRef.current?.reverse();
+
+    parent.addEventListener("mouseenter", open);
+    parent.addEventListener("mouseleave", close);
 
     return () => {
-      parent.removeEventListener("mouseenter", showDropdown);
-      parent.removeEventListener("mouseleave", hideDropdown);
+      parent.removeEventListener("mouseenter", open);
+      parent.removeEventListener("mouseleave", close);
+      tlRef.current?.kill();
     };
   }, []);
+
+  // Animate user section when signing in
+  useEffect(() => {
+    if (user && (userLabelRef.current || logoutRef.current)) {
+      const targets = [userLabelRef.current, logoutRef.current].filter(
+        Boolean
+      ) as Element[];
+      gsap.fromTo(
+        targets,
+        { autoAlpha: 0, y: -8 },
+        {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.28,
+          ease: "power2.out",
+          stagger: 0.05,
+        }
+      );
+    }
+  }, [user]);
+
+  // Smooth logout animation
+  const handleLogoutAnimated = async () => {
+    const targets = [logoutRef.current, userLabelRef.current].filter(
+      Boolean
+    ) as Element[];
+
+    if (targets.length) {
+      await new Promise<void>((resolve) => {
+        gsap.to(targets, {
+          autoAlpha: 0,
+          y: -8,
+          duration: 0.2,
+          ease: "power2.in",
+          stagger: { each: 0.03, from: "end" },
+          onComplete: resolve,
+        });
+      });
+    }
+
+    await logout();
+  };
 
   return (
     <nav className="top-5 flex flex-row items-center justify-between p-3 bg-[#A1CDD9] text-white shadow-xl rounded-full m-4">
@@ -91,7 +128,7 @@ const Navbar: React.FC = () => {
 
       {/* Menu with Dropdown */}
       <div className="relative group">
-        <div className="flex items-center rounded-full bg-[#74B7C9] p-4 cursor-pointer">
+        <div className="flex items-center rounded-full bg-[#74B7C9] p-4 cursor-pointer select-none">
           <Image
             src="/navBar/menu_icon.svg"
             alt="Menu Icon"
@@ -101,49 +138,48 @@ const Navbar: React.FC = () => {
           />
         </div>
 
-        {/* Dropdown Menu */}
+        {/* Dropdown */}
         <div
           ref={dropdownRef}
-          className="absolute right-0 mt-2 w-52 rounded-xl bg-[#74B7C9] text-white shadow-lg overflow-hidden"
+          className="absolute right-0 mt-2 w-56 rounded-xl bg-[#74B7C9] text-white shadow-lg overflow-hidden"
         >
           <ul className="flex flex-col divide-y divide-[#A1CDD9]">
-            {/* Auth-based rendering */}
-            <li
-              ref={(el) => {
-                listRefs.current[0] = el;
-              }}
-              className="px-4 py-2 hover:bg-[#A1CDD9] cursor-pointer"
-            >
-              {user ? (
-                <span>User: {user.uid}</span>
-              ) : (
+            {user ? (
+              <li
+                data-anim
+                ref={(el) => { userLabelRef.current = el; }}
+                className="px-4 py-2 hover:bg-[#A1CDD9] cursor-pointer"
+                onClick={() => (window.location.href = "/profile")}
+              >
+                User: {user.uid}
+              </li>
+            ) : (
+              <li
+                data-anim
+                className="px-4 py-2 hover:bg-[#A1CDD9] cursor-pointer"
+              >
                 <a href="/signin">Sign In</a>
-              )}
-            </li>
+              </li>
+            )}
 
             {user && (
               <li
-                ref={(el) => {
-                  listRefs.current[1] = el;
-                }}
+                data-anim
+                ref={(el) => { logoutRef.current = el; }}
                 className="px-4 py-2 hover:bg-[#A1CDD9] cursor-pointer"
               >
-                <button onClick={logout}>Logout</button>
+                <button onClick={handleLogoutAnimated}>Logout</button>
               </li>
             )}
 
             <li
-              ref={(el) => {
-                listRefs.current[2] = el;
-              }}
+              data-anim
               className="px-4 py-2 hover:bg-[#A1CDD9] cursor-pointer"
             >
               Link 3
             </li>
             <li
-              ref={(el) => {
-                listRefs.current[3] = el;
-              }}
+              data-anim
               className="px-4 py-2 hover:bg-[#A1CDD9] cursor-pointer"
             >
               Link 4
