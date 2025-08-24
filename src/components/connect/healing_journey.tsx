@@ -213,22 +213,70 @@ export default function HealingJourney() {
         }, "<");
     }, growRef);
 
+    // Divider animation with moving circle
+    const dividerCtx = gsap.context(() => {
+      const containers = gsap.utils.toArray<HTMLElement>('[data-el="divider-container"]');
+
+      containers.forEach((container, i) => {
+        if (i === containers.length - 1) return; // last divider doesn't animate
+
+        const progressEl = container.querySelector('[data-el="divider-progress"]') as HTMLElement;
+        const circleEl = container.querySelector('[data-el="divider-circle"]') as HTMLElement;
+        const nextContainer = containers[i + 1];
+
+        const distance =
+          nextContainer.getBoundingClientRect().top -
+          container.getBoundingClientRect().top;
+
+        // Animate progress fill
+        gsap.to(progressEl, {
+          height: distance,
+          ease: "none",
+          scrollTrigger: {
+            trigger: container,
+            start: "top center",
+            endTrigger: nextContainer,
+            end: "top center",
+            scrub: true,
+          },
+        });
+
+        // Animate circle traveling down
+        gsap.to(circleEl, {
+          y: distance,
+          ease: "none",
+          scrollTrigger: {
+            trigger: container,
+            start: "top center",
+            endTrigger: nextContainer,
+            end: "top center",
+            scrub: true,
+            onLeave: () => {
+              // Lock circle at bottom
+              gsap.set(circleEl, { y: distance });
+            },
+          },
+        });
+      });
+    });
+
     return () => {
       healCtx.revert();
       connectCtx.revert();
       growCtx.revert();
+      dividerCtx.revert();
       mm.revert();
     };
   }, []);
 
   return (
-    <div className="flex flex-col items-center relative min-h-screen px-32 py-24 gap-64">
+    <div className="flex flex-col items-center justify-center relative min-h-screen px-32 py-24 gap-64">
 
 
       {/* Step-1 */}
-      <div className="flex flex-row justify-center items-center gap-30">
+      <div className="flex flex-row justify-center gap-30 items-center w-full">
         {/* HEAL */}
-        <div ref={healRef} className="flex items-center justify-center">
+        <div ref={healRef} className="flex items-center justify-center max-w-md">
           {/* Parent Circle */}
           <div data-el="parent" className="p-60 bg-[#FB8728] rounded-full" />
 
@@ -294,10 +342,17 @@ export default function HealingJourney() {
         </div>
 
         {/* Divider */}
-        <div className="border-4 border-[#A1CDD9] h-full" />
+        <div data-el="divider-container" className="relative h-full flex justify-center">
+          {/* Background track */}
+          <div className="absolute w-6 bg-[#F7F4F2] rounded-full h-full" />
+          {/* Foreground progress */}
+          <div data-el="divider-progress" className="absolute w-6 bg-[#F7F4F2] rounded-full h-0" />
+          {/* Moving circle */}
+          <div data-el="divider-circle" className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-[#A1CDD9]" />
+        </div>
 
         {/* Details */}
-        <div className="flex flex-col items-start gap-8">
+        <div className="flex flex-col items-start gap-8 max-w-md">
           <div
             className="font-unsaid font-bold py-2 px-5 rounded-3xl border-[#736B66] border-2 bg-transparent"
             style={{ color: "#736B66", fontSize: "16px" }}
@@ -338,51 +393,11 @@ export default function HealingJourney() {
 
 
       {/* Step-2 */}
-      <div className="flex flex-row justify-center items-center gap-30">
-        {/* Details */}
-        <div className="flex flex-col items-start gap-8">
-          <div
-            className="font-unsaid font-bold py-2 px-5 rounded-3xl border-[#736B66] border-2 bg-transparent"
-            style={{ color: "#736B66", fontSize: "16px" }}
-          >
-            Step Two
-          </div>
-          <div className="flex flex-col items-start gap-6">
-            <div
-              className="font-unsaid font-bold"
-              style={{ color: "#A1CDD9", fontSize: "48px" }}
-            >
-              Connect
-            </div>
-            <div
-              className="font-unsaid font-medium"
-              style={{ color: "#736B66", fontSize: "20px" }}
-            >
-              Choose how you want to communicate — audio, video, or chat — and start your session.
-            </div>
-          </div>
-          <div className="flex flex-row gap-4 py-4 px-8 items-center justify-center rounded-4xl bg-[#A1CDD9]">
-            <div
-              className="font-unsaid font-extrabold text-white"
-              style={{ fontSize: "16px" }}
-            >
-              Talk to a Counsellor
-            </div>
-            <Image
-              src="/right_arrow.svg"
-              alt="Arrow"
-              width={32}
-              height={32}
-              className="w-6"
-            />
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div className="border-4 border-[#A1CDD9] h-full" />
+      <div className="flex flex-row justify-center gap-30 items-center w-full">
 
         {/* CONNECT */}
-        <div ref={connectRef} className="flex items-center justify-center">
+        <div ref={connectRef} className="flex items-center justify-center max-w-md">
+
           <div data-el="parent" className="p-60 bg-[#F4A258] rounded-full" />
 
           <div data-el="child1" className="p-6 bg-[#F4A258] absolute rounded-full border-8 border-white">
@@ -435,13 +450,62 @@ export default function HealingJourney() {
             </div>
           </div>
         </div>
+
+        {/* Divider */}
+        <div data-el="divider-container" className="relative h-full flex justify-center">
+          {/* Background track */}
+          <div className="absolute w-6 bg-[#F7F4F2] rounded-full h-full" />
+          {/* Foreground progress */}
+          <div data-el="divider-progress" className="absolute w-6 bg-[#F7F4F2] rounded-full h-0 -z-1" />
+          {/* Moving circle */}
+          <div data-el="divider-circle" className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-[#A1CDD9]" />
+        </div>
+
+        {/* Details */}
+        <div className="flex flex-col items-start gap-8 max-w-md">
+          <div
+            className="font-unsaid font-bold py-2 px-5 rounded-3xl border-[#736B66] border-2 bg-transparent"
+            style={{ color: "#736B66", fontSize: "16px" }}
+          >
+            Step Two
+          </div>
+          <div className="flex flex-col items-start gap-6">
+            <div
+              className="font-unsaid font-bold"
+              style={{ color: "#A1CDD9", fontSize: "48px" }}
+            >
+              Connect
+            </div>
+            <div
+              className="font-unsaid font-medium"
+              style={{ color: "#736B66", fontSize: "20px" }}
+            >
+              Choose how you want to communicate — audio, video, or chat — and start your session.
+            </div>
+          </div>
+          <div className="flex flex-row gap-4 py-4 px-8 items-center justify-center rounded-4xl bg-[#A1CDD9]">
+            <div
+              className="font-unsaid font-extrabold text-white"
+              style={{ fontSize: "16px" }}
+            >
+              Talk to a Counsellor
+            </div>
+            <Image
+              src="/right_arrow.svg"
+              alt="Arrow"
+              width={32}
+              height={32}
+              className="w-6"
+            />
+          </div>
+        </div>
       </div>
       
 
       {/* Step-3 */}
-      <div className="flex flex-row justify-center items-center gap-30">
+      <div className="flex flex-row justify-center gap-30 items-center w-full">
         {/* GROW */}
-        <div ref={growRef} className="flex items-center justify-center">
+        <div ref={growRef} className="flex items-center justify-center max-w-md">
           <div data-el="parent" className="p-60 bg-[#A1CDD9] rounded-full" />
 
           <div data-el="child1" className="p-7 bg-[#A1CDD9] absolute rounded-full border-8 border-white">
@@ -482,10 +546,17 @@ export default function HealingJourney() {
         </div>
 
         {/* Divider */}
-        <div className="border-4 border-[#A1CDD9] h-full" />
+        <div data-el="divider-container" className="relative h-full flex justify-center">
+          {/* Background track */}
+          <div className="absolute w-6 bg-[#F7F4F2] rounded-full h-full" />
+          {/* Foreground progress */}
+          <div data-el="divider-progress" className="absolute w-6 bg-[#F7F4F2] rounded-full h-0" />
+          {/* Moving circle */}
+          <div data-el="divider-circle" className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-[#A1CDD9]" />
+        </div>
 
         {/* Details */}
-        <div className="flex flex-col items-start gap-8">
+        <div className="flex flex-col items-start gap-8 max-w-md">
           <div
             className="font-unsaid font-bold py-2 px-5 rounded-3xl border-[#736B66] border-2 bg-transparent"
             style={{ color: "#736B66", fontSize: "16px" }}
