@@ -3,11 +3,12 @@
 import React, { useEffect, useRef } from "react";
 import Image from "next/image";
 import gsap from "gsap";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useSession, signOut } from 'next-auth/react';
 import styles from "./vibrate.module.css";
 
 const Navbar: React.FC = () => {
-  const { user, logout } = useAuthContext();
+  const { data: session } = useSession();
+  const user = session?.user;
 
   // Refs
   const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -98,7 +99,7 @@ const Navbar: React.FC = () => {
       });
     }
 
-    await logout();
+    await signOut({ callbackUrl: '/' });
   };
 
   return (
@@ -151,7 +152,7 @@ const Navbar: React.FC = () => {
                 className="px-4 py-2 hover:bg-[#A1CDD9] cursor-pointer"
                 onClick={() => (window.location.href = "/profile")}
               >
-                User: {user.uid}
+                User: {user.id}
               </li>
             ) : (
               <li

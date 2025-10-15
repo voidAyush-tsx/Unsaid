@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { signIn } from 'next-auth/react';
 
 export default function LogInForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -16,7 +16,7 @@ export default function LogInForm() {
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
-  const { signIn } = useAuthContext();
+  // use next-auth signIn for credentials
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,12 +30,12 @@ export default function LogInForm() {
     }
 
     try {
-      const { user, error: signInError } = await signIn(email, password, rememberMe);
-
-      if (signInError) {
-        setError(signInError);
-      } else if (user) {
-        window.location.href = "/connect"; // ✅ Redirect + Refresh
+      // next-auth signIn with credentials provider
+      const res = await signIn('credentials', { redirect: false, email, password });
+      if (res?.error) {
+        setError(res.error as string);
+      } else {
+        window.location.href = "/connect";
       }
     } catch {
       setError("An unexpected error occurred");

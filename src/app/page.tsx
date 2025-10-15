@@ -5,11 +5,12 @@ import Navbar from "@/components/navBar_v1";
 import Features from "@/components/features";
 import GetInTouch from "@/components/getInTouch";
 import Footer from "@/components/footer_v1";
-import { useAuthContext } from "@/contexts/AuthContext";
+import { useSession } from 'next-auth/react';
 import { useRouter } from "next/navigation";
 
 export default function Home() {
-  const { user } = useAuthContext();
+  const { data: session } = useSession();
+  const user = session?.user;
   const router = useRouter();
 
   // ✅ Common redirect function

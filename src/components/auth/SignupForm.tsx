@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useAuthContext } from "@/contexts/AuthContext";
 import DOMPurify from "dompurify";
 
 export default function SignUpForm() {
@@ -24,7 +23,6 @@ export default function SignUpForm() {
   >("");
   const [loading, setLoading] = useState(false);
 
-  const { signUp } = useAuthContext();
   const router = useRouter();
 
   // Email validation regex
@@ -173,12 +171,16 @@ export default function SignUpForm() {
     }
 
     try {
-      const { user, error } = await signUp(sanitizedEmail, sanitizedPassword);
-
-      if (error) {
-        setErrors((prev) => ({ ...prev, form: error }));
-      } else if (user) {
-        window.location.href = "/connect"; // ✅ Redirect + Refresh
+      const r = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: sanitizedEmail, password: sanitizedPassword }),
+      });
+      const json = await r.json();
+      if (!r.ok) {
+        setErrors((prev) => ({ ...prev, form: json.error || 'Signup failed' }));
+      } else {
+        window.location.href = '/connect';
       }
     } catch {
       setErrors((prev) => ({ ...prev, form: "An unexpected error occurred" }));

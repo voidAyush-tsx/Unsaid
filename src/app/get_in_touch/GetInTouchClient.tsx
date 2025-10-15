@@ -161,7 +161,7 @@ export default function GetInTouchClient() {
             backgroundSize: "auto 110%",
             backgroundPosition: "95% -95%"
           }}
-          onClick={() => (window.location.href = "/")}
+          onClick={() => window.dispatchEvent(new Event('open-chat'))}
           >
             <div className="font-unsaid text-left font-extrabold text-white" style={{ fontSize: '48px' }}>
               Live Chat
@@ -185,7 +185,7 @@ export default function GetInTouchClient() {
             backgroundSize: "auto 110%",
             backgroundPosition: "95% -95%",
           }}
-          onClick={() => (window.location.href = "/")}
+          onClick={() => window.dispatchEvent(new Event('open-chat'))}
           >
             <div className="font-unsaid text-left font-extrabold text-white" style={{ fontSize: '48px' }}>
               Audio Call
@@ -211,7 +211,7 @@ export default function GetInTouchClient() {
           backgroundSize: "auto 120%",
           backgroundPosition: "95% -95%"
         }}
-        onClick={() => (window.location.href = "/")}
+        onClick={() => window.dispatchEvent(new Event('open-chat'))}
         >
           <div className="font-unsaid w-full text-left font-extrabold text-[#74B7C9]" style={{ fontSize: '48px' }}>
             Video Call
