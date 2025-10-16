@@ -57,65 +57,140 @@ This project requires the following dependencies:
 
 Build Unsaid from the source and install dependencies:
 
+# UNSAID
+
+Empowering minds — a mental health support web application built with Next.js and TypeScript.
+
+[![last commit today](https://img.shields.io/badge/last%20commit-today-blue)](https://github.com/thecoderwithHat/Unsaid/commits/main)
+
+---
+
+## Table of contents
+
+- [Overview](#overview)
+- [Tech stack](#tech-stack)
+- [Getting started](#getting-started)
+   - [Prerequisites](#prerequisites)
+   - [Installation](#installation)
+   - [Environment variables](#environment-variables)
+   - [Database & Prisma](#database--prisma)
+- [Scripts](#scripts)
+- [Testing](#testing)
+- [Features](#features)
+- [Contributing](#contributing)
+
+## Overview
+
+Unsaid is a mental health support web application that offers assessments, counseling connection flows, an informational about page, and authentication. The app is built with accessibility and scalability in mind using a modern React/Next stack.
+
+## Tech stack
+
+- Next.js (App Router)
+- React + TypeScript
+- Prisma ORM + PostgreSQL (pg)
+- NextAuth.js for authentication
+- Firebase (client SDK + firebase-admin for server-side features)
+- Pusher for realtime chat
+- Tailwind CSS
+
+## Getting started
+
+### Prerequisites
+
+- Node.js (16.x or newer; Node 18+ recommended)
+- npm (or yarn/pnpm if you prefer)
+- A PostgreSQL database (local or hosted) or another database supported by Prisma
+
+### Installation
+
 1. Clone the repository:
-   ```
-   git clone https://github.com/Ayush007-pro/Unsaid
-   ```
 
-2. Navigate to the project directory:
-   ```
-   cd Unsaid
-   ```
+    git clone https://github.com/thecoderwithHat/Unsaid.git
 
-3. Install the dependencies:
-   ```
-   npm install
-   ```
+2. Enter the project directory and install dependencies:
 
-4. Set up environment variables:
-   - Create a `.env.local` file in the root directory.
-   - Add Firebase configuration (e.g., API key, auth domain) and any other sensitive data:
-     ```
-     NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
-     NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_auth_domain
-     ```
+    cd Unsaid
+    npm install
 
-## Usage
+3. Create a `.env.local` file at the project root (see the example below).
 
-Run the project with:
-```
-npm run dev
-```
+### Environment variables
 
-The application will be available at `http://localhost:3000`. Use this development server to test and iterate on the codebase.
+The project expects a few environment variables. Add these to `.env.local`:
+
+- DATABASE_URL=postgresql://user:password@host:5432/dbname
+- NEXTAUTH_URL=http://localhost:3000
+- NEXTAUTH_SECRET=some_long_secret
+- NEXT_PUBLIC_FIREBASE_API_KEY=...
+- NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=...
+- FIREBASE_SERVICE_ACCOUNT (or provide a service account JSON file and load it in your deployment)
+
+Adjust values for production accordingly.
+
+### Database & Prisma
+
+This repository uses Prisma. After setting `DATABASE_URL`:
+
+- Generate Prisma client and run migrations (development):
+
+   npx prisma generate
+   npx prisma migrate dev --name init
+
+- If you prefer to push schema without generating migrations (not recommended for production):
+
+   npx prisma db push
+
+- There is a seed script at `scripts/seedUsers.mjs` — run it after migrations if you want local seed data:
+
+   node scripts/seedUsers.mjs
+
+## Scripts
+
+Use npm to run the standard scripts defined in `package.json`:
+
+- npm run dev — run the app in development (Next.js)
+- npm run build — generate Prisma client and build for production
+- npm start — start the production server
+- npm run lint — run ESLint
+
+Example (development):
+
+   npm run dev
+
+The app will be available at http://localhost:3000 by default.
 
 ## Testing
 
-Unsaid uses Jest as the test framework. Run the test suite with:
-```
-npm test
-```
-
-Ensure test files are placed in `__tests__` directories or end with `.test.ts(x)`. Coverage reports can be generated with:
-```
-npm run test:coverage
-```
+There are no automated tests configured in `package.json` at the moment. If you want to add tests, consider Jest + React Testing Library for components and a small integration test setup for API routes.
 
 ## Features
 
-- **Homepage**: Welcoming narrative, core values, and call-to-action for assessments.
-- **Connect Page**: Options for chat, voice, and video support with counselor matching.
-- **Assessment Page**: Interactive GAD test with emotional index scoring.
-- **About Us**: Team story and counselor profiles.
-- **Contact Us**: Contact form, FAQs, and support channels.
-- **Authentication**: Secure sign-in and sign-up flows with Firebase.
+- Homepage with calls to action
+- Connect (chat/counseling) flows using Pusher for realtime
+- Assessment pages (GAD-like tests)
+- Authentication via NextAuth/Firebase
+- Admin API endpoints and Prisma-managed user data
 
 ## Contributing
 
-1. Fork the repository.
-2. Create a feature branch (`git checkout -b feature/new-feature`).
-3. Commit changes (`git commit -m 'Add new feature'`).
-4. Push to the branch (`git push origin feature/new-feature`).
-5. Open a pull request with a clear description of changes.
+Contributions are welcome. Typical workflow:
 
-Adhere to ESLint rules and ensure TypeScript type safety. Collaboration is encouraged to enhance scalability and user experience.
+1. Fork the repository
+2. Create a branch: `git checkout -b feature/your-feature`
+3. Commit your changes and push
+4. Open a pull request describing the change
+
+Please follow the existing linting and TypeScript conventions.
+
+## Troubleshooting
+
+- If Prisma client is missing, run `npx prisma generate`.
+- If you get database errors, double-check `DATABASE_URL` and that the DB is reachable.
+
+---
+
+If you'd like, I can also:
+
+- add a minimal `.env.example` file,
+- add a small CI workflow for lint/build,
+- or create a short developer checklist in the README.
