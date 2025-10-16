@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { signIn } from 'next-auth/react';
+import { signIn, getSession } from 'next-auth/react';
 
 export default function LogInForm() {
   const [showPassword, setShowPassword] = useState(false);
@@ -35,7 +35,18 @@ export default function LogInForm() {
       if (res?.error) {
         setError(res.error as string);
       } else {
-        window.location.href = "/connect";
+        // fetch session to see role set by server callbacks
+        const session = await getSession();
+        console.log('Session after login:', session);
+        const role = session?.user?.role as string | undefined;
+        console.log('User role:', role);
+        if (role === 'ADMIN') {
+          console.log('Redirecting to admin');
+          window.location.href = '/admin';
+        } else {
+          console.log('Redirecting to connect');
+          window.location.href = '/connect';
+        }
       }
     } catch {
       setError("An unexpected error occurred");

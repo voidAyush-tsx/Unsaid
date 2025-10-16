@@ -8,6 +8,8 @@ async function main() {
   const users = [
     { email: 'counsellor@example.com', password: 'Counsellor123!', role: 'COUNSELLOR' },
     { email: 'patient@example.com', password: 'Patient123!', role: 'USER' },
+    // admin credentials can be overridden by environment variables
+    { email: process.env.SEED_ADMIN_EMAIL || 'admin@example.com', password: process.env.SEED_ADMIN_PASSWORD || 'Admin123!', role: 'ADMIN' },
   ];
 
   for (const u of users) {
