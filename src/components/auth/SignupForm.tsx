@@ -9,11 +9,13 @@ export default function SignUpForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
+    name: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
   const [errors, setErrors] = useState({
+    name: "",
     email: "",
     password: "",
     form: "",
@@ -103,17 +105,18 @@ export default function SignUpForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrors({ email: "", password: "", form: "" });
+    setErrors({ name: "", email: "", password: "", form: "" });
     setLoading(true);
 
-    const { email, password, confirmPassword } = formData;
+    const { name, email, password, confirmPassword } = formData;
 
     // Sanitize inputs
+    const sanitizedName = DOMPurify.sanitize(name);
     const sanitizedEmail = DOMPurify.sanitize(email);
     const sanitizedPassword = DOMPurify.sanitize(password);
 
     // Validation
-    if (!sanitizedEmail || !sanitizedPassword || !confirmPassword) {
+    if (!sanitizedName || !sanitizedEmail || !sanitizedPassword || !confirmPassword) {
       setErrors((prev) => ({ ...prev, form: "Please fill in all fields" }));
       setLoading(false);
       return;
@@ -128,7 +131,16 @@ export default function SignUpForm() {
       return;
     }
 
-    if (password.length < 8) {
+    if (sanitizedName.length < 2) {
+      setErrors((prev) => ({
+        ...prev,
+        name: "Name must be at least 2 characters long",
+      }));
+      setLoading(false);
+      return;
+    }
+
+    if (sanitizedPassword.length < 8) {
       setErrors((prev) => ({
         ...prev,
         password: "Password must be at least 8 characters long",
@@ -174,7 +186,11 @@ export default function SignUpForm() {
       const r = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: sanitizedEmail, password: sanitizedPassword }),
+        body: JSON.stringify({ 
+          name: sanitizedName,
+          email: sanitizedEmail, 
+          password: sanitizedPassword 
+        }),
       });
       const json = await r.json();
       if (!r.ok) {
@@ -203,7 +219,7 @@ export default function SignUpForm() {
       onClick={() => window.location.href = "/"} 
       />
       <div
-        className="font-unsaid font-extrabold mt-8 mb-3"
+        className="font-unsaid font-extrabold mt-2 mb-1"
         style={{ color: "#A1CDD9", fontSize: "36px" }}
       >
         Sign Up to Unsaid
@@ -222,7 +238,43 @@ export default function SignUpForm() {
       )}
 
       <div className="flex flex-col items-start w-full mt-10 gap-4">
-        <div className="flex flex-col gap-2 w-full">
+        <div className="flex flex-col gap-1 w-full">
+          <div
+            className="font-unsaid font-extrabold"
+            style={{ color: "#A1CDD9", fontSize: "14px" }}
+          >
+            Name
+          </div>
+          <div
+            className={`flex flex-row rounded-full w-full border-2 ${
+              errors.name ? "border-red-500" : "border-[#F4A258]"
+            } px-4 py-3 gap-2`}
+          >
+            <Image src="/auth/email_icon.svg" alt="email" width={24} height={24} />
+            <input
+              type="text"
+              placeholder="Enter your name"
+              name="name"
+              value={formData.name}
+              onChange={handleInputChange}
+              className="bg-transparent outline-none font-unsaid font-bold rounded-r-full w-full"
+              style={{ color: "#736B66", fontSize: "16px" }}
+              disabled={loading}
+              aria-invalid={errors.name ? "true" : "false"}
+              aria-describedby={errors.name ? "name-error" : undefined}
+            />
+          </div>
+          {errors.name && (
+            <div
+              id="name-error"
+              className="text-red-500 text-sm font-unsaid font-medium"
+            >
+              {errors.name}
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-1 w-full">
           <div
             className="font-unsaid font-extrabold"
             style={{ color: "#A1CDD9", fontSize: "14px" }}
@@ -258,7 +310,7 @@ export default function SignUpForm() {
           )}
         </div>
 
-        <div className="flex flex-col gap-2 w-full">
+        <div className="flex flex-col gap-1 w-full">
           <div
             className="font-unsaid font-extrabold"
             style={{ color: "#A1CDD9", fontSize: "14px" }}
@@ -333,7 +385,7 @@ export default function SignUpForm() {
           )}
         </div>
 
-        <div className="flex flex-col gap-2 w-full">
+        <div className="flex flex-col gap-1 w-full">
           <div
             className="font-unsaid font-extrabold"
             style={{ color: "#A1CDD9", fontSize: "14px" }}
