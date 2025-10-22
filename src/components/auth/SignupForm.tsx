@@ -207,7 +207,7 @@ export default function SignUpForm() {
 
   return (
     <form
-      className="relative flex flex-col items-center overflow-hidden p-0 max-w-md mx-auto"
+      className="relative flex flex-col items-center overflow-hidden p-0 min-w-md mx-auto"
       onSubmit={handleSubmit}
     >
       <Image 

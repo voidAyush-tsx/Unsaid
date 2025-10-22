@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth/next';
 import type { Session } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
+import type { Prisma } from '@prisma/client';
 
 async function requireAdmin() {
   const session = (await getServerSession(authOptions)) as Session | null;
@@ -65,19 +66,26 @@ export async function PATCH(req: NextRequest) {
   if (unauthorized) return unauthorized;
 
   try {
-  const body = await req.json();
+    const body = await req.json();
     const { id, role, email, name } = body || {};
     if (!id) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
 
-    const updateData: { role?: 'ADMIN' | 'COUNSELLOR' | 'USER'; email?: string; name?: string | null } = {};
+    // Use proper Prisma update data type
+    const updateData: Prisma.UserUpdateInput = {};
+    
     if (role !== undefined) {
       if (!['ADMIN', 'COUNSELLOR', 'USER'].includes(role)) {
         return NextResponse.json({ error: 'Invalid role' }, { status: 400 });
       }
       updateData.role = role as 'ADMIN' | 'COUNSELLOR' | 'USER';
     }
+    
     if (email !== undefined) updateData.email = email;
-    if (name !== undefined) updateData.name = name;
+    
+    // Handle name specifically to work with Prisma's typing for nullable fields
+    if (name !== undefined) {
+      updateData.name = name === null ? null : name;
+    }
 
     const user = await prisma.user.update({ where: { id }, data: updateData });
     return NextResponse.json({ ok: true, user });
