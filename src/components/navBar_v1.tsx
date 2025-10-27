@@ -15,7 +15,11 @@ const Navbar: React.FC = () => {
   const rightRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const leftRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const logoRef = useRef<HTMLImageElement>(null);
+  const menuItemsRef = useRef<(HTMLLIElement | null)[]>([]);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
+  const menuTlRef = useRef<gsap.core.Timeline | null>(null);
 
   useEffect(() => {
     const refs = [
@@ -63,10 +67,74 @@ const Navbar: React.FC = () => {
   const onEnter = () => {
     tlRef.current?.play();
     setIsMenuOpen(true);
+
+    // Kill any existing timeline
+    menuTlRef.current?.kill();
+
+    // Create smooth coordinated timeline
+    const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+    menuTlRef.current = tl;
+
+    tl.to(menuRef.current, {
+      width: "calc(100% - 80px)",
+      opacity: 1,
+      duration: 0.8,
+    })
+      .to(
+        logoRef.current,
+        {
+          scale: 0.3,
+          opacity: 0,
+          duration: 0.8,
+        },
+        "<"
+      )
+      .fromTo(
+        menuItemsRef.current.filter((item): item is HTMLLIElement => item !== null),
+        { opacity: 0, x: 40 },
+        {
+          opacity: 1,
+          x: 0,
+          duration: 0.5,
+          stagger: 0.1,
+        },
+        "-=0.5"
+      );
   };
   const onLeave = () => {
     tlRef.current?.reverse();
     setIsMenuOpen(false);
+
+    // Kill any existing timeline
+    menuTlRef.current?.kill();
+
+    const tl = gsap.timeline({ defaults: { ease: "power3.in" } });
+    menuTlRef.current = tl;
+
+    tl.to(menuItemsRef.current.filter((item): item is HTMLLIElement => item !== null), {
+      opacity: 0,
+      x: 40,
+      duration: 0.3,
+      stagger: 0.05,
+    })
+      .to(
+        menuRef.current,
+        {
+          width: 0,
+          opacity: 0,
+          duration: 0.3,
+        },
+        "-=0.15"
+      )
+      .to(
+        logoRef.current,
+        {
+          scale: 1,
+          opacity: 1,
+          duration: 0.3,
+        },
+        "<"
+      );
   };
 
   return (
@@ -86,13 +154,15 @@ const Navbar: React.FC = () => {
 
       {/* Logo */}
       <Image
+        ref={logoRef}
         src="/navBar/navBar_logo.svg"
         alt="Logo"
         width={200}
         height={50}
-        className="w-50 cursor-pointer"
+        className="w-50 cursor-pointer absolute left-1/2 transform -translate-x-1/2 z-10"
         onClick={() => (window.location.href = "/")}
       />
+
       {/* Menu button */}
       <div
         className="relative group"
@@ -123,32 +193,45 @@ const Navbar: React.FC = () => {
             ></div>
           </div>
         </div>
-        {isMenuOpen && (
-          <div className="absolute top-0 right-0 h-full flex items-center pr-16">
-            <ul className="flex space-x-6 text-sm font-medium">
-              <li>
-                <a href="#" className="hover:underline">
+        <div
+          ref={menuRef}
+          className="absolute top-0 right-0 h-full bg-transparent rounded-full opacity-0 w-0 overflow-visible flex items-center justify-end pr-20 z-20"
+        >
+          <ul className="flex flex-row space-x-8 text-base font-medium text-white whitespace-nowrap">
+            <li ref={(el) => { menuItemsRef.current[0] = el; }}>
+              <a
+                href="#"
+                className="hover:underline hover:scale-110 inline-block transition-transform"
+              >
                   Home
                 </a>
               </li>
-              <li>
-                <a href="#" className="hover:underline">
+            <li ref={(el) => { menuItemsRef.current[1] = el; }}>
+              <a
+                href="#"
+                className="hover:underline hover:scale-110 inline-block transition-transform"
+              >
                   About
                 </a>
               </li>
-              <li>
-                <a href="#" className="hover:underline">
+            <li ref={(el) => { menuItemsRef.current[2] = el; }}>
+              <a
+                href="#"
+                className="hover:underline hover:scale-110 inline-block transition-transform"
+              >
                   Services
                 </a>
               </li>
-              <li>
-                <a href="#" className="hover:underline">
+            <li ref={(el) => { menuItemsRef.current[3] = el; }}>
+              <a
+                href="#"
+                className="hover:underline hover:scale-110 inline-block transition-transform"
+              >
                   Contact
                 </a>
               </li>
             </ul>
           </div>
-        )}
       </div>
     </nav>
   );
