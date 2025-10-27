@@ -1,0 +1,42 @@
+.iconContainer {
+  position: relative;
+  width: 16px;
+  height: 16px;
+}
+
+.iconPart {
+  position: absolute;
+  background-color: white;
+  width: 6px;
+  height: 6px;
+}
+
+.partCenter {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.partTop {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.partBottom {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.partLeft {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.partRight {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}

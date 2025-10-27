@@ -1,106 +1,66 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useRef, useEffect } from "react";
 import Image from "next/image";
-import gsap from "gsap";
-import { useSession, signOut } from 'next-auth/react';
+import { gsap } from "gsap";
 import styles from "./vibrate.module.css";
+import menuStyles from "./MenuButton.module.css";
 
 const Navbar: React.FC = () => {
-  const { data: session } = useSession();
-  const user = session?.user;
-
-  // Refs
-  const dropdownRef = useRef<HTMLDivElement | null>(null);
-  const userLabelRef = useRef<HTMLLIElement | null>(null);
-  const logoutRef = useRef<HTMLLIElement | null>(null);
+  // Refs for the menu button animation
+  const containerRef = useRef<HTMLDivElement>(null);
+  const centerRef = useRef<HTMLDivElement>(null);
+  const topRef = useRef<HTMLDivElement>(null);
+  const rightRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const leftRef = useRef<HTMLDivElement>(null);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
 
   useEffect(() => {
-    const dropdown = dropdownRef.current;
-    if (!dropdown) return;
+    const refs = [
+      containerRef.current,
+      centerRef.current,
+      topRef.current,
+      rightRef.current,
+      bottomRef.current,
+      leftRef.current,
+    ];
+    if (refs.some((ref) => !ref)) return;
 
-    gsap.set(dropdown, { autoAlpha: 0, y: -10, pointerEvents: "none" });
+    const parts = [
+      topRef.current,
+      rightRef.current,
+      bottomRef.current,
+      leftRef.current,
+    ];
 
-    const items = Array.from(
-      dropdown.querySelectorAll<HTMLLIElement>("li[data-anim]")
-    );
+    gsap.set(centerRef.current, { scale: 0, transformOrigin: "center center" });
 
-    tlRef.current = gsap.timeline({
-      paused: true,
-      defaults: { ease: "power3.out" },
-      onStart: () => { gsap.set(dropdown, { pointerEvents: "auto" }); },
-      onReverseComplete: () => {
-        gsap.set(dropdown, { pointerEvents: "none" });
-      },
-    });
+    gsap.set(parts, { borderRadius: "50%" });
+    // Adjust initial positions for the dot animation to form a square
+    gsap.set(topRef.current, { x: -6, y: -6 });
+    gsap.set(rightRef.current, { x: 6, y: -6 });
+    gsap.set(bottomRef.current, { x: 6, y: 6 });
+    gsap.set(leftRef.current, { x: -6, y: 6 });
 
-    tlRef.current
-      .to(dropdown, { autoAlpha: 1, y: 0, duration: 0.25 }, 0)
-      .fromTo(
-        items,
-        { autoAlpha: 0, y: -8 },
-        { autoAlpha: 1, y: 0, duration: 0.28, stagger: 0.07 },
-        0.05
-      );
-
-    const parent = dropdown.parentElement;
-    if (!parent) return;
-
-    const open = () => tlRef.current?.play();
-    const close = () => tlRef.current?.reverse();
-
-    parent.addEventListener("mouseenter", open);
-    parent.addEventListener("mouseleave", close);
+    tlRef.current = gsap
+      .timeline({
+        paused: true,
+        defaults: { duration: 0.3, ease: "power2.inOut" },
+      })
+      .to(containerRef.current, { rotate: 45 })
+      .to(parts, { x: 0, y: 0, borderRadius: "2.5px" }, "<")
+      .to([topRef.current, bottomRef.current], { scaleY: 4 }, "<")
+      .to([leftRef.current, rightRef.current], { scaleX: 4 }, "<")
+      .to(centerRef.current, { scale: 1 }, "<");
 
     return () => {
-      parent.removeEventListener("mouseenter", open);
-      parent.removeEventListener("mouseleave", close);
       tlRef.current?.kill();
     };
   }, []);
 
-  // Animate user section when signing in
-  useEffect(() => {
-    if (user && (userLabelRef.current || logoutRef.current)) {
-      const targets = [userLabelRef.current, logoutRef.current].filter(
-        Boolean
-      ) as Element[];
-      gsap.fromTo(
-        targets,
-        { autoAlpha: 0, y: -8 },
-        {
-          autoAlpha: 1,
-          y: 0,
-          duration: 0.28,
-          ease: "power2.out",
-          stagger: 0.05,
-        }
-      );
-    }
-  }, [user]);
-
-  // Smooth logout animation
-  const handleLogoutAnimated = async () => {
-    const targets = [logoutRef.current, userLabelRef.current].filter(
-      Boolean
-    ) as Element[];
-
-    if (targets.length) {
-      await new Promise<void>((resolve) => {
-        gsap.to(targets, {
-          autoAlpha: 0,
-          y: -8,
-          duration: 0.2,
-          ease: "power2.in",
-          stagger: { each: 0.03, from: "end" },
-          onComplete: resolve,
-        });
-      });
-    }
-
-    await signOut({ callbackUrl: '/' });
-  };
+  const onEnter = () => tlRef.current?.play();
+  const onLeave = () => tlRef.current?.reverse();
 
   return (
     <nav className="top-5 flex flex-row items-center justify-between p-3 bg-[#A1CDD9] text-white shadow-xl rounded-full m-4">
@@ -126,66 +86,35 @@ const Navbar: React.FC = () => {
         className="w-50 cursor-pointer"
         onClick={() => (window.location.href = "/")}
       />
-
-      {/* Menu with Dropdown */}
-      <div className="relative group">
+      {/* Menu button */}
+      <div
+        className="relative group"
+        onMouseEnter={onEnter}
+        onMouseLeave={onLeave}
+      >
         <div className="flex items-center rounded-full bg-[#74B7C9] p-4 cursor-pointer select-none">
-          <Image
-            src="/navBar/menu_icon.svg"
-            alt="Menu Icon"
-            width={16}
-            height={16}
-            className="w-4 h-4 group-hover:rotate-90 group-hover:scale-120 transition-transform duration-300"
-          />
-        </div>
-
-        {/* Dropdown */}
-        <div
-          ref={dropdownRef}
-          className="absolute right-0 mt-2 w-56 rounded-xl bg-[#74B7C9] text-white shadow-lg overflow-hidden"
-        >
-          <ul className="flex flex-col divide-y divide-[#A1CDD9]">
-            {user ? (
-              <li
-                data-anim
-                ref={(el) => { userLabelRef.current = el; }}
-                className="px-4 py-2 hover:bg-[#A1CDD9] cursor-pointer"
-                onClick={() => (window.location.href = "/profile")}
-              >
-                User: {user.id}
-              </li>
-            ) : (
-              <li
-                data-anim
-                className="px-4 py-2 hover:bg-[#A1CDD9] cursor-pointer"
-              >
-                <a href="/signin">Sign In</a>
-              </li>
-            )}
-
-            {user && (
-              <li
-                data-anim
-                ref={(el) => { logoutRef.current = el; }}
-                className="px-4 py-2 hover:bg-[#A1CDD9] cursor-pointer"
-              >
-                <button onClick={handleLogoutAnimated}>Logout</button>
-              </li>
-            )}
-
-            <li
-              data-anim
-              className="px-4 py-2 hover:bg-[#A1CDD9] cursor-pointer"
-            >
-              Link 3
-            </li>
-            <li
-              data-anim
-              className="px-4 py-2 hover:bg-[#A1CDD9] cursor-pointer"
-            >
-              Link 4
-            </li>
-          </ul>
+          <div ref={containerRef} className={menuStyles.iconContainer}>
+            <div
+              ref={centerRef}
+              className={`${menuStyles.iconPart} ${menuStyles.partCenter}`}
+            ></div>
+            <div
+              ref={topRef}
+              className={`${menuStyles.iconPart} ${menuStyles.partTop}`}
+            ></div>
+            <div
+              ref={rightRef}
+              className={`${menuStyles.iconPart} ${menuStyles.partRight}`}
+            ></div>
+            <div
+              ref={bottomRef}
+              className={`${menuStyles.iconPart} ${menuStyles.partBottom}`}
+            ></div>
+            <div
+              ref={leftRef}
+              className={`${menuStyles.iconPart} ${menuStyles.partLeft}`}
+            ></div>
+          </div>
         </div>
       </div>
     </nav>
