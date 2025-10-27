@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import Image from "next/image";
 import { gsap } from "gsap";
 import styles from "./vibrate.module.css";
 import menuStyles from "./MenuButton.module.css";
 
 const Navbar: React.FC = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   // Refs for the menu button animation
   const containerRef = useRef<HTMLDivElement>(null);
   const centerRef = useRef<HTMLDivElement>(null);
@@ -59,8 +60,14 @@ const Navbar: React.FC = () => {
     };
   }, []);
 
-  const onEnter = () => tlRef.current?.play();
-  const onLeave = () => tlRef.current?.reverse();
+  const onEnter = () => {
+    tlRef.current?.play();
+    setIsMenuOpen(true);
+  };
+  const onLeave = () => {
+    tlRef.current?.reverse();
+    setIsMenuOpen(false);
+  };
 
   return (
     <nav className="top-5 flex flex-row items-center justify-between p-3 bg-[#A1CDD9] text-white shadow-xl rounded-full m-4">
@@ -116,6 +123,32 @@ const Navbar: React.FC = () => {
             ></div>
           </div>
         </div>
+        {isMenuOpen && (
+          <div className="absolute top-0 right-0 h-full flex items-center pr-16">
+            <ul className="flex space-x-6 text-sm font-medium">
+              <li>
+                <a href="#" className="hover:underline">
+                  Home
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:underline">
+                  About
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:underline">
+                  Services
+                </a>
+              </li>
+              <li>
+                <a href="#" className="hover:underline">
+                  Contact
+                </a>
+              </li>
+            </ul>
+          </div>
+        )}
       </div>
     </nav>
   );
