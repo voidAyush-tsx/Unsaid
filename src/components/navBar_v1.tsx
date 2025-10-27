@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from "react"; // Added useState
+import React, { useRef, useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { gsap } from "gsap";
 import styles from "./vibrate.module.css";
 import menuStyles from "./MenuButton.module.css";
@@ -20,6 +21,7 @@ const Navbar: React.FC = () => {
   const tlRef = useRef<gsap.core.Timeline | null>(null);
   const menuTlRef = useRef<gsap.core.Timeline | null>(null);
   const [menuOpen, setMenuOpen] = useState(false); // State to track menu open/close
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // State to track login status
 
   useEffect(() => {
     const refs = [
@@ -197,26 +199,46 @@ const Navbar: React.FC = () => {
           }`}
         >
           <ul className="flex flex-row space-x-8 text-base font-extrabold text-white whitespace-nowrap">
-            {["Connect", "Assessment", "About Us", "Support", "Blog", "Account"].map(
-              (item, index) => (
-                <li
-                  key={index}
-                  ref={(el) => {
-                    menuItemsRef.current[index] = el;
-                  }}
-                  className={menuOpen ? "cursor-pointer" : "cursor-default"}
+            {[
+              { label: "Connect", href: "/connect" },
+              { label: "Assessment", href: "/assessment" },
+              { label: "About Us", href: "/about" },
+              { label: "Support", href: "/support" },
+              { label: "Blog", href: "/blog" },
+            ].map((item, index) => (
+              <li
+                key={index}
+                ref={(el) => {
+                  menuItemsRef.current[index] = el;
+                }}
+                className={menuOpen ? "cursor-pointer" : "cursor-default"}
+              >
+                <Link
+                  href={menuOpen ? item.href : "#"}
+                  className={`font-unsaid text-xl ${
+                    menuOpen ? "hover:text-[#926247]" : "pointer-events-none"
+                  } inline-block transition-transform`}
                 >
-                  <a
-                    href={menuOpen ? "#" : undefined}
-                    className={`font-unsaid text-xl ${
-                      menuOpen ? "hover:text-[#926247]" : "pointer-events-none"
-                    } inline-block transition-transform`}
-                  >
-                    {item}
-                  </a>
-                </li>
-              )
-            )}
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+            {/* Conditional rendering for Account/Sign In */}
+            <li
+              ref={(el) => {
+                menuItemsRef.current[5] = el;
+              }}
+              className={menuOpen ? "cursor-pointer" : "cursor-default"}
+            >
+              <Link
+                href={isLoggedIn ? "/account" : "/signin"}
+                className={`font-unsaid text-xl ${
+                  menuOpen ? "hover:text-[#926247]" : "pointer-events-none"
+                } inline-block transition-transform`}
+              >
+                {isLoggedIn ? "Account" : "Sign In"}
+              </Link>
+            </li>
           </ul>
         </div>
       </div>
