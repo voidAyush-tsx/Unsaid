@@ -31,7 +31,14 @@ const Navbar_v2: React.FC = () => {
         style={{ fontSize: "18px" }}
         onClick={() => (window.location.href = "/about?scroll=allcounsellors")}
       >
-        Counsellor
+        Connect
+      </button>
+      <button
+        className="font-unsaid font-semibold cursor-pointer text-[#251404] hover:text-[#E48A39] px-4 py-2 transition-colors"
+        style={{ fontSize: "18px" }}
+        onClick={() => (window.location.href = "/assessment")}
+      >
+        Assessment
       </button>
       <button
         className="font-unsaid font-semibold cursor-pointer text-[#251404] hover:text-[#E48A39] px-4 py-2 transition-colors"
@@ -43,16 +50,9 @@ const Navbar_v2: React.FC = () => {
       <button
         className="font-unsaid font-semibold cursor-pointer text-[#251404] hover:text-[#E48A39] px-4 py-2 transition-colors"
         style={{ fontSize: "18px" }}
-        onClick={() => (window.location.href = "/contact")}
+        onClick={() => (window.location.href = "/about?scroll=allcounsellors")}
       >
-        Contact Us
-      </button>
-      <button
-        className="font-unsaid font-semibold cursor-pointer text-[#251404] hover:text-[#E48A39] px-4 py-2 transition-colors"
-        style={{ fontSize: "18px" }}
-        onClick={() => (window.location.href = "/assessment")}
-      >
-        Assessment
+        Counsellor
       </button>
     </div>
   );
@@ -64,6 +64,26 @@ const Navbar_v2: React.FC = () => {
       }`}
     >
       <NavItems />
+      <button
+        className="flex items-center justify-center bg-[#A1CDD9] px-6 py-3 gap-2 rounded-4xl hover:bg-[#E48A39] transition-colors cursor-pointer"
+        onClick={() =>
+          (window.location.href = "/get_in_touch?scroll=contact_counsellor")
+        }
+      >
+        <div
+          className="font-unsaid font-extrabold"
+          style={{ color: "#FFFFFF", fontSize: "18px" }}
+        >
+          Talk to a Counsellor
+        </div>
+        <Image
+          src="/talk_to_counsellor_logo.svg"
+          alt="Talk to Counsellor arrow"
+          width={24}
+          height={24}
+          className="w-6"
+        />
+      </button>
       <button
         className="flex items-center justify-center bg-[#A1CDD9] px-6 py-3 gap-2 rounded-4xl hover:bg-[#E48A39] transition-colors cursor-pointer"
         onClick={() =>

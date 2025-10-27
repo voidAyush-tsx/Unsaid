@@ -1,13 +1,12 @@
 "use client";
 
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState } from "react"; // Added useState
 import Image from "next/image";
 import { gsap } from "gsap";
 import styles from "./vibrate.module.css";
 import menuStyles from "./MenuButton.module.css";
 
 const Navbar: React.FC = () => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   // Refs for the menu button animation
   const containerRef = useRef<HTMLDivElement>(null);
   const centerRef = useRef<HTMLDivElement>(null);
@@ -20,6 +19,7 @@ const Navbar: React.FC = () => {
   const menuItemsRef = useRef<(HTMLLIElement | null)[]>([]);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
   const menuTlRef = useRef<gsap.core.Timeline | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false); // State to track menu open/close
 
   useEffect(() => {
     const refs = [
@@ -64,77 +64,78 @@ const Navbar: React.FC = () => {
     };
   }, []);
 
-  const onEnter = () => {
-    tlRef.current?.play();
-    setIsMenuOpen(true);
+  const toggleMenu = () => {
+    setMenuOpen((prev) => !prev);
 
-    // Kill any existing timeline
-    menuTlRef.current?.kill();
+    if (!menuOpen) {
+      tlRef.current?.play();
 
-    // Create smooth coordinated timeline
-    const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-    menuTlRef.current = tl;
+      // Kill any existing timeline
+      menuTlRef.current?.kill();
 
-    tl.to(menuRef.current, {
-      width: "calc(100% - 80px)",
-      opacity: 1,
-      duration: 0.8,
-    })
-      .to(
-        logoRef.current,
-        {
-          scale: 0.3,
-          opacity: 0,
-          duration: 0.8,
-        },
-        "<"
-      )
-      .fromTo(
-        menuItemsRef.current.filter((item): item is HTMLLIElement => item !== null),
-        { opacity: 0, x: 40 },
-        {
-          opacity: 1,
-          x: 0,
-          duration: 0.5,
-          stagger: 0.1,
-        },
-        "-=0.5"
-      );
-  };
-  const onLeave = () => {
-    tlRef.current?.reverse();
-    setIsMenuOpen(false);
+      // Create smooth coordinated timeline
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+      menuTlRef.current = tl;
 
-    // Kill any existing timeline
-    menuTlRef.current?.kill();
+      tl.to(menuRef.current, {
+        width: "calc(100% - 80px)",
+        opacity: 1,
+        duration: 0.8,
+      })
+        .to(
+          logoRef.current,
+          {
+            scale: 0.3,
+            opacity: 0,
+            duration: 0.8,
+          },
+          "<"
+        )
+        .fromTo(
+          menuItemsRef.current.filter((item): item is HTMLLIElement => item !== null),
+          { opacity: 0, x: 40 },
+          {
+            opacity: 1,
+            x: 0,
+            duration: 0.5,
+            stagger: 0.1,
+          },
+          "-=0.5"
+        );
+    } else {
+      tlRef.current?.reverse();
 
-    const tl = gsap.timeline({ defaults: { ease: "power3.in" } });
-    menuTlRef.current = tl;
+      // Kill any existing timeline
+      menuTlRef.current?.kill();
 
-    tl.to(menuItemsRef.current.filter((item): item is HTMLLIElement => item !== null), {
-      opacity: 0,
-      x: 40,
-      duration: 0.3,
-      stagger: 0.05,
-    })
-      .to(
-        menuRef.current,
-        {
-          width: 0,
-          opacity: 0,
-          duration: 0.3,
-        },
-        "-=0.15"
-      )
-      .to(
-        logoRef.current,
-        {
-          scale: 1,
-          opacity: 1,
-          duration: 0.3,
-        },
-        "<"
-      );
+      const tl = gsap.timeline({ defaults: { ease: "power3.in" } });
+      menuTlRef.current = tl;
+
+      tl.to(menuItemsRef.current.filter((item): item is HTMLLIElement => item !== null), {
+        opacity: 0,
+        x: 40,
+        duration: 0.3,
+        stagger: 0.05,
+      })
+        .to(
+          menuRef.current,
+          {
+            width: 0,
+            opacity: 0,
+            duration: 0.3,
+          },
+          "-=0.15"
+        )
+        .to(
+          logoRef.current,
+          {
+            scale: 1,
+            opacity: 1,
+            duration: 0.3,
+          },
+          "<"
+        );
+    }
   };
 
   return (
@@ -164,11 +165,7 @@ const Navbar: React.FC = () => {
       />
 
       {/* Menu button */}
-      <div
-        className="relative group"
-        onMouseEnter={onEnter}
-        onMouseLeave={onLeave}
-      >
+      <div className="relative group" onClick={toggleMenu}>
         <div className="flex items-center rounded-full bg-[#74B7C9] p-4 cursor-pointer select-none">
           <div ref={containerRef} className={menuStyles.iconContainer}>
             <div
@@ -195,43 +192,33 @@ const Navbar: React.FC = () => {
         </div>
         <div
           ref={menuRef}
-          className="absolute top-0 right-0 h-full bg-transparent rounded-full opacity-0 w-0 overflow-visible flex items-center justify-end pr-20 z-20"
+          className={`absolute top-0 right-0 h-full bg-transparent rounded-full opacity-0 w-0 overflow-visible flex items-center justify-end pr-20 z-20 ${
+            menuOpen ? "" : "pointer-events-none"
+          }`}
         >
-          <ul className="flex flex-row space-x-8 text-base font-medium text-white whitespace-nowrap">
-            <li ref={(el) => { menuItemsRef.current[0] = el; }}>
-              <a
-                href="#"
-                className="hover:underline hover:scale-110 inline-block transition-transform"
-              >
-                  Home
-                </a>
-              </li>
-            <li ref={(el) => { menuItemsRef.current[1] = el; }}>
-              <a
-                href="#"
-                className="hover:underline hover:scale-110 inline-block transition-transform"
-              >
-                  About
-                </a>
-              </li>
-            <li ref={(el) => { menuItemsRef.current[2] = el; }}>
-              <a
-                href="#"
-                className="hover:underline hover:scale-110 inline-block transition-transform"
-              >
-                  Services
-                </a>
-              </li>
-            <li ref={(el) => { menuItemsRef.current[3] = el; }}>
-              <a
-                href="#"
-                className="hover:underline hover:scale-110 inline-block transition-transform"
-              >
-                  Contact
-                </a>
-              </li>
-            </ul>
-          </div>
+          <ul className="flex flex-row space-x-8 text-base font-extrabold text-white whitespace-nowrap">
+            {["Connect", "Assessment", "About Us", "Support", "Blog", "Account"].map(
+              (item, index) => (
+                <li
+                  key={index}
+                  ref={(el) => {
+                    menuItemsRef.current[index] = el;
+                  }}
+                  className={menuOpen ? "cursor-pointer" : "cursor-default"}
+                >
+                  <a
+                    href={menuOpen ? "#" : undefined}
+                    className={`font-unsaid text-xl ${
+                      menuOpen ? "hover:text-[#926247]" : "pointer-events-none"
+                    } inline-block transition-transform`}
+                  >
+                    {item}
+                  </a>
+                </li>
+              )
+            )}
+          </ul>
+        </div>
       </div>
     </nav>
   );
