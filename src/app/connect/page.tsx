@@ -11,7 +11,7 @@ import Footer_v2 from "@/components/footer_v2";
 export default function Connect() {
   return (
     <div className="relative w-full flex flex-col items-center justify-center min-h-screen overflow-hidden m-0">
-      <div className="w-full z-50">
+      <div className="w-full min-h-20 z-50">
         <Navbar_v2 />
       </div>
       <div className="w-full">
