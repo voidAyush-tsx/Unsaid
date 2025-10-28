@@ -9,6 +9,7 @@ const EVENT = 'message';
 const ChatWidget: React.FC = () => {
   const { data: session } = useSession();
   const user = session?.user;
+
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<{ text: string; ts: number; sender?: string }[]>([]);
   const [input, setInput] = useState('');
@@ -18,6 +19,7 @@ const ChatWidget: React.FC = () => {
   const channelRef = useRef<Channel | null>(null);
   const messagesRef = useRef<HTMLDivElement | null>(null);
 
+  // Subscribe to a channel and set up event listeners
   const subscribeToChannel = async (name: string, idToken?: string) => {
     // cleanup existing
     if (pusherRef.current) {
@@ -91,16 +93,18 @@ const ChatWidget: React.FC = () => {
     setChannelName(name);
   };
 
-  // Auto-subscribe to public-chat when widget opens
+  // Auto-subscribе to public-chat when widget opens
   useEffect(() => {
-    if (open && !isSubscribed) {
+    if (session && user && open && !isSubscribed) {
       console.debug('[ChatWidget] auto-subscribing to public-chat');
       subscribeToChannel('public-chat');
     }
-  }, [open, isSubscribed]);
+  }, [session, user, open, isSubscribed]);
 
   // Listen for a global event to open the chat (used by pages like GetInTouchClient)
   useEffect(() => {
+    if (!session || !user) return;
+
     const handler = async (ev: Event) => {
       setOpen(true);
       const anyEv = ev as CustomEvent<Record<string, string | undefined>>;
@@ -125,8 +129,9 @@ const ChatWidget: React.FC = () => {
 
     window.addEventListener('open-chat', handler as EventListener);
     return () => window.removeEventListener('open-chat', handler as EventListener);
-  }, [user]);
+  }, [user, session]);
 
+  // Auto-scroll messages
   useEffect(() => {
     messagesRef.current?.scrollTo({ top: messagesRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages]);
@@ -149,6 +154,11 @@ const ChatWidget: React.FC = () => {
       console.error('sendMessage error', err);
     }
   };
+
+  // Don't render widget if user is not authenticated
+  if (!session || !user) {
+    return null;
+  }
 
   return (
     <div className="fixed bottom-6 right-6 z-50">

@@ -3,11 +3,14 @@
 import React, { useRef, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useSession, signOut } from "next-auth/react";
 import { gsap } from "gsap";
 import styles from "./vibrate.module.css";
 import menuStyles from "./MenuButton.module.css";
 
 const Navbar: React.FC = () => {
+  const { data: session } = useSession();
+
   // Refs for the menu button animation
   const containerRef = useRef<HTMLDivElement>(null);
   const centerRef = useRef<HTMLDivElement>(null);
@@ -21,7 +24,7 @@ const Navbar: React.FC = () => {
   const tlRef = useRef<gsap.core.Timeline | null>(null);
   const menuTlRef = useRef<gsap.core.Timeline | null>(null);
   const [menuOpen, setMenuOpen] = useState(false); // State to track menu open/close
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // State to track login status
+  const [accountDropdownOpen, setAccountDropdownOpen] = useState(false);
 
   useEffect(() => {
     const refs = [
@@ -67,7 +70,12 @@ const Navbar: React.FC = () => {
   }, []);
 
   const toggleMenu = () => {
-    setMenuOpen((prev) => !prev);
+    setMenuOpen((prev) => {
+      if (!prev) {
+        setAccountDropdownOpen(false); // Close dropdown when opening menu
+      }
+      return !prev;
+    });
 
     if (!menuOpen) {
       tlRef.current?.play();
@@ -223,22 +231,85 @@ const Navbar: React.FC = () => {
                 </Link>
               </li>
             ))}
-            {/* Conditional rendering for Account/Sign In */}
-            <li
-              ref={(el) => {
-                menuItemsRef.current[5] = el;
-              }}
-              className={menuOpen ? "cursor-pointer" : "cursor-default"}
-            >
-              <Link
-                href={isLoggedIn ? "/account" : "/signin"}
-                className={`font-unsaid text-xl ${
-                  menuOpen ? "hover:text-[#926247]" : "pointer-events-none"
-                } inline-block transition-transform`}
+            {/* Conditional rendering for Account/Sign In based on session */}
+            {session ? (
+              <li
+                ref={(el) => {
+                  menuItemsRef.current[5] = el;
+                }}
+                className={`${
+                  menuOpen ? "cursor-pointer" : "cursor-default"
+                } relative`}
+                onClick={(e) => {
+                  if (menuOpen) {
+                    e.stopPropagation();
+                    setAccountDropdownOpen((prev) => !prev);
+                  }
+                }}
               >
-                {isLoggedIn ? "Account" : "Sign In"}
-              </Link>
-            </li>
+                <div
+                  className={`font-unsaid text-xl flex items-center ${
+                    menuOpen ? "hover:text-[#926247]" : "pointer-events-none"
+                  } transition-transform`}
+                >
+                  Account
+                  <svg
+                    className={`w-4 h-4 ml-1 transition-transform ${
+                      accountDropdownOpen ? "rotate-180" : ""
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </div>
+                <ul
+                  className={`absolute top-full left-0 bg-[#A1CDD9] rounded-md shadow-lg py-1 z-30 ${
+                    accountDropdownOpen ? "block" : "hidden"
+                  }`}
+                >
+                  <li>
+                    <Link
+                      href="/account"
+                      className="block px-4 py-2 font-unsaid text-lg hover:bg-[#74B7C9]"
+                    >
+                      Profile
+                    </Link>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => signOut()}
+                      className="block w-full text-left px-4 py-2 font-unsaid text-lg hover:bg-[#74B7C9]"
+                    >
+                      Log Out
+                    </button>
+                  </li>
+                </ul>
+              </li>
+            ) : (
+              <li
+                ref={(el) => {
+                  menuItemsRef.current[5] = el;
+                }}
+                className={menuOpen ? "cursor-pointer" : "cursor-default"}
+              >
+                <Link
+                  href={"/signin"}
+                  className={`font-unsaid text-xl ${
+                    menuOpen ? "hover:text-[#926247]" : "pointer-events-none"
+                  } inline-block transition-transform`}
+                >
+                  Sign In
+                </Link>
+              </li>
+            )}
           </ul>
         </div>
       </div>
