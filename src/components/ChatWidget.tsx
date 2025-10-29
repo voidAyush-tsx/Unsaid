@@ -185,7 +185,7 @@ const ChatWidget: React.FC = () => {
       `}</style>
 
       <div
-        className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-300 ease-in-out ${
+        className={`fixed inset-0 bg-[#000000cd] bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-300 ease-in-out ${
           open ? "opacity-100" : "opacity-0 pointer-events-none"
         }`}
       >
