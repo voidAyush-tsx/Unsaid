@@ -1,105 +1,151 @@
 "use client";
 
-import React, { useEffect, useRef } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import Image from "next/image";
-import gsap from "gsap";
-import { useSession, signOut } from 'next-auth/react';
+import Link from "next/link";
+import { useSession, signOut } from "next-auth/react";
+import { gsap } from "gsap";
 import styles from "./vibrate.module.css";
+import menuStyles from "./MenuButton.module.css";
 
 const Navbar: React.FC = () => {
   const { data: session } = useSession();
-  const user = session?.user;
 
-  // Refs
-  const dropdownRef = useRef<HTMLDivElement | null>(null);
-  const userLabelRef = useRef<HTMLLIElement | null>(null);
-  const logoutRef = useRef<HTMLLIElement | null>(null);
+  // Refs for the menu button animation
+  const containerRef = useRef<HTMLDivElement>(null);
+  const centerRef = useRef<HTMLDivElement>(null);
+  const topRef = useRef<HTMLDivElement>(null);
+  const rightRef = useRef<HTMLDivElement>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const leftRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const logoRef = useRef<HTMLImageElement>(null);
+  const menuItemsRef = useRef<(HTMLLIElement | null)[]>([]);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
+  const menuTlRef = useRef<gsap.core.Timeline | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false); // State to track menu open/close
+  const [accountDropdownOpen, setAccountDropdownOpen] = useState(false);
 
   useEffect(() => {
-    const dropdown = dropdownRef.current;
-    if (!dropdown) return;
+    const refs = [
+      containerRef.current,
+      centerRef.current,
+      topRef.current,
+      rightRef.current,
+      bottomRef.current,
+      leftRef.current,
+    ];
+    if (refs.some((ref) => !ref)) return;
 
-    gsap.set(dropdown, { autoAlpha: 0, y: -10, pointerEvents: "none" });
+    const parts = [
+      topRef.current,
+      rightRef.current,
+      bottomRef.current,
+      leftRef.current,
+    ];
 
-    const items = Array.from(
-      dropdown.querySelectorAll<HTMLLIElement>("li[data-anim]")
-    );
+    gsap.set(centerRef.current, { scale: 0, transformOrigin: "center center" });
 
-    tlRef.current = gsap.timeline({
-      paused: true,
-      defaults: { ease: "power3.out" },
-      onStart: () => { gsap.set(dropdown, { pointerEvents: "auto" }); },
-      onReverseComplete: () => {
-        gsap.set(dropdown, { pointerEvents: "none" });
-      },
-    });
+    gsap.set(parts, { borderRadius: "50%" });
+    // Adjust initial positions for the dot animation to form a square
+    gsap.set(topRef.current, { x: -6, y: -6 });
+    gsap.set(rightRef.current, { x: 6, y: -6 });
+    gsap.set(bottomRef.current, { x: 6, y: 6 });
+    gsap.set(leftRef.current, { x: -6, y: 6 });
 
-    tlRef.current
-      .to(dropdown, { autoAlpha: 1, y: 0, duration: 0.25 }, 0)
-      .fromTo(
-        items,
-        { autoAlpha: 0, y: -8 },
-        { autoAlpha: 1, y: 0, duration: 0.28, stagger: 0.07 },
-        0.05
-      );
-
-    const parent = dropdown.parentElement;
-    if (!parent) return;
-
-    const open = () => tlRef.current?.play();
-    const close = () => tlRef.current?.reverse();
-
-    parent.addEventListener("mouseenter", open);
-    parent.addEventListener("mouseleave", close);
+    tlRef.current = gsap
+      .timeline({
+        paused: true,
+        defaults: { duration: 0.3, ease: "power2.inOut" },
+      })
+      .to(containerRef.current, { rotate: 45 })
+      .to(parts, { x: 0, y: 0, borderRadius: "2.5px" }, "<")
+      .to([topRef.current, bottomRef.current], { scaleY: 4 }, "<")
+      .to([leftRef.current, rightRef.current], { scaleX: 4 }, "<")
+      .to(centerRef.current, { scale: 1 }, "<");
 
     return () => {
-      parent.removeEventListener("mouseenter", open);
-      parent.removeEventListener("mouseleave", close);
       tlRef.current?.kill();
     };
   }, []);
 
-  // Animate user section when signing in
-  useEffect(() => {
-    if (user && (userLabelRef.current || logoutRef.current)) {
-      const targets = [userLabelRef.current, logoutRef.current].filter(
-        Boolean
-      ) as Element[];
-      gsap.fromTo(
-        targets,
-        { autoAlpha: 0, y: -8 },
-        {
-          autoAlpha: 1,
-          y: 0,
-          duration: 0.28,
-          ease: "power2.out",
-          stagger: 0.05,
-        }
-      );
+  const toggleMenu = () => {
+    setMenuOpen((prev) => {
+      if (!prev) {
+        setAccountDropdownOpen(false); // Close dropdown when opening menu
+      }
+      return !prev;
+    });
+
+    if (!menuOpen) {
+      tlRef.current?.play();
+
+      // Kill any existing timeline
+      menuTlRef.current?.kill();
+
+      // Create smooth coordinated timeline
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+      menuTlRef.current = tl;
+
+      tl.to(menuRef.current, {
+        width: "calc(100% - 80px)",
+        opacity: 1,
+        duration: 0.8,
+      })
+        .to(
+          logoRef.current,
+          {
+            scale: 0.3,
+            opacity: 0,
+            duration: 0.8,
+          },
+          "<"
+        )
+        .fromTo(
+          menuItemsRef.current.filter((item): item is HTMLLIElement => item !== null),
+          { opacity: 0, x: 40 },
+          {
+            opacity: 1,
+            x: 0,
+            duration: 0.5,
+            stagger: 0.1,
+          },
+          "-=0.5"
+        );
+    } else {
+      tlRef.current?.reverse();
+
+      // Kill any existing timeline
+      menuTlRef.current?.kill();
+
+      const tl = gsap.timeline({ defaults: { ease: "power3.in" } });
+      menuTlRef.current = tl;
+
+      tl.to(menuItemsRef.current.filter((item): item is HTMLLIElement => item !== null), {
+        opacity: 0,
+        x: 40,
+        duration: 0.3,
+        stagger: 0.05,
+      })
+        .to(
+          menuRef.current,
+          {
+            width: 0,
+            opacity: 0,
+            duration: 0.3,
+          },
+          "-=0.15"
+        )
+        .to(
+          logoRef.current,
+          {
+            scale: 1,
+            opacity: 1,
+            duration: 0.3,
+          },
+          "<"
+        );
     }
-  }, [user]);
-
-  // Smooth logout animation
-  const handleLogoutAnimated = async () => {
-    const targets = [logoutRef.current, userLabelRef.current].filter(
-      Boolean
-    ) as Element[];
-
-    if (targets.length) {
-      await new Promise<void>((resolve) => {
-        gsap.to(targets, {
-          autoAlpha: 0,
-          y: -8,
-          duration: 0.2,
-          ease: "power2.in",
-          stagger: { each: 0.03, from: "end" },
-          onComplete: resolve,
-        });
-      });
-    }
-
-    await signOut({ callbackUrl: '/' });
   };
 
   return (
@@ -119,72 +165,151 @@ const Navbar: React.FC = () => {
 
       {/* Logo */}
       <Image
+        ref={logoRef}
         src="/navBar/navBar_logo.svg"
         alt="Logo"
         width={200}
         height={50}
-        className="w-50 cursor-pointer"
+        className="w-50 cursor-pointer absolute left-1/2 transform -translate-x-1/2 z-10"
         onClick={() => (window.location.href = "/")}
       />
 
-      {/* Menu with Dropdown */}
-      <div className="relative group">
+      {/* Menu button */}
+      <div className="relative group" onClick={toggleMenu}>
         <div className="flex items-center rounded-full bg-[#74B7C9] p-4 cursor-pointer select-none">
-          <Image
-            src="/navBar/menu_icon.svg"
-            alt="Menu Icon"
-            width={16}
-            height={16}
-            className="w-4 h-4 group-hover:rotate-90 group-hover:scale-120 transition-transform duration-300"
-          />
+          <div ref={containerRef} className={menuStyles.iconContainer}>
+            <div
+              ref={centerRef}
+              className={`${menuStyles.iconPart} ${menuStyles.partCenter}`}
+            ></div>
+            <div
+              ref={topRef}
+              className={`${menuStyles.iconPart} ${menuStyles.partTop}`}
+            ></div>
+            <div
+              ref={rightRef}
+              className={`${menuStyles.iconPart} ${menuStyles.partRight}`}
+            ></div>
+            <div
+              ref={bottomRef}
+              className={`${menuStyles.iconPart} ${menuStyles.partBottom}`}
+            ></div>
+            <div
+              ref={leftRef}
+              className={`${menuStyles.iconPart} ${menuStyles.partLeft}`}
+            ></div>
+          </div>
         </div>
-
-        {/* Dropdown */}
         <div
-          ref={dropdownRef}
-          className="absolute right-0 mt-2 w-56 rounded-xl bg-[#74B7C9] text-white shadow-lg overflow-hidden"
+          ref={menuRef}
+          className={`absolute top-0 right-0 h-full bg-transparent rounded-full opacity-0 w-0 overflow-visible flex items-center justify-end pr-20 z-20 ${
+            menuOpen ? "" : "pointer-events-none"
+          }`}
         >
-          <ul className="flex flex-col divide-y divide-[#A1CDD9]">
-            {user ? (
+          <ul className="flex flex-row space-x-8 text-base font-extrabold text-white whitespace-nowrap">
+            {[
+              { label: "Connect", href: "/connect" },
+              { label: "Assessment", href: "/assessment" },
+              { label: "About Us", href: "/about" },
+              { label: "Support", href: "/support" },
+              { label: "Blog", href: "/blog" },
+            ].map((item, index) => (
               <li
-                data-anim
-                ref={(el) => { userLabelRef.current = el; }}
-                className="px-4 py-2 hover:bg-[#A1CDD9] cursor-pointer"
-                onClick={() => (window.location.href = "/profile")}
+                key={index}
+                ref={(el) => {
+                  menuItemsRef.current[index] = el;
+                }}
+                className={menuOpen ? "cursor-pointer" : "cursor-default"}
               >
-                User: {user.id}
+                <Link
+                  href={menuOpen ? item.href : "#"}
+                  className={`font-unsaid text-xl ${
+                    menuOpen ? "hover:text-[#926247]" : "pointer-events-none"
+                  } inline-block transition-transform`}
+                >
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+            {/* Conditional rendering for Account/Sign In based on session */}
+            {session ? (
+              <li
+                ref={(el) => {
+                  menuItemsRef.current[5] = el;
+                }}
+                className={`${
+                  menuOpen ? "cursor-pointer" : "cursor-default"
+                } relative`}
+                onClick={(e) => {
+                  if (menuOpen) {
+                    e.stopPropagation();
+                    setAccountDropdownOpen((prev) => !prev);
+                  }
+                }}
+              >
+                <div
+                  className={`font-unsaid text-xl flex items-center ${
+                    menuOpen ? "hover:text-[#926247]" : "pointer-events-none"
+                  } transition-transform`}
+                >
+                  Account
+                  <svg
+                    className={`w-4 h-4 ml-1 transition-transform ${
+                      accountDropdownOpen ? "rotate-180" : ""
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </div>
+                <ul
+                  className={`absolute top-full left-0 mt-2 bg-[#A1CDD9] rounded-md shadow-lg z-30 ${
+                    accountDropdownOpen ? "block" : "hidden"
+                  }`}
+                >
+                  <li>
+                    <Link
+                      href="/account"
+                      className="block px-4 py-2 font-unsaid text-lg hover:bg-[#74B7C9] bg-[#99c3ce] rounded-t-md"
+                    >
+                      Profile
+                    </Link>
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => signOut()}
+                      className="block w-full text-left px-4 py-2 font-unsaid text-lg hover:bg-[#74B7C9] bg-[#99c3ce] rounded-b-md"
+                    >
+                      Log Out
+                    </button>
+                  </li>
+                </ul>
               </li>
             ) : (
               <li
-                data-anim
-                className="px-4 py-2 hover:bg-[#A1CDD9] cursor-pointer"
+                ref={(el) => {
+                  menuItemsRef.current[5] = el;
+                }}
+                className={menuOpen ? "cursor-pointer" : "cursor-default"}
               >
-                <a href="/signin">Sign In</a>
+                <Link
+                  href={"/signin"}
+                  className={`font-unsaid text-xl ${
+                    menuOpen ? "hover:text-[#926247]" : "pointer-events-none"
+                  } inline-block transition-transform`}
+                >
+                  Sign In
+                </Link>
               </li>
             )}
-
-            {user && (
-              <li
-                data-anim
-                ref={(el) => { logoutRef.current = el; }}
-                className="px-4 py-2 hover:bg-[#A1CDD9] cursor-pointer"
-              >
-                <button onClick={handleLogoutAnimated}>Logout</button>
-              </li>
-            )}
-
-            <li
-              data-anim
-              className="px-4 py-2 hover:bg-[#A1CDD9] cursor-pointer"
-            >
-              Link 3
-            </li>
-            <li
-              data-anim
-              className="px-4 py-2 hover:bg-[#A1CDD9] cursor-pointer"
-            >
-              Link 4
-            </li>
           </ul>
         </div>
       </div>
