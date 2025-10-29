@@ -271,14 +271,14 @@ const Navbar: React.FC = () => {
                   </svg>
                 </div>
                 <ul
-                  className={`absolute top-full left-0 bg-[#A1CDD9] rounded-md shadow-lg py-1 z-30 ${
+                  className={`absolute top-full left-0 mt-2 bg-[#A1CDD9] rounded-md shadow-lg z-30 ${
                     accountDropdownOpen ? "block" : "hidden"
                   }`}
                 >
                   <li>
                     <Link
                       href="/account"
-                      className="block px-4 py-2 font-unsaid text-lg hover:bg-[#74B7C9]"
+                      className="block px-4 py-2 font-unsaid text-lg hover:bg-[#74B7C9] bg-[#99c3ce] rounded-t-md"
                     >
                       Profile
                     </Link>
@@ -286,7 +286,7 @@ const Navbar: React.FC = () => {
                   <li>
                     <button
                       onClick={() => signOut()}
-                      className="block w-full text-left px-4 py-2 font-unsaid text-lg hover:bg-[#74B7C9]"
+                      className="block w-full text-left px-4 py-2 font-unsaid text-lg hover:bg-[#74B7C9] bg-[#99c3ce] rounded-b-md"
                     >
                       Log Out
                     </button>
