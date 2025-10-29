@@ -19,7 +19,6 @@ const ChatWidget: React.FC = () => {
   const channelRef = useRef<Channel | null>(null);
   const messagesRef = useRef<HTMLDivElement | null>(null);
 
-  // Subscribe to a channel and set up event listeners
   const subscribeToChannel = async (name: string, idToken?: string) => {
     // cleanup existing
     if (pusherRef.current) {
@@ -34,13 +33,7 @@ const ChatWidget: React.FC = () => {
     pusherRef.current = new Pusher(process.env.NEXT_PUBLIC_PUSHER_KEY || '', {
       cluster: process.env.NEXT_PUBLIC_PUSHER_CLUSTER || '',
       authEndpoint: '/api/pusher/auth',
-  // Always provide an `auth` object (even if empty). Some pusher-js internals
-  // check properties on the auth/options object using the `in` operator,
-  // which throws if auth is `undefined`. Providing an object avoids that.
-  auth: { ...(idToken ? { headers: { Authorization: `Bearer ${idToken}` } } : {}) },
-      // Provide a custom authorizer so we can include credentials (cookies)
-      // when the browser calls the auth endpoint. This allows NextAuth session
-      // cookies to be sent and private channel auth to succeed.
+      auth: { ...(idToken ? { headers: { Authorization: `Bearer ${idToken}` } } : {}) },
       authorizer: (channel): ReturnType<ChannelAuthorizerGenerator> => {
         return {
           authorize: (socketId: string, callback: ChannelAuthorizationCallback) => {
@@ -68,7 +61,7 @@ const ChatWidget: React.FC = () => {
     });
 
     pusherRef.current.connection.bind('connected', () => console.debug('[ChatWidget] pusher connected'));
-  pusherRef.current.connection.bind('error', (err: unknown) => console.error('[ChatWidget] pusher connection error', err));
+    pusherRef.current.connection.bind('error', (err: unknown) => console.error('[ChatWidget] pusher connection error', err));
 
     const channel = pusherRef.current.subscribe(name);
     channel.bind('pusher:subscription_succeeded', () => {
@@ -93,7 +86,6 @@ const ChatWidget: React.FC = () => {
     setChannelName(name);
   };
 
-  // Auto-subscribе to public-chat when widget opens
   useEffect(() => {
     if (session && user && open && !isSubscribed) {
       console.debug('[ChatWidget] auto-subscribing to public-chat');
@@ -131,7 +123,6 @@ const ChatWidget: React.FC = () => {
     return () => window.removeEventListener('open-chat', handler as EventListener);
   }, [user, session]);
 
-  // Auto-scroll messages
   useEffect(() => {
     messagesRef.current?.scrollTo({ top: messagesRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages]);
@@ -155,49 +146,114 @@ const ChatWidget: React.FC = () => {
     }
   };
 
+  const isOwnMessage = (sender?: string) => {
+    if (!sender) return false;
+    return sender === user?.email || sender === user?.id;
+  };
+
   // Don't render widget if user is not authenticated
   if (!session || !user) {
     return null;
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
-      <div className="flex flex-col items-end">
-        {open && (
-          <div className="w-80 h-96 bg-[var(--background)] border border-gray-200 rounded-lg shadow-lg flex flex-col overflow-hidden">
-            <div className="px-3 py-2 border-b flex items-center justify-between">
-              <div className="font-unsaid font-semibold">Live Chat</div>
-              <button onClick={() => setOpen(false)} className="text-sm">Close</button>
-            </div>
-            <div ref={messagesRef} className="flex-1 p-2 overflow-auto">
-              {messages.map((m, i) => (
-                <div key={i} className="mb-2">
-                  <div className="text-sm text-gray-700">{m.sender ? `${m.sender}: ` : ''}{m.text}</div>
-                </div>
-              ))}
-            </div>
-            <div className="px-2 py-2 border-t flex gap-2">
-              <input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                className="flex-1 px-3 py-2 rounded-md border bg-transparent text-[var(--foreground)]"
-                placeholder="Type a message..."
-                onKeyDown={(e) => { if (e.key === 'Enter') sendMessage(); }}
-              />
-              <button onClick={sendMessage} className="bg-[#A1CDD9] px-3 py-2 rounded-md text-white">Send</button>
-            </div>
-          </div>
-        )}
+    <>
+      {/* Global styles for custom scrollbar */}
+      <style jsx>{`
+        /* Custom Scrollbar for WebKit browsers (Chrome, Edge, Safari) */
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: #f7f4f2;
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #a1cdd9;
+          border-radius: 10px;
+          border: 2px solid #f7f4f2;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: #7db7c7;
+        }
 
+        /* For Firefox */
+        .custom-scrollbar {
+          scrollbar-width: thin;
+          scrollbar-color: #a1cdd9 #f7f4f2;
+        }
+      `}</style>
+
+      <div
+        className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-300 ease-in-out ${
+          open ? "opacity-100" : "opacity-0 pointer-events-none"
+        }`}
+      >
+        <div
+          className={`w-[500px] h-[600px] bg-[#F7F4F2] border-4 border-[#C6C3C2] rounded-3xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300 ease-in-out ${
+            open ? "scale-100 opacity-100" : "scale-95 opacity-0"
+          }`}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 pb-2">
+            <div className="text-2xl font-extrabold text-[#736B66] cursor-default">Live Chat</div>
+            <button
+              onClick={() => setOpen(false)}
+              className="text-3xl text-gray-500 hover:text-gray-700 leading-none w-8 h-8 flex items-center justify-center cursor-pointer"
+            >
+              &times;
+            </button>
+          </div>
+
+          {/* Messages */}
+          <div ref={messagesRef} className="flex-1 overflow-y-auto px-4 py-2 space-y-4 custom-scrollbar">
+            {messages.map((m, i) => (
+              <div key={i} className={`flex ${isOwnMessage(m.sender) ? "justify-end" : "justify-start"}`}>
+                <div
+                  className={`max-w-[60%] px-6 py-3 rounded-xl ${
+                    isOwnMessage(m.sender)
+                      ? "bg-[#A1CDD9] text-white text-xl font-unsaid font-bold border border-[#F4A258]"
+                      : "bg-white text-[#736B66] text-xl font-unsaid font-bold border border-[#F4A258]"
+                  }`}
+                >
+                  <div className="text-base leading-relaxed">{m.text}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Input */}
+          <div className="bg-[#FBFAF9] border-t border-[#C4B5A0] p-3 flex items-center justify-between">
+            <input
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              className="flex-1 bg-transparent text-[#736B66] font-semibold outline-none ml-3 text-xl placeholder-[#B9B5B3]"
+              placeholder="Type your message..."
+              onKeyDown={(e) => {
+                if (e.key === "Enter") sendMessage();
+              }}
+            />
+            <button
+              onClick={sendMessage}
+              className="bg-[#F4A258] hover:bg-[#DC924F] text-xl text-white font-extrabold px-8 py-2 rounded-3xl cursor-pointer shadow-md transform active:shadow-none active:scale-95 transition-all duration-75 ease-out"
+            >
+              Send
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Toggle Button */}
+      <div className="fixed bottom-6 right-6 z-40">
         <button
           onClick={() => setOpen((s) => !s)}
-          className="w-14 h-14 rounded-full bg-[#A1CDD9] flex items-center justify-center shadow-lg text-white font-bold"
-          aria-label="Open chat"
+          className="w-16 h-16 rounded-full bg-[#9DCDDC] hover:bg-[#8BBDCC] flex items-center justify-center shadow-xl text-2xl transition-all"
+          aria-label="Toggle chat"
         >
-          {open ? '×' : '💬'}
+          💬
         </button>
       </div>
-    </div>
+    </>
   );
 };
 
