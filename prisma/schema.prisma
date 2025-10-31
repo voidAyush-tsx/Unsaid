@@ -15,10 +15,16 @@ model User {
   emailVerified DateTime?
   image         String?
   role          Role      @default(USER)
+  lastActive    DateTime? // Track online/offline status
   accounts      Account[]
   sessions      Session[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
+  
+  // Assignments where this user is the patient
+  assignmentsAsPatient Assignment[] @relation("PatientAssignments")
+  // Assignments where this user is the counsellor
+  assignmentsAsCounsellor Assignment[] @relation("CounsellorAssignments")
 }
 
 model Account {
@@ -61,4 +67,19 @@ enum Role {
   ADMIN
   COUNSELLOR
   USER
+}
+
+model Assignment {
+  id            String   @id @default(cuid())
+  patientId     String
+  counsellorId  String
+  assignedAt    DateTime @default(now())
+  isActive      Boolean  @default(true)
+  
+  patient       User     @relation("PatientAssignments", fields: [patientId], references: [id], onDelete: Cascade)
+  counsellor    User     @relation("CounsellorAssignments", fields: [counsellorId], references: [id], onDelete: Cascade)
+  
+  @@unique([patientId, counsellorId])
+  @@index([patientId])
+  @@index([counsellorId])
 }

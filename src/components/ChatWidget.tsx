@@ -15,6 +15,7 @@ const ChatWidget: React.FC = () => {
   const [input, setInput] = useState('');
   const [channelName, setChannelName] = useState('public-chat');
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const [assignedCounsellor, setAssignedCounsellor] = useState<{ id: string; name?: string; email?: string } | null>(null);
   const pusherRef = useRef<Pusher | null>(null);
   const channelRef = useRef<Channel | null>(null);
   const messagesRef = useRef<HTMLDivElement | null>(null);
@@ -86,14 +87,66 @@ const ChatWidget: React.FC = () => {
     setChannelName(name);
   };
 
+  // Fetch assigned counsellor on mount (for patients)
+  useEffect(() => {
+    if (!session || !user || user.role !== 'USER') return;
+
+    const fetchAssignment = async () => {
+      try {
+        const res = await fetch('/api/assignments');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.assignment?.counsellor) {
+            setAssignedCounsellor(data.assignment.counsellor);
+            console.debug('[ChatWidget] Assigned counsellor:', data.assignment.counsellor);
+          }
+        }
+      } catch (err) {
+        console.error('[ChatWidget] Failed to fetch assignment:', err);
+      }
+    };
+
+    fetchAssignment();
+  }, [session, user]);
+
+  // Activity heartbeat - update lastActive every 2 minutes
+  useEffect(() => {
+    if (!session || !user) return;
+
+    const updateActivity = async () => {
+      try {
+        await fetch('/api/activity', { method: 'POST' });
+      } catch (err) {
+        console.debug('[ChatWidget] Activity update failed:', err);
+      }
+    };
+
+    // Initial update
+    updateActivity();
+
+    // Update every 2 minutes
+    const interval = setInterval(updateActivity, 2 * 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, [session, user]);
+
   useEffect(() => {
     if (session && user && open && !isSubscribed) {
-      console.debug('[ChatWidget] auto-subscribing to public-chat');
-      subscribeToChannel('public-chat');
+      console.debug('[ChatWidget] auto-subscribing to channel');
+      
+      // If patient with assigned counsellor, use private channel
+      if (user.role === 'USER' && assignedCounsellor) {
+        const privateChannel = `private-chat-${assignedCounsellor.id}-${user.id}`;
+        console.debug('[ChatWidget] Using private channel with assigned counsellor:', privateChannel);
+        subscribeToChannel(privateChannel);
+      } else {
+        // Otherwise use public chat
+        subscribeToChannel('public-chat');
+      }
     }
-  }, [session, user, open, isSubscribed]);
+  }, [session, user, open, isSubscribed, assignedCounsellor]);
 
-  // Listen for a global event to open the chat (used by pages like GetInTouchClient)
+  // Listen for a global event to open the chat (used by counsellor/patient dashboards)
   useEffect(() => {
     if (!session || !user) return;
 
@@ -101,13 +154,24 @@ const ChatWidget: React.FC = () => {
       setOpen(true);
       const anyEv = ev as CustomEvent<Record<string, string | undefined>>;
       const counsellorId = anyEv?.detail?.counsellorId;
+      const patientId = anyEv?.detail?.patientId;
 
       let name = 'public-chat';
       try {
+        // If counsellor opening chat with patient
+        if (user.role === 'COUNSELLOR' && patientId) {
+          name = `private-chat-${user.id}-${patientId}`;
+          console.debug('[ChatWidget] Counsellor opening chat with patient:', name);
+          await subscribeToChannel(name);
+          return;
+        }
+
+        // If patient opening chat with counsellor (or assigned counsellor)
         if (counsellorId) {
           const patientUid = user?.id;
           if (patientUid) {
             name = `private-chat-${counsellorId}-${patientUid}`;
+            console.debug('[ChatWidget] Patient opening chat with counsellor:', name);
           }
           await subscribeToChannel(name);
           return;
@@ -196,7 +260,17 @@ const ChatWidget: React.FC = () => {
         >
           {/* Header */}
           <div className="flex items-center justify-between p-4 pb-2">
-            <div className="text-2xl font-extrabold text-[#736B66] cursor-default">Live Chat</div>
+            <div className="flex flex-col">
+              <div className="text-2xl font-extrabold text-[#736B66] cursor-default">Live Chat</div>
+              {user.role === 'USER' && assignedCounsellor && (
+                <div className="text-sm text-gray-600">
+                  With: {assignedCounsellor.name || assignedCounsellor.email}
+                </div>
+              )}
+              {user.role === 'COUNSELLOR' && channelName.startsWith('private-') && (
+                <div className="text-sm text-gray-600">Private conversation</div>
+              )}
+            </div>
             <button
               onClick={() => setOpen(false)}
               className="text-3xl text-gray-500 hover:text-gray-700 leading-none w-8 h-8 flex items-center justify-center cursor-pointer"

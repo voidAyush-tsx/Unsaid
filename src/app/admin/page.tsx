@@ -1,27 +1,60 @@
-import React from 'react';
-import { getServerSession } from 'next-auth/next';
-import { redirect } from 'next/navigation';
-import { authOptions } from '@/lib/auth';
+'use client';
 
+import React, { useState } from 'react';
 import AdminUserList from '../../components/AdminUserList';
+import AdminAssignments from '../../components/AdminAssignments';
 
-export const metadata = {
-  title: 'Admin - Users'
-};
+type Tab = 'users' | 'assignments';
 
-export default async function AdminPage() {
-  const session = await getServerSession(authOptions);
-  if (!session || session.user?.role !== 'ADMIN') {
-    // not authorized
-    redirect('/');
-  }
+export default function AdminPage() {
+  const [activeTab, setActiveTab] = useState<Tab>('assignments');
 
   return (
     <main className="p-8">
-      <h1 className="text-2xl font-semibold mb-4">Admin: Manage Users</h1>
-      <p className="mb-6">From here you can view, change roles and delete users.</p>
-  {/* Client component handles fetching and actions */}
-      <AdminUserList />
+      <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
+
+      {/* Tabs */}
+      <div className="flex border-b mb-6">
+        <button
+          onClick={() => setActiveTab('assignments')}
+          className={`px-6 py-3 font-semibold transition-colors ${
+            activeTab === 'assignments'
+              ? 'border-b-2 border-blue-600 text-blue-600'
+              : 'text-gray-600 hover:text-gray-800'
+          }`}
+        >
+          Assignments & Activity
+        </button>
+        <button
+          onClick={() => setActiveTab('users')}
+          className={`px-6 py-3 font-semibold transition-colors ${
+            activeTab === 'users'
+              ? 'border-b-2 border-blue-600 text-blue-600'
+              : 'text-gray-600 hover:text-gray-800'
+          }`}
+        >
+          Manage Users
+        </button>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'assignments' && (
+        <div>
+          <p className="mb-6 text-gray-600">
+            View and manage counsellor-patient assignments. Monitor online/offline status in real-time.
+          </p>
+          <AdminAssignments />
+        </div>
+      )}
+
+      {activeTab === 'users' && (
+        <div>
+          <p className="mb-6 text-gray-600">
+            View, create, edit, and delete users. Change user roles and manage authentication.
+          </p>
+          <AdminUserList />
+        </div>
+      )}
     </main>
   );
 }
