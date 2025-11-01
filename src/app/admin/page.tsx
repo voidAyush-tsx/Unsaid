@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import AdminUserList from '../../components/AdminUserList';
 import AdminAssignments from '../../components/AdminAssignments';
+import ActivityTester from '../../components/ActivityTester';
 
 type Tab = 'users' | 'assignments';
 
@@ -43,6 +44,12 @@ export default function AdminPage() {
           <p className="mb-6 text-gray-600">
             View and manage counsellor-patient assignments. Monitor online/offline status in real-time.
           </p>
+          
+          {/* Activity Tester - for debugging */}
+          <div className="mb-6">
+            <ActivityTester />
+          </div>
+          
           <AdminAssignments />
         </div>
       )}

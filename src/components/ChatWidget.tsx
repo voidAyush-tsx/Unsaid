@@ -1,14 +1,16 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import Pusher, { Channel, ChannelAuthorizerGenerator, ChannelAuthorizationCallback } from 'pusher-js';
 import { useSession } from 'next-auth/react';
+import { usePathname } from 'next/navigation';
 
 const EVENT = 'message';
 
 const ChatWidget: React.FC = () => {
   const { data: session } = useSession();
   const user = session?.user;
+  const pathname = usePathname();
 
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<{ text: string; ts: number; sender?: string }[]>([]);
@@ -20,7 +22,12 @@ const ChatWidget: React.FC = () => {
   const channelRef = useRef<Channel | null>(null);
   const messagesRef = useRef<HTMLDivElement | null>(null);
 
-  const subscribeToChannel = async (name: string, idToken?: string) => {
+  const subscribeToChannel = useCallback(async (name: string, idToken?: string) => {
+    console.log('[ChatWidget] ===== SUBSCRIBING TO CHANNEL =====');
+    console.log('[ChatWidget] Channel name:', name);
+    console.log('[ChatWidget] User:', user?.email, 'Role:', user?.role, 'ID:', user?.id);
+    console.log('[ChatWidget] ====================================');
+    
     // cleanup existing
     if (pusherRef.current) {
       try {
@@ -78,14 +85,29 @@ const ChatWidget: React.FC = () => {
       if (data && typeof data.message === 'string') {
         const text = data.message;
         const ts = data.timestamp || Date.now();
-        console.debug('[ChatWidget] incoming message', { text, ts, sender: data.sender });
-        setMessages((m) => [...m, { text, ts, sender: data.sender }]);
+        console.debug('[ChatWidget] incoming message from Pusher', { text, ts, sender: data.sender });
+        
+        // Add message, but check for duplicates (within 1 second window)
+        setMessages((m) => {
+          const isDuplicate = m.some(msg => 
+            msg.text === text && 
+            msg.sender === data.sender && 
+            Math.abs(msg.ts - ts) < 1000
+          );
+          
+          if (isDuplicate) {
+            console.debug('[ChatWidget] Duplicate message detected, skipping');
+            return m;
+          }
+          
+          return [...m, { text, ts, sender: data.sender }];
+        });
       }
     });
 
     channelRef.current = channel;
     setChannelName(name);
-  };
+  }, [user]);
 
   // Fetch assigned counsellor on mount (for patients)
   useEffect(() => {
@@ -109,13 +131,18 @@ const ChatWidget: React.FC = () => {
     fetchAssignment();
   }, [session, user]);
 
-  // Activity heartbeat - update lastActive every 2 minutes
+  // Activity heartbeat - update lastActive every 30 seconds
   useEffect(() => {
     if (!session || !user) return;
 
     const updateActivity = async () => {
       try {
-        await fetch('/api/activity', { method: 'POST' });
+        const res = await fetch('/api/activity', { method: 'POST' });
+        if (res.ok) {
+          console.debug('[ChatWidget] Activity heartbeat sent successfully');
+        } else {
+          console.warn('[ChatWidget] Activity heartbeat failed:', res.status);
+        }
       } catch (err) {
         console.debug('[ChatWidget] Activity update failed:', err);
       }
@@ -124,8 +151,8 @@ const ChatWidget: React.FC = () => {
     // Initial update
     updateActivity();
 
-    // Update every 2 minutes
-    const interval = setInterval(updateActivity, 2 * 60 * 1000);
+    // Update every 30 seconds (more frequent for better real-time feel)
+    const interval = setInterval(updateActivity, 30 * 1000);
 
     return () => clearInterval(interval);
   }, [session, user]);
@@ -139,29 +166,35 @@ const ChatWidget: React.FC = () => {
         const privateChannel = `private-chat-${assignedCounsellor.id}-${user.id}`;
         console.debug('[ChatWidget] Using private channel with assigned counsellor:', privateChannel);
         subscribeToChannel(privateChannel);
+      } else if (user.role === 'COUNSELLOR') {
+        // Counsellor should not auto-subscribe to public-chat
+        // They will only join private channels via the open-chat event
+        console.debug('[ChatWidget] Counsellor waiting for specific patient chat');
       } else {
         // Otherwise use public chat
         subscribeToChannel('public-chat');
       }
     }
-  }, [session, user, open, isSubscribed, assignedCounsellor]);
+  }, [session, user, open, isSubscribed, assignedCounsellor, subscribeToChannel]);
 
   // Listen for a global event to open the chat (used by counsellor/patient dashboards)
   useEffect(() => {
     if (!session || !user) return;
 
     const handler = async (ev: Event) => {
+      console.log('[ChatWidget] ===== OPEN-CHAT EVENT RECEIVED =====');
       setOpen(true);
       const anyEv = ev as CustomEvent<Record<string, string | undefined>>;
       const counsellorId = anyEv?.detail?.counsellorId;
       const patientId = anyEv?.detail?.patientId;
+      
+      console.log('[ChatWidget] Event details:', { counsellorId, patientId, userRole: user.role, userId: user.id });
 
-      let name = 'public-chat';
       try {
         // If counsellor opening chat with patient
         if (user.role === 'COUNSELLOR' && patientId) {
-          name = `private-chat-${user.id}-${patientId}`;
-          console.debug('[ChatWidget] Counsellor opening chat with patient:', name);
+          const name = `private-chat-${user.id}-${patientId}`;
+          console.log('[ChatWidget] ✅ Counsellor opening chat with patient, channel:', name);
           await subscribeToChannel(name);
           return;
         }
@@ -170,22 +203,32 @@ const ChatWidget: React.FC = () => {
         if (counsellorId) {
           const patientUid = user?.id;
           if (patientUid) {
-            name = `private-chat-${counsellorId}-${patientUid}`;
+            const name = `private-chat-${counsellorId}-${patientUid}`;
             console.debug('[ChatWidget] Patient opening chat with counsellor:', name);
+            await subscribeToChannel(name);
+            return;
           }
+        }
+
+        // Patient with assigned counsellor opening chat (no explicit counsellor ID in event)
+        if (user.role === 'USER' && assignedCounsellor) {
+          const name = `private-chat-${assignedCounsellor.id}-${user.id}`;
+          console.log('[ChatWidget] Patient opening chat with assigned counsellor:', name);
           await subscribeToChannel(name);
           return;
         }
+
+        // Fallback to public chat only if no private channel is applicable
+        console.log('[ChatWidget] Falling back to public-chat');
+        await subscribeToChannel('public-chat');
       } catch (err) {
         console.error('subscribe error', err);
       }
-
-      await subscribeToChannel('public-chat');
     };
 
     window.addEventListener('open-chat', handler as EventListener);
     return () => window.removeEventListener('open-chat', handler as EventListener);
-  }, [user, session]);
+  }, [user, session, assignedCounsellor, subscribeToChannel]);
 
   useEffect(() => {
     messagesRef.current?.scrollTo({ top: messagesRef.current.scrollHeight, behavior: 'smooth' });
@@ -194,8 +237,20 @@ const ChatWidget: React.FC = () => {
   const sendMessage = async () => {
     if (!input.trim()) return;
     const sender = user?.email ?? user?.id ?? 'Guest';
-    const payload = { channel: channelName, event: EVENT, message: input, sender };
-    console.debug('[ChatWidget] sending message', payload);
+    const messageText = input;
+    const timestamp = Date.now();
+    
+    // Optimistic update - show message immediately
+    setMessages((m) => [...m, { text: messageText, ts: timestamp, sender }]);
+    setInput('');
+    
+    const payload = { channel: channelName, event: EVENT, message: messageText, sender };
+    console.log('[ChatWidget] ===== SENDING MESSAGE =====');
+    console.log('[ChatWidget] Channel:', channelName);
+    console.log('[ChatWidget] Sender:', sender);
+    console.log('[ChatWidget] Message:', messageText);
+    console.log('[ChatWidget] ============================');
+    
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -204,9 +259,16 @@ const ChatWidget: React.FC = () => {
       });
       const result = await response.json();
       console.debug('[ChatWidget] send response', response.status, result);
-      setInput('');
+      
+      if (!response.ok) {
+        console.error('[ChatWidget] Failed to send message:', result);
+        // Remove optimistic message on failure
+        setMessages((m) => m.filter(msg => !(msg.text === messageText && msg.ts === timestamp)));
+      }
     } catch (err) {
       console.error('sendMessage error', err);
+      // Remove optimistic message on error
+      setMessages((m) => m.filter(msg => !(msg.text === messageText && msg.ts === timestamp)));
     }
   };
 
@@ -219,6 +281,9 @@ const ChatWidget: React.FC = () => {
   if (!session || !user) {
     return null;
   }
+
+  // Don't show chat button for counsellors on /connect page
+  const shouldHideButton = user.role === 'COUNSELLOR' && pathname === '/connect';
 
   return (
     <>
@@ -318,15 +383,17 @@ const ChatWidget: React.FC = () => {
       </div>
 
       {/* Toggle Button */}
-      <div className="fixed bottom-6 right-6 z-40">
-        <button
-          onClick={() => setOpen((s) => !s)}
-          className="w-16 h-16 rounded-full bg-[#9DCDDC] hover:bg-[#8BBDCC] flex items-center justify-center shadow-xl text-2xl transition-all"
-          aria-label="Toggle chat"
-        >
-          💬
-        </button>
-      </div>
+      {!shouldHideButton && (
+        <div className="fixed bottom-6 right-6 z-40">
+          <button
+            onClick={() => setOpen((s) => !s)}
+            className="w-16 h-16 rounded-full bg-[#9DCDDC] hover:bg-[#8BBDCC] flex items-center justify-center shadow-xl text-2xl transition-all"
+            aria-label="Toggle chat"
+          >
+            💬
+          </button>
+        </div>
+      )}
     </>
   );
 };

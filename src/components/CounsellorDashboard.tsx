@@ -42,8 +42,8 @@ export default function CounsellorDashboard() {
     if (session?.user?.role === 'COUNSELLOR') {
       fetchAssignments();
       
-      // Refresh every 30 seconds to update activity status
-      const interval = setInterval(fetchAssignments, 30000);
+      // Refresh every 5 seconds to update activity status in real-time
+      const interval = setInterval(fetchAssignments, 5000);
       return () => clearInterval(interval);
     }
   }, [session]);

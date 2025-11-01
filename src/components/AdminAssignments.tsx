@@ -29,6 +29,7 @@ export default function AdminAssignments() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState('');
   const [selectedCounsellor, setSelectedCounsellor] = useState('');
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
 
   const fetchData = async () => {
     setLoading(true);
@@ -48,6 +49,7 @@ export default function AdminAssignments() {
       
       setCounsellors(allUsers.filter((u: User) => u.role === 'COUNSELLOR'));
       setPatients(allUsers.filter((u: User) => u.role === 'USER'));
+      setLastRefresh(new Date());
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       setError(message);
@@ -59,8 +61,8 @@ export default function AdminAssignments() {
   useEffect(() => {
     fetchData();
     
-    // Refresh every 10 seconds to show updated activity
-    const interval = setInterval(fetchData, 10000);
+    // Refresh every 5 seconds to show updated activity (more responsive)
+    const interval = setInterval(fetchData, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -122,8 +124,11 @@ export default function AdminAssignments() {
   const getStatusBadge = (user: User) => {
     const online = isOnline(user.lastActive);
     return (
-      <span className={`px-2 py-1 text-xs rounded-full ${online ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
-        {online ? '🟢 Online' : '⚪ Offline'}
+      <span className={`px-2 py-1 text-xs rounded-full inline-flex items-center gap-1 ${online ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
+        <span className={online ? 'animate-pulse' : ''}>
+          {online ? '🟢' : '⚪'}
+        </span>
+        {online ? 'Online' : 'Offline'}
       </span>
     );
   };
@@ -131,13 +136,27 @@ export default function AdminAssignments() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Counsellor-Patient Assignments</h2>
-        <button
-          onClick={() => setShowCreateForm(!showCreateForm)}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          {showCreateForm ? 'Cancel' : 'Create Assignment'}
-        </button>
+        <div>
+          <h2 className="text-xl font-semibold">Counsellor-Patient Assignments</h2>
+          <p className="text-xs text-gray-500 mt-1">
+            Last updated: {lastRefresh.toLocaleTimeString()} • Auto-refreshes every 5s
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <button
+            onClick={() => fetchData()}
+            disabled={loading}
+            className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 disabled:opacity-50"
+          >
+            {loading ? '↻ Refreshing...' : '↻ Refresh Now'}
+          </button>
+          <button
+            onClick={() => setShowCreateForm(!showCreateForm)}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          >
+            {showCreateForm ? 'Cancel' : 'Create Assignment'}
+          </button>
+        </div>
       </div>
 
       {loading && <div>Loading assignments...</div>}
