@@ -1,6 +1,7 @@
-'use client';
+"use client";
 
 import React, { useState } from 'react';
+import { signOut } from 'next-auth/react';
 import AdminUserList from '../../components/AdminUserList';
 import AdminAssignments from '../../components/AdminAssignments';
 import ActivityTester from '../../components/ActivityTester';
@@ -10,9 +11,22 @@ type Tab = 'users' | 'assignments';
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<Tab>('assignments');
 
+  const handleSignOut = () => {
+    // Use next-auth signOut and redirect to the sign-in page
+    signOut({ callbackUrl: '/signin' });
+  };
+
   return (
     <main className="p-8">
-      <h1 className="text-3xl font-bold mb-6">Admin Dashboard</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+        <button
+          onClick={handleSignOut}
+          className="ml-4 px-4 py-2 rounded-full bg-[#F4A258] text-white font-semibold hover:opacity-90 transition-colors"
+        >
+          Sign Out
+        </button>
+      </div>
 
       {/* Tabs */}
       <div className="flex border-b mb-6">
