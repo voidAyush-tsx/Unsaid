@@ -15,7 +15,7 @@ export default function About() {
   const AllCounsellorRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (searchParams.get("scroll") === "allcounsellors") {
+    if (searchParams?.get("scroll") === "allcounsellors") {
       setTimeout(() => {
         AllCounsellorRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 500); // delay so page renders first
