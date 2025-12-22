@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react';
 import type { Metadata } from 'next';
-import AboutClient from "@/app/about/AboutClient";
+import AboutClient from "./AboutClient";
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://unsaid-drab.vercel.app/about'), // Replace with your production URL
