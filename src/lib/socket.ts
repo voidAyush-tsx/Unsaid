@@ -10,6 +10,21 @@ export type MessageData = {
   room: string;
 };
 
+export type UserStatusData = {
+  userId: string;
+  email?: string;
+  role?: string;
+  isOnline: boolean;
+  timestamp: string;
+};
+
+export type OnlineUser = {
+  userId: string;
+  email?: string;
+  role?: string;
+  connectedAt: Date;
+};
+
 class SocketService {
   private socket: Socket | null = null;
   private currentRoom: string | null = null;
@@ -119,6 +134,21 @@ class SocketService {
 
   sendTyping(room: string, userId: string, isTyping: boolean): void {
     this.socket?.emit('typing', { room, userId, isTyping });
+  }
+
+  // Request online users list (admin only)
+  requestOnlineUsers(): void {
+    this.socket?.emit('get-online-users');
+  }
+
+  // Subscribe to user status changes
+  onUserStatusChange(callback: (data: UserStatusData) => void): void {
+    this.socket?.on('user-status-change', callback);
+  }
+
+  // Subscribe to online users list
+  onOnlineUsersList(callback: (data: { users: OnlineUser[] }) => void): void {
+    this.socket?.on('online-users-list', callback);
   }
 
   on(event: string, callback: (...args: unknown[]) => void): void {

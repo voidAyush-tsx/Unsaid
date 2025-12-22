@@ -15,14 +15,34 @@ interface NextApiResponseWithSocket extends NextApiResponse {
   socket: SocketWithIO;
 }
 
-// Store connected users
+// Store connected users with their online status
 const connectedUsers = new Map<string, {
   socketId: string;
   userId?: string;
   email?: string;
   role?: string;
   rooms: Set<string>;
+  connectedAt: Date;
 }>();
+
+// Map userId to socketId for quick lookups
+const userSocketMap = new Map<string, string>();
+
+// Get all online users
+export function getOnlineUsers() {
+  const onlineUsers: { userId: string; email?: string; role?: string; connectedAt: Date }[] = [];
+  connectedUsers.forEach((user) => {
+    if (user.userId) {
+      onlineUsers.push({
+        userId: user.userId,
+        email: user.email,
+        role: user.role,
+        connectedAt: user.connectedAt,
+      });
+    }
+  });
+  return onlineUsers;
+}
 
 export const config = {
   api: {
@@ -58,6 +78,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponseWithSoc
     connectedUsers.set(socket.id, {
       socketId: socket.id,
       rooms: new Set(),
+      connectedAt: new Date(),
     });
 
     // Authenticate
@@ -67,8 +88,35 @@ export default function handler(req: NextApiRequest, res: NextApiResponseWithSoc
         user.userId = data.userId;
         user.email = data.email;
         user.role = data.role;
-        console.log(`[Socket.IO] Authenticated: ${data.email}`);
+        
+        // Map userId to socketId
+        userSocketMap.set(data.userId, socket.id);
+        
+        console.log(`[Socket.IO] Authenticated: ${data.email} (${data.role})`);
         socket.emit('authenticated', { success: true });
+        
+        // Join admin room if user is admin
+        if (data.role === 'ADMIN') {
+          socket.join('admin-status-room');
+        }
+        
+        // Broadcast user online status to admins
+        io.to('admin-status-room').emit('user-status-change', {
+          userId: data.userId,
+          email: data.email,
+          role: data.role,
+          isOnline: true,
+          timestamp: new Date().toISOString(),
+        });
+      }
+    });
+
+    // Request online users list (for admins)
+    socket.on('get-online-users', () => {
+      const user = connectedUsers.get(socket.id);
+      if (user?.role === 'ADMIN') {
+        const onlineUsers = getOnlineUsers();
+        socket.emit('online-users-list', { users: onlineUsers });
       }
     });
 
@@ -123,7 +171,21 @@ export default function handler(req: NextApiRequest, res: NextApiResponseWithSoc
     });
 
     socket.on('disconnect', () => {
-      console.log(`[Socket.IO] Disconnected: ${socket.id}`);
+      const user = connectedUsers.get(socket.id);
+      console.log(`[Socket.IO] Disconnected: ${socket.id} (${user?.email || 'unknown'})`);
+      
+      // Broadcast user offline status to admins
+      if (user?.userId) {
+        userSocketMap.delete(user.userId);
+        io.to('admin-status-room').emit('user-status-change', {
+          userId: user.userId,
+          email: user.email,
+          role: user.role,
+          isOnline: false,
+          timestamp: new Date().toISOString(),
+        });
+      }
+      
       connectedUsers.delete(socket.id);
     });
   });

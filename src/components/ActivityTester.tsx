@@ -1,43 +1,71 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useSession } from 'next-auth/react';
+import socketService from '@/lib/socket';
 
 export default function ActivityTester() {
   const { data: session } = useSession();
-  const [lastHeartbeat, setLastHeartbeat] = useState<Date | null>(null);
-  const [heartbeatCount, setHeartbeatCount] = useState(0);
+  const [isConnected, setIsConnected] = useState(false);
+  const [connectedAt, setConnectedAt] = useState<Date | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const socketInitialized = useRef(false);
 
   useEffect(() => {
     if (!session?.user) return;
+    if (socketInitialized.current) return;
+    socketInitialized.current = true;
 
-    const updateActivity = async () => {
+    const initSocket = async () => {
       try {
-        const res = await fetch('/api/activity', { method: 'POST' });
-        const data = await res.json();
+        await socketService.init();
+        const socket = socketService.connect();
         
-        if (res.ok) {
-          setLastHeartbeat(new Date());
-          setHeartbeatCount(prev => prev + 1);
+        socket.on('connect', () => {
+          console.log('[ActivityTester] Socket connected');
+          setIsConnected(true);
+          setConnectedAt(new Date());
           setError(null);
-          console.log('[ActivityTester] Heartbeat successful:', data);
-        } else {
-          setError(`Failed: ${res.status} - ${data.error || 'Unknown error'}`);
-        }
+          
+          // Authenticate with user info
+          socketService.authenticate(
+            session.user.id,
+            session.user.email || undefined,
+            session.user.role || 'USER'
+          );
+        });
+
+        socket.on('authenticated', (data: { success: boolean }) => {
+          if (data.success) {
+            console.log('[ActivityTester] Authenticated successfully');
+          }
+        });
+
+        socket.on('disconnect', () => {
+          console.log('[ActivityTester] Socket disconnected');
+          setIsConnected(false);
+        });
+
+        socket.on('connect_error', (err: Error) => {
+          console.error('[ActivityTester] Connection error:', err);
+          setError(`Connection error: ${err.message}`);
+          setIsConnected(false);
+        });
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         setError(`Error: ${message}`);
       }
     };
 
-    // Initial update
-    updateActivity();
+    initSocket();
 
-    // Update every 10 seconds for testing
-    const interval = setInterval(updateActivity, 10000);
-
-    return () => clearInterval(interval);
+    return () => {
+      // Clean up on unmount
+      socketService.off('connect');
+      socketService.off('disconnect');
+      socketService.off('authenticated');
+      socketService.off('connect_error');
+    };
   }, [session]);
 
   if (!session?.user) {
@@ -50,24 +78,27 @@ export default function ActivityTester() {
 
   return (
     <div className="p-4 border rounded bg-blue-50">
-      <h3 className="font-bold text-blue-900 mb-2">Activity Heartbeat Tester</h3>
+      <h3 className="font-bold text-blue-900 mb-2">WebSocket Status</h3>
       <div className="space-y-2 text-sm">
         <div className="flex items-center gap-2">
-          <span className={`w-3 h-3 rounded-full ${lastHeartbeat ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`}></span>
+          <span className={`w-3 h-3 rounded-full ${isConnected ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`}></span>
           <span className="font-medium">Status:</span>
-          <span>{lastHeartbeat ? '✅ Active' : '⏳ Waiting...'}</span>
+          <span>{isConnected ? '✅ Connected' : '⏳ Disconnected'}</span>
         </div>
         
-        {lastHeartbeat && (
-          <>
-            <div>
-              <span className="font-medium">Last heartbeat:</span> {lastHeartbeat.toLocaleTimeString()}
-            </div>
-            <div>
-              <span className="font-medium">Total heartbeats:</span> {heartbeatCount}
-            </div>
-          </>
+        {connectedAt && (
+          <div>
+            <span className="font-medium">Connected at:</span> {connectedAt.toLocaleTimeString()}
+          </div>
         )}
+        
+        <div>
+          <span className="font-medium">User:</span> {session.user.email}
+        </div>
+        
+        <div>
+          <span className="font-medium">Role:</span> {session.user.role || 'USER'}
+        </div>
         
         {error && (
           <div className="text-red-600 bg-red-50 p-2 rounded text-xs">
@@ -76,7 +107,7 @@ export default function ActivityTester() {
         )}
         
         <div className="text-xs text-gray-600 mt-2">
-          Heartbeat interval: 10 seconds (for testing)
+          Real-time status via WebSocket (no polling)
         </div>
       </div>
     </div>

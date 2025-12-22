@@ -38,14 +38,16 @@ const ChatWidget: React.FC = () => {
 
   // Initialize socket
   const initSocket = useCallback(async () => {
-    // Allow retry if not connected
-    if (initRef.current) return;
+    // If already connected via PresenceTracker or previous init, just update state
     if (socketService.isConnected()) {
       setIsConnected(true);
       return;
     }
     
+    // Prevent multiple simultaneous init attempts
+    if (initRef.current) return;
     initRef.current = true;
+    
     console.log('[Chat] Initializing socket...');
 
     try {
@@ -54,30 +56,35 @@ const ChatWidget: React.FC = () => {
       
       const socket = socketService.connect();
 
-      socket.off('connect'); // Remove any existing listeners
-      socket.off('disconnect');
-      socket.off('connect_error');
-
-      socket.on('connect', () => {
+      const onConnect = () => {
         console.log('[Chat] Connected, socket id:', socket.id);
         setIsConnected(true);
         initRef.current = false;
         if (user) socketService.authenticate(user.id, user.email ?? undefined, user.role);
-      });
+      };
 
-      socket.on('disconnect', (reason) => {
+      const onDisconnect = (reason: string) => {
         console.log('[Chat] Disconnected:', reason);
         setIsConnected(false);
         setIsSubscribed(false);
         initRef.current = false;
-      });
+      };
 
-      socket.on('connect_error', (err) => {
+      const onConnectError = (err: Error) => {
         console.error('[Chat] Connection error:', err.message);
         initRef.current = false;
-      });
+      };
 
-      // If already connected (rare but possible)
+      // Remove any existing listeners first to avoid duplicates
+      socket.off('connect', onConnect);
+      socket.off('disconnect', onDisconnect);
+      socket.off('connect_error', onConnectError);
+
+      socket.on('connect', onConnect);
+      socket.on('disconnect', onDisconnect);
+      socket.on('connect_error', onConnectError);
+
+      // If already connected (e.g., by PresenceTracker)
       if (socket.connected) {
         setIsConnected(true);
         initRef.current = false;
@@ -88,6 +95,31 @@ const ChatWidget: React.FC = () => {
       initRef.current = false;
     }
   }, [user]);
+
+  // Sync connection state - check if PresenceTracker already connected the socket
+  useEffect(() => {
+    const syncConnectionState = () => {
+      const connected = socketService.isConnected();
+      if (connected && !isConnected) {
+        console.log('[Chat] Socket already connected, syncing state...');
+        setIsConnected(true);
+      }
+    };
+
+    // Check immediately
+    syncConnectionState();
+
+    // Also check periodically in case connection happens after mount
+    const interval = setInterval(syncConnectionState, 500);
+    
+    // Stop checking after 5 seconds
+    const timeout = setTimeout(() => clearInterval(interval), 5000);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+    };
+  }, [isConnected]);
 
   // Subscribe to channel
   const subscribeToChannel = useCallback(async (name: string) => {

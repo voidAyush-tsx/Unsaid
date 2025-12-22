@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { useSession } from 'next-auth/react';
+import socketService, { UserStatusData } from '@/lib/socket';
 
 type User = {
   id: string;
@@ -20,7 +22,11 @@ type Assignment = {
   counsellor: User;
 };
 
+// Track online status by userId
+type OnlineStatus = Map<string, { isOnline: boolean; timestamp: string }>;
+
 export default function AdminAssignments() {
+  const { data: session } = useSession();
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [counsellors, setCounsellors] = useState<User[]>([]);
   const [patients, setPatients] = useState<User[]>([]);
@@ -30,6 +36,9 @@ export default function AdminAssignments() {
   const [selectedPatient, setSelectedPatient] = useState('');
   const [selectedCounsellor, setSelectedCounsellor] = useState('');
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  const [onlineStatus, setOnlineStatus] = useState<OnlineStatus>(new Map());
+  const [socketConnected, setSocketConnected] = useState(false);
+  const socketInitialized = useRef(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -61,10 +70,74 @@ export default function AdminAssignments() {
   useEffect(() => {
     fetchData();
     
-    // Refresh every 5 seconds to show updated activity (more responsive)
-    const interval = setInterval(fetchData, 5000);
-    return () => clearInterval(interval);
-  }, []);
+    // Initialize WebSocket for real-time status updates
+    const initSocket = async () => {
+      if (socketInitialized.current) return;
+      if (!session?.user) return;
+      socketInitialized.current = true;
+      
+      await socketService.init();
+      const socket = socketService.connect();
+      
+      socket.on('connect', () => {
+        console.log('[AdminAssignments] Socket connected');
+        setSocketConnected(true);
+        
+        // Authenticate as admin to join admin-status-room
+        socketService.authenticate(
+          session.user.id,
+          session.user.email || undefined,
+          session.user.role || 'ADMIN'
+        );
+        
+        // Request initial online users list
+        setTimeout(() => {
+          socketService.requestOnlineUsers();
+        }, 500);
+      });
+      
+      socket.on('disconnect', () => {
+        console.log('[AdminAssignments] Socket disconnected');
+        setSocketConnected(false);
+      });
+      
+      // Listen for user status changes
+      socketService.onUserStatusChange((data: UserStatusData) => {
+        console.log('[AdminAssignments] User status change:', data);
+        setOnlineStatus(prev => {
+          const newStatus = new Map(prev);
+          newStatus.set(data.userId, { 
+            isOnline: data.isOnline, 
+            timestamp: data.timestamp 
+          });
+          return newStatus;
+        });
+        setLastRefresh(new Date());
+      });
+      
+      // Listen for initial online users list
+      socketService.onOnlineUsersList((data) => {
+        console.log('[AdminAssignments] Online users list:', data.users);
+        const newStatus = new Map<string, { isOnline: boolean; timestamp: string }>();
+        data.users.forEach(user => {
+          newStatus.set(user.userId, { 
+            isOnline: true, 
+            timestamp: new Date(user.connectedAt).toISOString() 
+          });
+        });
+        setOnlineStatus(newStatus);
+        setLastRefresh(new Date());
+      });
+    };
+    
+    initSocket();
+    
+    return () => {
+      // Clean up socket listeners when component unmounts
+      socketService.off('user-status-change');
+      socketService.off('online-users-list');
+    };
+  }, [session]);
 
   const createAssignment = async () => {
     if (!selectedPatient || !selectedCounsellor) {
@@ -115,21 +188,31 @@ export default function AdminAssignments() {
     }
   };
 
-  const isOnline = (lastActive?: string | null) => {
-    if (!lastActive) return false;
-    const fiveMinutesAgo = Date.now() - 5 * 60 * 1000;
-    return new Date(lastActive).getTime() > fiveMinutesAgo;
-  };
+  const isOnline = useCallback((userId: string) => {
+    const status = onlineStatus.get(userId);
+    return status?.isOnline ?? false;
+  }, [onlineStatus]);
+
+  const getLastSeen = useCallback((userId: string) => {
+    const status = onlineStatus.get(userId);
+    return status?.timestamp ? new Date(status.timestamp).toLocaleTimeString() : null;
+  }, [onlineStatus]);
 
   const getStatusBadge = (user: User) => {
-    const online = isOnline(user.lastActive);
+    const online = isOnline(user.id);
+    const lastSeen = getLastSeen(user.id);
     return (
-      <span className={`px-2 py-1 text-xs rounded-full inline-flex items-center gap-1 ${online ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
-        <span className={online ? 'animate-pulse' : ''}>
-          {online ? '🟢' : '⚪'}
+      <div>
+        <span className={`px-2 py-1 text-xs rounded-full inline-flex items-center gap-1 ${online ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'}`}>
+          <span className={`w-2 h-2 rounded-full ${online ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`}></span>
+          {online ? 'Online' : 'Offline'}
         </span>
-        {online ? 'Online' : 'Offline'}
-      </span>
+        {lastSeen && (
+          <div className="text-xs text-gray-500 mt-1">
+            Last: {lastSeen}
+          </div>
+        )}
+      </div>
     );
   };
 
@@ -138,13 +221,20 @@ export default function AdminAssignments() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold">Counsellor-Patient Assignments</h2>
-          <p className="text-xs text-gray-500 mt-1">
-            Last updated: {lastRefresh.toLocaleTimeString()} • Auto-refreshes every 5s
+          <p className="text-xs text-gray-500 mt-1 flex items-center gap-2">
+            <span className={`inline-flex items-center gap-1 ${socketConnected ? 'text-green-600' : 'text-red-600'}`}>
+              <span className={`w-2 h-2 rounded-full ${socketConnected ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></span>
+              {socketConnected ? 'WebSocket Connected' : 'WebSocket Disconnected'}
+            </span>
+            • Last updated: {lastRefresh.toLocaleTimeString()}
           </p>
         </div>
         <div className="flex gap-2">
           <button
-            onClick={() => fetchData()}
+            onClick={() => {
+              fetchData();
+              socketService.requestOnlineUsers();
+            }}
             disabled={loading}
             className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 disabled:opacity-50"
           >
@@ -241,19 +331,9 @@ export default function AdminAssignments() {
                 </td>
                 <td className="border px-4 py-2">
                   {getStatusBadge(assignment.patient)}
-                  {assignment.patient.lastActive && (
-                    <div className="text-xs text-gray-500 mt-1">
-                      Last: {new Date(assignment.patient.lastActive).toLocaleTimeString()}
-                    </div>
-                  )}
                 </td>
                 <td className="border px-4 py-2">
                   {getStatusBadge(assignment.counsellor)}
-                  {assignment.counsellor.lastActive && (
-                    <div className="text-xs text-gray-500 mt-1">
-                      Last: {new Date(assignment.counsellor.lastActive).toLocaleTimeString()}
-                    </div>
-                  )}
                 </td>
                 <td className="border px-4 py-2 text-sm">
                   {new Date(assignment.assignedAt).toLocaleString()}
@@ -287,13 +367,13 @@ export default function AdminAssignments() {
         </div>
         <div className="p-4 border rounded bg-green-50">
           <div className="text-2xl font-bold text-green-700">
-            {assignments.filter(a => a.isActive && isOnline(a.patient.lastActive)).length}
+            {assignments.filter(a => a.isActive && isOnline(a.patient.id)).length}
           </div>
           <div className="text-sm text-green-600">Patients Online</div>
         </div>
         <div className="p-4 border rounded bg-purple-50">
           <div className="text-2xl font-bold text-purple-700">
-            {counsellors.filter(c => isOnline(c.lastActive)).length}
+            {counsellors.filter(c => isOnline(c.id)).length}
           </div>
           <div className="text-sm text-purple-600">Counsellors Online</div>
         </div>
