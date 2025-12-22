@@ -19,7 +19,7 @@
     "framer-motion": "^12.23.12",
     "gsap": "^3.13.0",
     "lucide-react": "^0.548.0",
-    "next": "latest",
+    "next": "15.5.8",
     "next-auth": "^4.22.1",
     "pg": "^8.11.2",
     "pusher": "^5.0.0",
