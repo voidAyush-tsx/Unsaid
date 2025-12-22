@@ -22,7 +22,7 @@ export default function GetInTouchClient() {
   const CounsellorRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (searchParams.get('scroll') === 'contact_counsellor') {
+    if (searchParams?.get('scroll') === 'contact_counsellor') {
       setTimeout(() => {
         CounsellorRef.current?.scrollIntoView({ behavior: 'smooth' });
       }, 500); // Delay so page renders first
@@ -30,7 +30,7 @@ export default function GetInTouchClient() {
   }, [searchParams]);
 
   useEffect(() => {
-    if (searchParams.get('scroll') === 'form') {
+    if (searchParams?.get('scroll') === 'form') {
       setTimeout(() => {
         formRef.current?.scrollIntoView({ behavior: 'smooth' });
       }, 500); // Delay so page renders first
