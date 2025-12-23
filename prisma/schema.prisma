@@ -15,6 +15,7 @@ model User {
   emailVerified DateTime?
   image         String?
   role          Role      @default(USER)
+  mustChangePassword Boolean @default(false)
   lastActive    DateTime? // Track online/offline status
   accounts      Account[]
   sessions      Session[]

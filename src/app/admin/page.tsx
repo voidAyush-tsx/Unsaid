@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { signOut } from 'next-auth/react';
 import AdminUserList from '../../components/AdminUserList';
+import AdminUserUpload from '../../components/AdminUserUpload';
 import AdminAssignments from '../../components/AdminAssignments';
 import ActivityTester from '../../components/ActivityTester';
 
@@ -10,6 +11,7 @@ type Tab = 'users' | 'assignments';
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<Tab>('assignments');
+  const [usersRefreshKey, setUsersRefreshKey] = useState(0);
 
   const handleSignOut = () => {
     // Use next-auth signOut and redirect to the sign-in page
@@ -73,7 +75,8 @@ export default function AdminPage() {
           <p className="mb-6 text-gray-600">
             View, create, edit, and delete users. Change user roles and manage authentication.
           </p>
-          <AdminUserList />
+          <AdminUserUpload onUploadSuccess={() => setUsersRefreshKey(prev => prev + 1)} />
+          <AdminUserList refreshKey={usersRefreshKey} />
         </div>
       )}
     </main>

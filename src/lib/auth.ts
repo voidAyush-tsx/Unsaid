@@ -4,8 +4,8 @@ import { compare } from 'bcryptjs';
 import type { NextAuthOptions } from 'next-auth';
 import { prisma } from './prisma';
 
-type UserWithRole = { id: string; name?: string | null; email?: string | null; role?: 'ADMIN' | 'COUNSELLOR' | 'USER' };
-type JWTToken = { id?: string; role?: 'ADMIN' | 'COUNSELLOR' | 'USER'; [k: string]: unknown };
+type UserWithRole = { id: string; name?: string | null; email?: string | null; role?: 'ADMIN' | 'COUNSELLOR' | 'USER'; mustChangePassword?: boolean };
+type JWTToken = { id?: string; role?: 'ADMIN' | 'COUNSELLOR' | 'USER'; mustChangePassword?: boolean; [k: string]: unknown };
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -22,7 +22,7 @@ export const authOptions: NextAuthOptions = {
         if (!user || !user.hashedPassword) return null;
         const valid = await compare(credentials.password, user.hashedPassword);
         if (!valid) return null;
-        return { id: user.id, name: user.name, email: user.email, role: user.role };
+        return { id: user.id, name: user.name, email: user.email, role: user.role, mustChangePassword: user.mustChangePassword };
       }
     })
   ],
@@ -34,6 +34,7 @@ export const authOptions: NextAuthOptions = {
         const u = user as unknown as UserWithRole;
         token.id = (u && (u.id as string)) || token.id;
         if (u?.role) token.role = u.role;
+        if (u?.mustChangePassword !== undefined) token.mustChangePassword = u.mustChangePassword;
       }
       return token;
     },
@@ -43,6 +44,7 @@ export const authOptions: NextAuthOptions = {
         const t = token as JWTToken;
   if (t.id) session.user.id = String(t.id);
   if (t.role) session.user.role = t.role;
+  if (t.mustChangePassword !== undefined) session.user.mustChangePassword = t.mustChangePassword;
       }
       return session;
     }

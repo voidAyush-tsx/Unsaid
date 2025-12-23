@@ -17,7 +17,7 @@ type NewUser = {
   role: 'ADMIN' | 'COUNSELLOR' | 'USER';
 };
 
-export default function AdminUserList() {
+export default function AdminUserList({ refreshKey }: { refreshKey?: number }) {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,7 +44,7 @@ export default function AdminUserList() {
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [refreshKey]);
 
 
 
