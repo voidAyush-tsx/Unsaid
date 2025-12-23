@@ -6,11 +6,13 @@ import Navbar from "@/components/navBar_v1";
 import Footer from "@/components/footer_v1";
 import { useSession } from "next-auth/react";
 import GADTest from "@/components/assessment/GADTest";
+import CalmSpace from "@/components/assessment/CalmSpace";
 
 export default function Assessment() {
   const { data: session } = useSession();
   const userName = session?.user?.name ?? "Shinomiya";
   const [showGADTest, setShowGADTest] = useState(false);
+  const [showCalmSpace, setShowCalmSpace] = useState(false);
 
   return (
     <div className="relative w-full min-h-screen flex flex-col m-0">
@@ -135,7 +137,10 @@ export default function Assessment() {
           </div>
 
           {/* 3rd Card */}
-          <div className="group flex flex-col items-center justify-between rounded-4xl p-6 gap-4 bg-[#F4A258] hover:scale-105 transition-transform">
+          <div 
+            onClick={() => setShowCalmSpace(true)}
+            className="group flex flex-col items-center justify-between rounded-4xl p-6 gap-4 bg-[#F4A258] hover:scale-105 transition-transform cursor-pointer"
+          >
             <div className="flex flex-row items-center w-full justify-between">
               <div
                 className="font-unsaid font-bold text-white"
@@ -243,6 +248,7 @@ export default function Assessment() {
       </div>
 
       {showGADTest && <GADTest onClose={() => setShowGADTest(false)} />}
+      {showCalmSpace && <CalmSpace onClose={() => setShowCalmSpace(false)} />}
     </div>
   );
 }
