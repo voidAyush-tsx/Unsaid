@@ -122,7 +122,7 @@ const Navbar_v2: React.FC = () => {
                 <button
                   onClick={() => {
                     setIsDropdownOpen(false);
-                    window.location.href = "/profile";
+                    window.location.href = "/account";
                   }}
                   className="block w-full rounded-t-md text-left px-4 py-2 text-base font-unsaid font-bold text-[#F7F4F2] hover:bg-[#99C3CE] hover:text-white cursor-pointer"
                 >
