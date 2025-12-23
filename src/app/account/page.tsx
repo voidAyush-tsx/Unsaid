@@ -1,10 +1,18 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 import Navbar_v2 from '@/components/navBar_v2';
 import ChangePasswordForm from '@/components/auth/ChangePasswordForm';
+
+interface AssessmentResult {
+  id: string;
+  type: string;
+  score: number;
+  level: string;
+  createdAt: string;
+}
 
 export default function ProfilePage() {
   const { data: session, status, update } = useSession();
@@ -12,12 +20,26 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
+  const [assessments, setAssessments] = useState<AssessmentResult[]>([]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (session?.user?.name) {
       setName(session.user.name);
     }
   }, [session?.user?.name]);
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      fetch('/api/user/assessments')
+        .then((res) => res.json())
+        .then((data) => {
+          if (Array.isArray(data)) {
+            setAssessments(data);
+          }
+        })
+        .catch((err) => console.error('Failed to fetch assessments', err));
+    }
+  }, [status]);
 
   if (status === 'loading') {
     return (
@@ -147,6 +169,50 @@ export default function ProfilePage() {
           {/* Change Password Card */}
           <ChangePasswordForm />
         </div>
+
+        {/* Assessment History */}
+        {assessments.length > 0 && (
+          <div className="mt-12 max-w-4xl mx-auto">
+            <h2 className="text-2xl font-unsaid font-bold text-[#3A3633] mb-6 text-center">Assessment History</h2>
+            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead className="bg-gray-50 border-b border-gray-100">
+                    <tr>
+                      <th className="px-6 py-4 font-semibold text-gray-600">Date</th>
+                      <th className="px-6 py-4 font-semibold text-gray-600">Test Type</th>
+                      <th className="px-6 py-4 font-semibold text-gray-600">Score</th>
+                      <th className="px-6 py-4 font-semibold text-gray-600">Result</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {assessments.map((assessment) => (
+                      <tr key={assessment.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-4 text-gray-600">
+                          {new Date(assessment.createdAt).toLocaleDateString()} {new Date(assessment.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </td>
+                        <td className="px-6 py-4 font-medium text-gray-800">{assessment.type}</td>
+                        <td className="px-6 py-4 text-gray-600">{assessment.score}</td>
+                        <td className="px-6 py-4">
+                          <span 
+                            className={`px-3 py-1 rounded-full text-sm font-medium
+                              ${assessment.level.includes('Severe') ? 'bg-red-100 text-red-700' :
+                                assessment.level.includes('Moderate') ? 'bg-orange-100 text-orange-700' :
+                                assessment.level.includes('Mild') ? 'bg-yellow-100 text-yellow-700' :
+                                'bg-green-100 text-green-700'
+                              }`}
+                          >
+                            {assessment.level}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );

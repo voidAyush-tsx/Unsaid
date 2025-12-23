@@ -26,6 +26,18 @@ model User {
   assignmentsAsPatient Assignment[] @relation("PatientAssignments")
   // Assignments where this user is the counsellor
   assignmentsAsCounsellor Assignment[] @relation("CounsellorAssignments")
+  
+  assessmentResults AssessmentResult[]
+}
+
+model AssessmentResult {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String   // e.g., "GAD-7"
+  score     Int
+  level     String   // e.g., "Moderate anxiety"
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Account {

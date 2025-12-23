@@ -47,8 +47,25 @@ export default function GADTest({ onClose }: GADTestProps) {
 
   const isComplete = answers.every((a) => a !== -1);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (isComplete) {
+      const score = calculateScore();
+      const result = getResult(score);
+      
+      try {
+        await fetch("/api/assessment/save", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "GAD-7",
+            score,
+            level: result.level,
+          }),
+        });
+      } catch (error) {
+        console.error("Failed to save assessment result", error);
+      }
+
       setShowResult(true);
     }
   };
