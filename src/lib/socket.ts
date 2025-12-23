@@ -36,7 +36,7 @@ class SocketService {
     
     try {
       // Initialize Socket.IO server by hitting the API endpoint
-      await fetch('/api/socketio');
+      await fetch('/api/socket');
       this.initialized = true;
     } catch (e) {
       console.error('[SocketService] Init failed:', e);

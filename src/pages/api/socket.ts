@@ -1,7 +1,7 @@
 import { Server as NetServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
-import type { NextApiRequest, NextApiResponse } from 'next';
-import type { Socket as NetSocket } from 'net';
+import { NextApiRequest, NextApiResponse } from 'next';
+import { Socket as NetSocket } from 'net';
 
 interface SocketServer extends NetServer {
   io?: SocketIOServer;
@@ -28,8 +28,14 @@ const connectedUsers = new Map<string, {
 // Map userId to socketId for quick lookups
 const userSocketMap = new Map<string, string>();
 
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
 // Get all online users
-export function getOnlineUsers() {
+function getOnlineUsers() {
   const onlineUsers: { userId: string; email?: string; role?: string; connectedAt: Date }[] = [];
   connectedUsers.forEach((user) => {
     if (user.userId) {
@@ -44,13 +50,7 @@ export function getOnlineUsers() {
   return onlineUsers;
 }
 
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
-
-export default function handler(req: NextApiRequest, res: NextApiResponseWithSocket) {
+export default function SocketHandler(req: NextApiRequest, res: NextApiResponseWithSocket) {
   if (res.socket.server.io) {
     console.log('[Socket.IO] Already initialized');
     res.end();
@@ -60,11 +60,11 @@ export default function handler(req: NextApiRequest, res: NextApiResponseWithSoc
   console.log('[Socket.IO] Initializing...');
   
   const io = new SocketIOServer(res.socket.server, {
-    path: '/api/socketio',
+    path: '/api/socket',
     addTrailingSlash: false,
     cors: {
       origin: process.env.NODE_ENV === 'development' 
-        ? ['http://localhost:3000'] 
+        ? ['http://localhost:3000', 'http://localhost:3001'] 
         : [process.env.NEXT_PUBLIC_APP_URL || ''],
       methods: ['GET', 'POST'],
       credentials: true,
@@ -72,34 +72,36 @@ export default function handler(req: NextApiRequest, res: NextApiResponseWithSoc
     transports: ['websocket', 'polling'],
   });
 
-  io.on('connection', (socket) => {
-    console.log(`[Socket.IO] Connected: ${socket.id}`);
+  res.socket.server.io = io;
 
-    connectedUsers.set(socket.id, {
-      socketId: socket.id,
+  io.on('connection', (clientSocket) => {
+    console.log(`[Socket.IO] Connected: ${clientSocket.id}`);
+
+    connectedUsers.set(clientSocket.id, {
+      socketId: clientSocket.id,
       rooms: new Set(),
       connectedAt: new Date(),
     });
 
     // Authenticate
-    socket.on('authenticate', (data: { userId: string; email?: string; role?: string }) => {
-      const user = connectedUsers.get(socket.id);
+    clientSocket.on('authenticate', (data: { userId: string; email?: string; role?: string }) => {
+      const user = connectedUsers.get(clientSocket.id);
       if (user) {
         user.userId = data.userId;
         user.email = data.email;
         user.role = data.role;
         
         // Map userId to socketId
-        userSocketMap.set(data.userId, socket.id);
+        userSocketMap.set(data.userId, clientSocket.id);
         
         console.log(`[Socket.IO] Authenticated: ${data.email} (${data.role})`);
-        socket.emit('authenticated', { success: true });
-        
-        // Join admin room if user is admin
+        clientSocket.emit('authenticated', { success: true });
+
+        // Join admin room if admin
         if (data.role === 'ADMIN') {
-          socket.join('admin-status-room');
+          clientSocket.join('admin-status-room');
         }
-        
+
         // Broadcast user online status to admins
         io.to('admin-status-room').emit('user-status-change', {
           userId: data.userId,
@@ -112,18 +114,18 @@ export default function handler(req: NextApiRequest, res: NextApiResponseWithSoc
     });
 
     // Request online users list (for admins)
-    socket.on('get-online-users', () => {
-      const user = connectedUsers.get(socket.id);
+    clientSocket.on('get-online-users', () => {
+      const user = connectedUsers.get(clientSocket.id);
       if (user?.role === 'ADMIN') {
         const onlineUsers = getOnlineUsers();
-        socket.emit('online-users-list', { users: onlineUsers });
+        clientSocket.emit('online-users-list', { users: onlineUsers });
       }
     });
 
     // Join room
-    socket.on('join-room', (data: { room: string; userId: string }) => {
+    clientSocket.on('join-room', (data: { room: string; userId: string }) => {
       const { room, userId } = data;
-      const user = connectedUsers.get(socket.id);
+      const user = connectedUsers.get(clientSocket.id);
 
       // Validate private room access
       if (room.startsWith('private-chat-')) {
@@ -133,26 +135,26 @@ export default function handler(req: NextApiRequest, res: NextApiResponseWithSoc
 
         if (userId !== counsellorId && userId !== patientId) {
           console.warn(`[Socket.IO] Unauthorized: ${userId} -> ${room}`);
-          socket.emit('error', { message: 'Unauthorized' });
+          clientSocket.emit('error', { message: 'Unauthorized' });
           return;
         }
       }
 
-      socket.join(room);
+      clientSocket.join(room);
       if (user) user.rooms.add(room);
       console.log(`[Socket.IO] ${userId} joined: ${room}`);
-      socket.emit('room-joined', { room, success: true });
+      clientSocket.emit('room-joined', { room, success: true });
     });
 
     // Leave room
-    socket.on('leave-room', (data: { room: string }) => {
-      socket.leave(data.room);
-      const user = connectedUsers.get(socket.id);
+    clientSocket.on('leave-room', (data: { room: string }) => {
+      clientSocket.leave(data.room);
+      const user = connectedUsers.get(clientSocket.id);
       if (user) user.rooms.delete(data.room);
     });
 
     // Message
-    socket.on('message', (data: { room: string; message: string; sender: string; senderId?: string }) => {
+    clientSocket.on('message', (data: { room: string; message: string; sender: string; senderId?: string }) => {
       const { room, message, sender, senderId } = data;
       console.log(`[Socket.IO] Message in ${room}: ${message.substring(0, 50)}`);
 
@@ -166,13 +168,13 @@ export default function handler(req: NextApiRequest, res: NextApiResponseWithSoc
     });
 
     // Typing indicator
-    socket.on('typing', (data: { room: string; userId: string; isTyping: boolean }) => {
-      socket.to(data.room).emit('typing', { userId: data.userId, isTyping: data.isTyping });
+    clientSocket.on('typing', (data: { room: string; userId: string; isTyping: boolean }) => {
+      clientSocket.to(data.room).emit('typing', { userId: data.userId, isTyping: data.isTyping });
     });
 
-    socket.on('disconnect', () => {
-      const user = connectedUsers.get(socket.id);
-      console.log(`[Socket.IO] Disconnected: ${socket.id} (${user?.email || 'unknown'})`);
+    clientSocket.on('disconnect', () => {
+      const user = connectedUsers.get(clientSocket.id);
+      console.log(`[Socket.IO] Disconnected: ${clientSocket.id} (${user?.email || 'unknown'})`);
       
       // Broadcast user offline status to admins
       if (user?.userId) {
@@ -186,11 +188,10 @@ export default function handler(req: NextApiRequest, res: NextApiResponseWithSoc
         });
       }
       
-      connectedUsers.delete(socket.id);
+      connectedUsers.delete(clientSocket.id);
     });
   });
 
-  res.socket.server.io = io;
   console.log('[Socket.IO] Server started');
   res.end();
 }
