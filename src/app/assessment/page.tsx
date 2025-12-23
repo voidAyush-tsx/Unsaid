@@ -1,13 +1,17 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Navbar from "@/components/navBar_v1";
 import Footer from "@/components/footer_v1";
 import { useSession } from "next-auth/react";
+import GADTest from "@/components/assessment/GADTest";
 
 export default function Assessment() {
   const { data: session } = useSession();
   const userName = session?.user?.name ?? "Shinomiya";
+  const [showGADTest, setShowGADTest] = useState(false);
+
   return (
     <div className="relative w-full min-h-screen flex flex-col m-0">
       {/* Navbar */}
@@ -52,7 +56,10 @@ export default function Assessment() {
         </div>
         <div className="flex flex-row items-stretch gap-5 w-full">
           {/* 1st Card */}
-          <div className="group flex flex-col items-center justify-between rounded-4xl p-6 gap-4 bg-[#FB8728] hover:scale-105 transition-transform">
+          <div 
+            onClick={() => setShowGADTest(true)}
+            className="group flex flex-col items-center justify-between rounded-4xl p-6 gap-4 bg-[#FB8728] hover:scale-105 transition-transform cursor-pointer"
+          >
             <div className="flex flex-row items-center w-full justify-between">
               <div
                 className="font-unsaid font-bold text-white"
@@ -234,6 +241,8 @@ export default function Assessment() {
       <div className="w-full">
         <Footer />
       </div>
+
+      {showGADTest && <GADTest onClose={() => setShowGADTest(false)} />}
     </div>
   );
 }
