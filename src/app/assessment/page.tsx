@@ -3,8 +3,11 @@
 import Image from "next/image";
 import Navbar from "@/components/navBar_v1";
 import Footer from "@/components/footer_v1";
+import { useSession } from "next-auth/react";
 
 export default function Assessment() {
+  const { data: session } = useSession();
+  const userName = session?.user?.name ?? "Shinomiya";
   return (
     <div className="relative w-full min-h-screen flex flex-col m-0">
       {/* Navbar */}
@@ -28,7 +31,7 @@ export default function Assessment() {
           className="absolute font-unsaid font-extrabold bottom-5 left-10"
           style={{ color: "#FB8728", fontSize: "48px" }}
         >
-          Hello, Shinomiya! 👋
+          {`Hello, ${userName}! 👋`}
         </div>
       </div>
 
