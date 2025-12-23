@@ -1,0 +1,48 @@
+# Development dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+.env
+.env.local
+.env*.local
+
+# Git
+.git
+.gitignore
+.github
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store
+
+# CI/CD
+.github
+.gitlab-ci.yml
+.circleci
+
+# Documentation
+README.md
+CHANGELOG.md
+docs
+
+# Next.js
+.next
+out
+build
+
+# Testing
+.jest
+coverage
+.nyc_output
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Others
+.vercel
+.turbo
