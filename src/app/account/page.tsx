@@ -71,6 +71,7 @@ export default function ProfilePage() {
       setMessage('Profile updated successfully');
       setIsEditing(false);
     } catch (error) {
+      console.error(error);
       setMessage('Error updating profile');
     } finally {
       setLoading(false);

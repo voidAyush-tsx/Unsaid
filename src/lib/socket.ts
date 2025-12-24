@@ -55,7 +55,7 @@ class SocketService {
 
     // Create new socket
     this.socket = io(typeof window !== 'undefined' ? window.location.origin : '', {
-      path: '/api/socketio',
+      path: '/api/socket',
       transports: ['polling', 'websocket'],
       reconnection: true,
       reconnectionAttempts: 10,

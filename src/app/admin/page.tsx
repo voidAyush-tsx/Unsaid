@@ -6,8 +6,9 @@ import AdminUserList from '../../components/AdminUserList';
 import AdminUserUpload from '../../components/AdminUserUpload';
 import AdminAssignments from '../../components/AdminAssignments';
 import ActivityTester from '../../components/ActivityTester';
+import AdminChatHistory from '../../components/AdminChatHistory';
 
-type Tab = 'users' | 'assignments';
+type Tab = 'users' | 'assignments' | 'chats';
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<Tab>('assignments');
@@ -52,6 +53,16 @@ export default function AdminPage() {
         >
           Manage Users
         </button>
+        <button
+          onClick={() => setActiveTab('chats')}
+          className={`px-6 py-3 font-semibold transition-colors ${
+            activeTab === 'chats'
+              ? 'border-b-2 border-blue-600 text-blue-600'
+              : 'text-gray-600 hover:text-gray-800'
+          }`}
+        >
+          Chat History
+        </button>
       </div>
 
       {/* Tab Content */}
@@ -77,6 +88,15 @@ export default function AdminPage() {
           </p>
           <AdminUserUpload onUploadSuccess={() => setUsersRefreshKey(prev => prev + 1)} />
           <AdminUserList refreshKey={usersRefreshKey} />
+        </div>
+      )}
+
+      {activeTab === 'chats' && (
+        <div>
+          <p className="mb-6 text-gray-600">
+            Monitor and review chat conversations between counsellors and patients.
+          </p>
+          <AdminChatHistory />
         </div>
       )}
     </main>

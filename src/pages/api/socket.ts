@@ -2,6 +2,7 @@ import { Server as NetServer } from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Socket as NetSocket } from 'net';
+import {prisma} from '@/lib/prisma';
 
 interface SocketServer extends NetServer {
   io?: SocketIOServer;
@@ -154,9 +155,25 @@ export default function SocketHandler(req: NextApiRequest, res: NextApiResponseW
     });
 
     // Message
-    clientSocket.on('message', (data: { room: string; message: string; sender: string; senderId?: string }) => {
+    clientSocket.on('message', async (data: { room: string; message: string; sender: string; senderId?: string }) => {
       const { room, message, sender, senderId } = data;
       console.log(`[Socket.IO] Message in ${room}: ${message.substring(0, 50)}`);
+
+      try {
+        // Save to database
+        if (senderId) {
+          await prisma.chatMessage.create({
+            data: {
+              room,
+              message,
+              sender,
+              senderId,
+            },
+          });
+        }
+      } catch (error) {
+        console.error('[Socket.IO] Error saving message:', error);
+      }
 
       io.to(room).emit('message', {
         message,
