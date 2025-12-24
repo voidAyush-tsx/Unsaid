@@ -7,8 +7,9 @@ import AdminUserUpload from '../../components/AdminUserUpload';
 import AdminAssignments from '../../components/AdminAssignments';
 import ActivityTester from '../../components/ActivityTester';
 import AdminChatHistory from '../../components/AdminChatHistory';
+import AdminContactMessages from '../../components/AdminContactMessages';
 
-type Tab = 'users' | 'assignments' | 'chats';
+type Tab = 'users' | 'assignments' | 'chats' | 'contact';
 
 export default function AdminPage() {
   const [activeTab, setActiveTab] = useState<Tab>('assignments');
@@ -63,6 +64,16 @@ export default function AdminPage() {
         >
           Chat History
         </button>
+        <button
+          onClick={() => setActiveTab('contact')}
+          className={`px-6 py-3 font-semibold transition-colors ${
+            activeTab === 'contact'
+              ? 'border-b-2 border-blue-600 text-blue-600'
+              : 'text-gray-600 hover:text-gray-800'
+          }`}
+        >
+          Contact Messages
+        </button>
       </div>
 
       {/* Tab Content */}
@@ -97,6 +108,15 @@ export default function AdminPage() {
             Monitor and review chat conversations between counsellors and patients.
           </p>
           <AdminChatHistory />
+        </div>
+      )}
+
+      {activeTab === 'contact' && (
+        <div>
+          <p className="mb-6 text-gray-600">
+            View and manage messages submitted through the &quot;Get In Touch&quot; contact form.
+          </p>
+          <AdminContactMessages />
         </div>
       )}
     </main>

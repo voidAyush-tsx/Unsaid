@@ -29,7 +29,11 @@ const MsgForm: React.FC = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
 
-    if (name === 'phone' && value !== '' && !/^\d*$/.test(value)) return;
+    // Phone: only allow digits and limit to 10 digits
+    if (name === 'phone') {
+      if (!/^\d*$/.test(value)) return;
+      if (value.length > 10) return;
+    }
 
     if (name === 'message') {
       const words = value.trim().split(/\s+/).filter(word => word.length > 0);
@@ -46,7 +50,7 @@ const MsgForm: React.FC = () => {
   };
 
   // Handle submit
-  const handleSubmit = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     let hasError = false;
     const newErrors = { name: '', occupation: '', email: '', phone: '', message: '' };
@@ -69,8 +73,8 @@ const MsgForm: React.FC = () => {
     if (!formData.phone.trim()) {
       newErrors.phone = 'Phone number is required';
       hasError = true;
-    } else if (!/^\d{10,15}$/.test(formData.phone)) {
-      newErrors.phone = 'Phone number must be 10-15 digits';
+    } else if (!/^\d{10}$/.test(formData.phone)) {
+      newErrors.phone = 'Phone number must be exactly 10 digits';
       hasError = true;
     }
     if (!formData.message.trim()) {
@@ -85,13 +89,33 @@ const MsgForm: React.FC = () => {
       return;
     }
 
-    setFormError(""); // clear global error
-    console.log("Form submitted:", formData);
+    if (!termsAccepted) {
+      setFormError("⚠️ ERROR: You must agree to the Terms & Conditions!");
+      return;
+    }
 
-    // Reset
-    setFormData({ name: '', occupation: '', email: '', phone: '', message: '' });
-    setWordCount(0);
-    setTermsAccepted(false);
+    setFormError(""); // clear global error
+    
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (res.ok) {
+        alert("Thank you! Your message has been sent.");
+        // Reset
+        setFormData({ name: '', occupation: '', email: '', phone: '', message: '' });
+        setWordCount(0);
+        setTermsAccepted(false);
+      } else {
+        setFormError("⚠️ ERROR: Failed to send message. Please try again later.");
+      }
+    } catch (err) {
+      console.error("Form submission error:", err);
+      setFormError("⚠️ ERROR: Something went wrong. Please try again.");
+    }
   };
   
   return (
@@ -129,9 +153,12 @@ const MsgForm: React.FC = () => {
             <div className="flex flex-row rounded-full w-full border-2 border-[#F4A258] bg-[#F7F4F2] px-4 py-3 gap-2">
             <Image src="/auth/email_icon.svg" alt="occupation" width={24} height={24} />
             <input
-                type="text" name="occupation" value={formData.occupation} onChange={handleInputChange}
+                type="text" 
+                name="occupation" 
+                value={formData.occupation} 
+                onChange={handleInputChange}
                 placeholder="Enter your occupation..."
-                className="bg-transparent outline-none font-unsaid font-bold rounded-r-full w-full text-[#736B66]"
+                className="bg-transparent outline-none font-unsaid font-bold w-full text-[#736B66]"
                 required
             />
             </div>

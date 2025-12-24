@@ -108,3 +108,14 @@ model ChatMessage {
   @@index([room])
   @@index([timestamp])
 }
+
+model ContactMessage {
+  id          String   @id @default(cuid())
+  name        String
+  occupation  String
+  email       String
+  phone       String
+  message     String
+  createdAt   DateTime @default(now())
+  isRead      Boolean  @default(false)
+}
